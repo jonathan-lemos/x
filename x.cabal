@@ -28,9 +28,16 @@ library
       Lib
       Parser.Parser
       Parser.Parsers.Char
+      Parser.Parsers.Chars
       Parser.Parsers.Conditional
       Parser.Parsers.Literal
-      Parser.Parsers.Many
+      Parser.Parsers.Numeric.Digit
+      Parser.Parsers.Numeric.Number
+      Parser.Parsers.Numeric.XNumber
+      Parser.Parsers.ParseWhile
+      Parser.Parsers.ParseWhileAggregate
+      Parser.Parsers.Whitespace
+      Types.XNumber
       Utils
   other-modules:
       Paths_x
@@ -58,6 +65,11 @@ test-suite x-test
   other-modules:
       Parser.Parsers.CharSpec
       Parser.Parsers.ConditionalSpec
+      Parser.Parsers.LiteralSpec
+      Parser.Parsers.Numeric.DigitSpec
+      Parser.Parsers.Numeric.NumberSpec
+      Parser.Parsers.Numeric.XNumberSpec
+      Parser.ParserSpec
       Paths_x
   hs-source-dirs:
       test

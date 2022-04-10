@@ -1,4 +1,3 @@
-
 module Parser.Parsers.ConditionalSpec where
 
 import Test.Hspec
@@ -18,5 +17,5 @@ spec = do
         it "does not read char if condition not met" $ do
             f "bc" `shouldBe` Nothing
 
-        it "returns nothing on no char" $ do
+        it "returns nothing on underlying parser not matching" $ do
             f "" `shouldBe` Nothing
