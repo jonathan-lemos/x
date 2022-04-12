@@ -1,4 +1,4 @@
-module Parser.Parsers.Char where
+module Parser.Parsers.Text.Char where
 
 import Parser.Parser
 

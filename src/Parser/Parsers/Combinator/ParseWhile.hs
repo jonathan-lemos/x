@@ -1,4 +1,4 @@
-module Parser.Parsers.ParseWhile where
+module Parser.Parsers.Combinator.ParseWhile where
 import Parser.Parser
 import Utils
 

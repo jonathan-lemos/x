@@ -1,4 +1,4 @@
-module Parser.Parsers.Conditional where
+module Parser.Parsers.Combinator.Conditional where
 
 import Control.Monad
 import Parser.Parser

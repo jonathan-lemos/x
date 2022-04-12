@@ -27,16 +27,16 @@ library
   exposed-modules:
       Lib
       Parser.Parser
-      Parser.Parsers.Char
-      Parser.Parsers.Chars
-      Parser.Parsers.Conditional
-      Parser.Parsers.Literal
+      Parser.Parsers.Combinator.Conditional
+      Parser.Parsers.Combinator.ParseWhile
+      Parser.Parsers.Combinator.ParseWhileAggregate
       Parser.Parsers.Numeric.Digit
       Parser.Parsers.Numeric.Number
       Parser.Parsers.Numeric.XNumber
-      Parser.Parsers.ParseWhile
-      Parser.Parsers.ParseWhileAggregate
-      Parser.Parsers.Whitespace
+      Parser.Parsers.Text.Char
+      Parser.Parsers.Text.Chars
+      Parser.Parsers.Text.Literal
+      Parser.Parsers.Text.Whitespace
       Types.XNumber
       Utils
   other-modules:
@@ -63,12 +63,12 @@ test-suite x-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Parser.Parsers.CharSpec
-      Parser.Parsers.ConditionalSpec
-      Parser.Parsers.LiteralSpec
       Parser.Parsers.Numeric.DigitSpec
       Parser.Parsers.Numeric.NumberSpec
       Parser.Parsers.Numeric.XNumberSpec
+      Parser.Parsers.Text.CharSpec
+      Parser.Parsers.Text.ConditionalSpec
+      Parser.Parsers.Text.LiteralSpec
       Parser.ParserSpec
       Paths_x
   hs-source-dirs:
