@@ -5,7 +5,6 @@ import Parser.Parser
 import Parser.Parsers.Numeric.Number
 import Parser.Parsers.Numeric.XNumber (xnumber)
 import Types.XNumber
-import Types.XNumber (XNumber(XReal))
 
 spec :: Spec 
 spec = do

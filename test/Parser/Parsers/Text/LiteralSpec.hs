@@ -1,8 +1,8 @@
-module Parser.Parsers.LiteralSpec where
+module Parser.Parsers.Text.LiteralSpec where
 
 import Test.Hspec
 import Parser.Parser
-import Parser.Parsers.Literal
+import Parser.Parsers.Text.Literal
 
 spec :: Spec
 spec = do

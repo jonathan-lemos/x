@@ -1,7 +1,7 @@
-module Parser.Parsers.Chars where
+module Parser.Parsers.Text.Chars where
 
-import Parser.Parsers.Conditional
-import Parser.Parsers.Char
+import Parser.Parsers.Combinator.Conditional
+import Parser.Parsers.Text.Char
 import Parser.Parser
 import Control.Applicative
 

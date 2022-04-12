@@ -1,4 +1,4 @@
-module Parser.Parsers.ParseWhileAggregate where
+module Parser.Parsers.Combinator.ParseWhileAggregate where
 
 import Parser.Parser
 

@@ -2,7 +2,7 @@ module Parser.ParserSpec where
 
 import Test.Hspec
 import Parser.Parser
-import Parser.Parsers.Char
+import Parser.Parsers.Text.Char
 import Parser.Parsers.Numeric.Digit
 import Control.Monad
 import Control.Applicative

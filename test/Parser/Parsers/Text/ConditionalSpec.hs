@@ -1,9 +1,9 @@
-module Parser.Parsers.ConditionalSpec where
+module Parser.Parsers.Text.ConditionalSpec where
 
 import Test.Hspec
 import Parser.Parser
-import Parser.Parsers.Char
-import Parser.Parsers.Conditional
+import Parser.Parsers.Text.Char
+import Parser.Parsers.Combinator.Conditional
 
 spec :: Spec
 spec = do
