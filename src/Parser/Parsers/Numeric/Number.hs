@@ -6,6 +6,7 @@ import Parser.Parser
 import Parser.Parsers.Combinator.Conditional
 import Data.Char
 import Parser.Parsers.Text.Char
+import Parser.Parsers.Text.CharEq
 
 integer :: Parser Integer
 integer = foldl (\a c -> a * 10 + toInteger c) 0 <$> some digit
@@ -15,7 +16,7 @@ double = do
     let digitString = some (conditional char isDigit)
 
     whole <- digitString <|> return "0"
-    point <- conditional char (== '.')
+    point <- charEq '.'
     decimal <- digitString
 
     return $ read $ concat [whole, [point], decimal]
