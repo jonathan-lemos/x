@@ -1,4 +1,4 @@
-module Parser.Parsers.Text.ConditionalSpec where
+module Parser.Parsers.Combinator.ConditionalSpec where
 
 import Test.Hspec
 import Parser.Parser
