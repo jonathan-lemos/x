@@ -10,13 +10,3 @@ import Parser.Parsers.Text.CharEq
 
 integer :: Parser Integer
 integer = foldl (\a c -> a * 10 + toInteger c) 0 <$> some digit
-
-double :: Parser Double
-double = do
-    let digitString = some (conditional char isDigit)
-
-    whole <- digitString <|> return "0"
-    point <- charEq '.'
-    decimal <- digitString
-
-    return $ read $ concat [whole, [point], decimal]

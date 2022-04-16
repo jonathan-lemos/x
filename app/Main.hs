@@ -1,6 +1,10 @@
 module Main where
 
 import Lib
+import GHC.IO.Handle
+import GHC.IO.Handle.FD
 
 main :: IO ()
-main = someFunc
+main = do
+    hSetBuffering stdout NoBuffering 
+    repl

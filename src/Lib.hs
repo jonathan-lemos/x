@@ -1,6 +1,11 @@
-module Lib
-    ( someFunc
-    ) where
+module Lib where
+import Shell
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+repl :: IO ()
+repl = do
+    prompt
+    line <- getLine 
+    case execute line of
+        Left errMsg -> putStrLn errMsg
+        Right val -> putStrLn val
+    repl

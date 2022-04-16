@@ -5,13 +5,13 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           x
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/x#readme>
-homepage:       https://github.com/githubuser/x#readme
-bug-reports:    https://github.com/githubuser/x/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2022 Author name here
+version:        0.0.1.0
+description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
+homepage:       https://github.com/jonathan-lemos/x#readme
+bug-reports:    https://github.com/jonathan-lemos/x/issues
+author:         Jonathan Lemos
+maintainer:     jonathanlemos@protonmail.com
+copyright:      2022 Jonathan Lemos
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/x
+  location: https://github.com/jonathan-lemos/x
 
 library
   exposed-modules:
@@ -31,23 +31,28 @@ library
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.ParseWhile
       Parser.Parsers.Combinator.ParseWhileAggregate
+      Parser.Parsers.Numeric.CReal
       Parser.Parsers.Numeric.Digit
       Parser.Parsers.Numeric.Number
-      Parser.Parsers.Numeric.XNumber
       Parser.Parsers.Text.Char
+      Parser.Parsers.Text.CharAny
       Parser.Parsers.Text.CharEq
       Parser.Parsers.Text.Chars
       Parser.Parsers.Text.Literal
       Parser.Parsers.Text.Whitespace
+      Shell
       Types.AST.ArithmeticExpression
-      Types.XNumber
-      Utils
+      Types.Expression
+      Utils.Either
+      Utils.Monad
   other-modules:
       Paths_x
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , bifunctors
+    , numbers
   default-language: Haskell2010
 
 executable x-exe
@@ -59,6 +64,8 @@ executable x-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bifunctors
+    , numbers
     , x
   default-language: Haskell2010
 
@@ -66,12 +73,13 @@ test-suite x-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.Combinator.ConditionalSpec
       Parser.Parsers.Combinator.ParseWhileAggregateSpec
       Parser.Parsers.Combinator.ParseWhileSpec
+      Parser.Parsers.Numeric.CRealSpec
       Parser.Parsers.Numeric.DigitSpec
       Parser.Parsers.Numeric.NumberSpec
-      Parser.Parsers.Numeric.XNumberSpec
       Parser.Parsers.Text.CharEqSpec
       Parser.Parsers.Text.CharSpec
       Parser.Parsers.Text.LiteralSpec
@@ -82,6 +90,8 @@ test-suite x-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bifunctors
     , hspec
+    , numbers
     , x
   default-language: Haskell2010
