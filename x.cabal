@@ -31,23 +31,26 @@ library
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.ParseWhile
       Parser.Parsers.Combinator.ParseWhileAggregate
+      Parser.Parsers.Numeric.CReal
       Parser.Parsers.Numeric.Digit
       Parser.Parsers.Numeric.Number
-      Parser.Parsers.Numeric.XNumber
       Parser.Parsers.Text.Char
+      Parser.Parsers.Text.CharAny
       Parser.Parsers.Text.CharEq
       Parser.Parsers.Text.Chars
       Parser.Parsers.Text.Literal
       Parser.Parsers.Text.Whitespace
       Types.AST.ArithmeticExpression
-      Types.XNumber
-      Utils
+      Types.Expression
+      Utils.Monad
   other-modules:
       Paths_x
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , bifunctors
+    , numbers
   default-language: Haskell2010
 
 executable x-exe
@@ -59,6 +62,8 @@ executable x-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bifunctors
+    , numbers
     , x
   default-language: Haskell2010
 
@@ -66,12 +71,13 @@ test-suite x-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.Combinator.ConditionalSpec
       Parser.Parsers.Combinator.ParseWhileAggregateSpec
       Parser.Parsers.Combinator.ParseWhileSpec
+      Parser.Parsers.Numeric.CRealSpec
       Parser.Parsers.Numeric.DigitSpec
       Parser.Parsers.Numeric.NumberSpec
-      Parser.Parsers.Numeric.XNumberSpec
       Parser.Parsers.Text.CharEqSpec
       Parser.Parsers.Text.CharSpec
       Parser.Parsers.Text.LiteralSpec
@@ -82,6 +88,8 @@ test-suite x-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bifunctors
     , hspec
+    , numbers
     , x
   default-language: Haskell2010

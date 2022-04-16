@@ -2,19 +2,19 @@
 module Parser.Parser where
 
 import Control.Monad
-import Utils (mapSnd)
 import Control.Applicative
+import Data.Bifunctor
 
 newtype Parser t = Parser {parse :: String -> Maybe (String, t)}
 
 instance Functor Parser where
-    fmap f (Parser pf) = Parser $ fmap (mapSnd f) . pf
+    fmap f (Parser pf) = Parser $ fmap (second f) . pf
 
 instance Applicative Parser where
     pure x = Parser $ Just . (, x)
 
     (Parser ab) <*> (Parser a) =
-        Parser $ ab >=> \(r, f) -> mapSnd f <$> a r
+        Parser $ ab >=> \(r, f) -> second f <$> a r
 
 instance Monad Parser where
     (Parser a) >>= f =
@@ -24,7 +24,7 @@ instance Monad Parser where
 instance Semigroup t => Semigroup (Parser t) where
     (Parser a) <> (Parser b) =
         Parser $ transform <=< a where
-            transform (newInput, aValue) = mapSnd (aValue <>) <$> b newInput
+            transform (newInput, aValue) = second (aValue <>) <$> b newInput
 
 instance Monoid t => Monoid (Parser t) where
     mempty = Parser $ Just . (, mempty)

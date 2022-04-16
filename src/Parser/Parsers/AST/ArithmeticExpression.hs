@@ -6,9 +6,23 @@ import Parser.Parser
 import Parser.Parsers.Combinator.ParseWhile
 import Parser.Parsers.Text.Char
 import Types.AST.ArithmeticExpression
-import Utils
+import Utils.Monad
 import Parser.Parsers.Text.CharEq
-import Parser.Parsers.Numeric.XNumber
+import Parser.Parsers.Numeric.CReal
+import Parser.Parsers.Text.Whitespace
+
+leftAssociativeExpression :: (sub -> [(op, sub)] -> expr) -> Parser op -> Parser sub -> Parser expr
+leftAssociativeExpression constructor operator subexpressionParser =
+    let predicate = liftA2 (,) (whitespace >> operator) (whitespace >> subexpressionParser)
+    in liftA2 constructor subexpressionParser (parseWhile predicate)
+
+rightAssociativeExpression :: (sub -> expr) -> (sub -> op -> expr -> expr) -> Parser op -> Parser sub -> Parser expr
+rightAssociativeExpression noRight right operator subexpressionParser =
+    let rhsParser = liftA2 (,) (whitespace >> operator) (whitespace >> rightAssociativeExpression noRight right operator subexpressionParser)
+    in do
+        left <- subexpressionParser
+        fmap (uncurry (right left)) rhsParser <|> pure (noRight left)
+
 
 arithmeticExpression :: Parser ArithmeticExpression
 arithmeticExpression =
@@ -18,9 +32,7 @@ arithmeticExpression =
                 mapOp _  = Nothing
             in mapOp <$?> char
 
-        predicate = liftA2 (,) operator multiplication
-
-    in liftA2 ArithmeticExpression multiplication (parseWhile predicate)
+    in leftAssociativeExpression ArithmeticExpression operator multiplication
 
 multiplication :: Parser Multiplication
 multiplication =
@@ -30,21 +42,22 @@ multiplication =
                 mapOp _   = Nothing
             in mapOp <$?> char
 
-        predicate = liftA2 (,) operator power
-        
-    in liftA2 Multiplication power (parseWhile predicate)
+    in leftAssociativeExpression Multiplication operator power
 
 power :: Parser Power
-power = do
-    f <- factor
-    (Power f <$> (charEq '^' >> power)) <|> pure (NoPower f)
+power =
+    let mkPower left _op = Power left
+    in rightAssociativeExpression NoPower mkPower (charEq '^') factor
 
 factor :: Parser Factor
 factor =
     let parenExpr = do
+            whitespace
             charEq '('
+            whitespace
             e <- arithmeticExpression
+            whitespace
             charEq ')'
             return e
 
-    in (FactorNumber <$> xnumber) <|> (Parentheses <$> parenExpr)
+    in (FactorNumber <$> (whitespace >> creal)) <|> (Parentheses <$> parenExpr)

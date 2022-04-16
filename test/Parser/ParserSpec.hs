@@ -7,6 +7,8 @@ import Parser.Parsers.Numeric.Digit
 import Control.Monad
 import Control.Applicative
 import Parser.Parsers.Numeric.Number
+import Parser.Parsers.Text.CharEq (charEq)
+import Parser.Parsers.Text.Literal (literal)
 
 spec :: Spec
 spec = do
@@ -77,3 +79,22 @@ spec = do
         it "returns nothing if both fail" $ do
             let f = parse $ empty <|> (empty :: Parser Int)
             f "abc" `shouldBe` Nothing
+
+    describe "parser monoid" $ do
+        let f = parse $ literal "hello" <> literal "world"
+
+        it "concatenates with <>" $ do
+            f "helloworldbar" `shouldBe` Just ("bar", "helloworld")
+
+        it "<> fails if left doesn't match" $ do
+            f "helworldbar" `shouldBe` Nothing
+
+        it "<> fails if right doesn't match" $ do
+            f "helloworbar" `shouldBe` Nothing
+
+        it "<> fails if neither matches" $ do
+            f "bar" `shouldBe` Nothing
+
+        it "mempty does nothing" $ do
+            let g = parse (mempty :: Parser String)
+            g "helloworldbar" `shouldBe` Just ("helloworldbar", "")
