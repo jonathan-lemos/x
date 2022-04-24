@@ -29,7 +29,6 @@ library
       Parser.Parser
       Parser.Parsers.AST.ArithmeticExpression
       Parser.Parsers.Combinator.Conditional
-      Parser.Parsers.Combinator.ParseWhile
       Parser.Parsers.Combinator.ParseWhileAggregate
       Parser.Parsers.Numeric.CReal
       Parser.Parsers.Numeric.Digit
@@ -76,7 +75,6 @@ test-suite x-test
       Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.Combinator.ConditionalSpec
       Parser.Parsers.Combinator.ParseWhileAggregateSpec
-      Parser.Parsers.Combinator.ParseWhileSpec
       Parser.Parsers.Numeric.CRealSpec
       Parser.Parsers.Numeric.DigitSpec
       Parser.Parsers.Numeric.NumberSpec

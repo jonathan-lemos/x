@@ -1,35 +1,55 @@
 {-# LANGUAGE TupleSections #-}
+
 module Parser.Parser where
 
-import Control.Monad
 import Control.Applicative
+import Control.Monad
 import Data.Bifunctor
 
-newtype Parser t = Parser {parse :: String -> Maybe (String, t)}
+data Parser t = Parser
+    { name :: String
+    , expected :: [String]
+    , parse :: String -> Maybe (String, t)
+    }
 
 instance Functor Parser where
-    fmap f (Parser pf) = Parser $ fmap (second f) . pf
+    fmap f p = p{parse = fmap (second f) . parse p}
 
 instance Applicative Parser where
-    pure x = Parser $ Just . (, x)
+    pure x = Parser "" [] $ Just . (,x)
 
-    (Parser ab) <*> (Parser a) =
-        Parser $ ab >=> \(r, f) -> second f <$> a r
+    ab <*> a =
+        ab{parse = parse ab >=> \(r, f) -> second f <$> parse a r}
 
 instance Monad Parser where
-    (Parser a) >>= f =
-        Parser $ transform <=< a where
-            transform (newInput, aValue) = parse (f aValue) newInput
+    a >>= f =
+        a{parse = parse a >=> \(newInput, aValue) -> parse (f aValue) newInput}
 
 instance Semigroup t => Semigroup (Parser t) where
-    (Parser a) <> (Parser b) =
-        Parser $ transform <=< a where
-            transform (newInput, aValue) = second (aValue <>) <$> b newInput
+    a <> b =
+        Parser
+            { name = concat [name a, " + ", name b]
+            , expected = expected a <> expected b
+            , parse = parse a >=> \(newInput, aValue) -> second (aValue <>) <$> parse b newInput
+            }
 
 instance Monoid t => Monoid (Parser t) where
-    mempty = Parser $ Just . (, mempty)
+    mempty = Parser "" [] $ Just . (,mempty)
 
 instance Alternative Parser where
-    empty = Parser $ const Nothing
-    (Parser f) <|> (Parser g) =
-        Parser $ \s -> f s <|> g s
+    empty = Parser "" [] $ const Nothing
+    f <|> g =
+        Parser
+            { name = concat [name f, " | ", name g]
+            , expected = expected f ++ expected g
+            , parse = \s -> parse f s <|> parse g s
+            }
+
+instance Show (Parser a) where
+    show = name
+
+rename :: String -> Parser a -> Parser a
+rename s p = p{name = s}
+
+setExpected :: [String] -> Parser a -> Parser a
+setExpected e p = p{expected = e}

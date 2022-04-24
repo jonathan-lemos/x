@@ -24,21 +24,31 @@ jobs:
         enable-stack: true
         stack-version: ${{ matrix.stack }}
 
+    - name: Add Cabal bin to $PATH
+      run: echo "${HOME}/.cabal/bin" >> $GITHUB_PATH
+
     - uses: actions/cache@v3
-      name: Cache Stack work directories
+      name: Cache Cabal and Stack work directories
       with:
         path: |
           ~/.stack
           .stack-work
+          ~/.cabal
         key: ${{ matrix.ghc }}-${{ matrix.cabal }}-${{ matrix.stack }}
 
-    - name: Build
-      run: stack build
+    - name: Update Cabal mirrors
+      run: cabal update
+
+    - name: Install Doctest
+      run: cabal install doctest
 
     - uses: haskell/actions/hlint-setup@v2
       name: Setup hLint
       with:
         version: "3.3.6"
+
+    - name: Build
+      run: stack build
 
     - uses: haskell/actions/hlint-run@v2
       name: Run hLint
@@ -46,5 +56,8 @@ jobs:
         path: src/
         fail-on: warning
 
-    - name: Run tests
+    - name: Run doctest tests
+      run: cabal repl --with-ghc=doctest
+
+    - name: Run hSpec tests
       run: stack test
