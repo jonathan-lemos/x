@@ -1,4 +1,4 @@
-module Parser.Parsers.Numeric.CReal (creal) where
+module Parser.Parsers.Numeric.CReal where
 
 import Data.Number.CReal
 import Control.Applicative

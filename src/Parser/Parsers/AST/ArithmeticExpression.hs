@@ -3,7 +3,6 @@ module Parser.Parsers.AST.ArithmeticExpression where
 import Control.Applicative
 import Control.Monad
 import Parser.Parser
-import Parser.Parsers.Combinator.ParseWhile
 import Parser.Parsers.Text.Char
 import Types.AST.ArithmeticExpression
 import Utils.Monad
@@ -14,7 +13,7 @@ import Parser.Parsers.Text.Whitespace
 leftAssociativeExpression :: (sub -> [(op, sub)] -> expr) -> Parser op -> Parser sub -> Parser expr
 leftAssociativeExpression constructor operator subexpressionParser =
     let predicate = liftA2 (,) (whitespace >> operator) (whitespace >> subexpressionParser)
-    in liftA2 constructor subexpressionParser (parseWhile predicate)
+    in liftA2 constructor subexpressionParser (many predicate)
 
 rightAssociativeExpression :: (sub -> expr) -> (sub -> op -> expr -> expr) -> Parser op -> Parser sub -> Parser expr
 rightAssociativeExpression noRight right operator subexpressionParser =
