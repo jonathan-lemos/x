@@ -2,6 +2,8 @@ module Parser.Parsers.Text.CharEq where
 
 import Parser.Parser
 import Parser.Parsers.Text.CharAny
+import Control.Applicative
+import Utils.String
 
 -- | Reads a character equal to the given character, failing on EOF or on a different character
 --
@@ -16,8 +18,4 @@ import Parser.Parsers.Text.CharAny
 -- >>> parse (charEq 'a') ""
 -- Nothing
 charEq :: Char -> Parser Char
-charEq c =
-    (charAny [c]) {
-        name = [c],
-        expected = [[c]]
-    }
+charEq c = charAny [c] <|> fail ("Expected " <> quoteShow c)

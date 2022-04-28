@@ -1,14 +1,8 @@
 module Parser.Parsers.Combinator.Conditional where
 
-import Control.Monad
 import Parser.Parser
+import Parser.Parsers.Combinator.Check
 
-conditional :: Parser t -> (t -> Bool) -> Parser t
-conditional p f =
-    p
-        { parse =
-            parse p >=> \(input, value) ->
-                if f value
-                    then Just (input, value)
-                    else Nothing
-        }
+-- | If the parser succeeds, but the predicate returns `False`, fails with the default error message, otherwise passes the parser through.
+conditional :: (a -> Bool) -> Parser a -> Parser a
+conditional f = check f (const defaultErrMsg)

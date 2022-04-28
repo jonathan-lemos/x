@@ -16,5 +16,5 @@ import Parser.Parsers.Text.Chars
 --
 -- >>> parse whitespace ""
 -- Just ("","")
-whitespace :: Parser String 
-whitespace = chars isSpace "whitespace"
+whitespace :: Parser String
+whitespace = chars isSpace

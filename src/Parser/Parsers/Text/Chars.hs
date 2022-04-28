@@ -18,8 +18,5 @@ import Control.Applicative
 --
 -- >>> parse (chars (const True) "always") ""
 -- Just ("","")
-chars :: (Char -> Bool) -> String -> Parser String 
-chars predicate name = (many $ conditional char predicate) {
-    name = name,
-    expected = [name]
-}
+chars :: (Char -> Bool) -> Parser String
+chars predicate = many $ conditional predicate char
