@@ -5,51 +5,40 @@ module Parser.Parser where
 import Control.Applicative
 import Control.Monad
 import Data.Bifunctor
+import Parser.Error
 
-data Parser t = Parser
-    { name :: String
-    , expected :: [String]
-    , parse :: String -> Maybe (String, t)
-    }
+defaultErrMsg :: String
+defaultErrMsg = "Syntax Error"
+
+newtype Parser a = Parser {
+    parse :: String -> Either ParseError (String, a)
+}
 
 instance Functor Parser where
-    fmap f p = p{parse = fmap (second f) . parse p}
+    fmap f p = Parser $ fmap (second f) . parse p
 
 instance Applicative Parser where
-    pure x = Parser "" [] $ Just . (,x)
+    pure x = Parser $ Right . (,x)
 
     ab <*> a =
-        ab{parse = parse ab >=> \(r, f) -> second f <$> parse a r}
+        Parser $ parse ab >=> \(r, f) -> second f <$> parse a r
 
 instance Monad Parser where
     a >>= f =
-        a{parse = parse a >=> \(newInput, aValue) -> parse (f aValue) newInput}
+        Parser $ parse a >=> \(newInput, aValue) -> parse (f aValue) newInput
+
+instance MonadFail Parser where
+    fail msg = Parser $ Left . ParseError msg
 
 instance Semigroup t => Semigroup (Parser t) where
     a <> b =
-        Parser
-            { name = concat [name a, " + ", name b]
-            , expected = expected a <> expected b
-            , parse = parse a >=> \(newInput, aValue) -> second (aValue <>) <$> parse b newInput
-            }
+        Parser $ parse a >=> \(newInput, aValue) -> second (aValue <>) <$> parse b newInput
 
 instance Monoid t => Monoid (Parser t) where
-    mempty = Parser "" [] $ Just . (,mempty)
+    mempty = pure mempty
 
 instance Alternative Parser where
-    empty = Parser "" [] $ const Nothing
+    empty = Parser $ Left . ParseError defaultErrMsg
     f <|> g =
-        Parser
-            { name = concat [name f, " | ", name g]
-            , expected = expected f ++ expected g
-            , parse = \s -> parse f s <|> parse g s
-            }
+        Parser $ \s -> parse f s <> parse g s
 
-instance Show (Parser a) where
-    show = name
-
-rename :: String -> Parser a -> Parser a
-rename s p = p{name = s}
-
-setExpected :: [String] -> Parser a -> Parser a
-setExpected e p = p{expected = e}
