@@ -4,11 +4,12 @@ import IO.IOCmd
 import Parser.Error
 import Parser.Parser
 import Parser.Parsers.AST.ArithmeticExpression
-import Parser.Parsers.Text.Whitespace (whitespace)
+import Parser.Parsers.Text.Whitespace
 import System.Console.ANSI
 import Types.Expression
 import Utils.String
 
+-- | Commands that print the erroring input and its location given the `terminal width` and `remaining input`
 makeErrorFooter :: Int -> String -> [IOCmd]
 makeErrorFooter maxWidth content =
     let contentLines = take 5 $ trimLine maxWidth <$> lines content
@@ -19,8 +20,9 @@ makeErrorFooter maxWidth content =
         ]
             <> fmap (coloredLine [SetColor Foreground Dull White]) followingLines
 
-execute :: String -> Either ParseError String
-execute statement =
+-- | Calculates the result of input, returning Either an error or the result of said input
+calculate :: String -> Either ParseError String
+calculate statement =
     let parser = do
             pt <- arithmeticExpression
             whitespace
@@ -32,6 +34,7 @@ execute statement =
             Right (remaining, _) -> Left $ ParseError "Unexpected end of parse" remaining
             Left pe -> Left pe
 
+-- | Given the `terminal width` result of `execute`, makes commands for printing it
 printResult :: Int -> Either ParseError String -> [IOCmd]
 printResult _width (Right value) =
     [coloredLine [SetColor Foreground Vivid Blue] value]
@@ -43,5 +46,10 @@ printResult width (Left (ParseError reason currentInput)) =
     ]
         <> makeErrorFooter width currentInput
 
+-- | Given the terminal width and a line, produces IO Commands to output
+execute :: Int -> String -> [IOCmd]
+execute width line = printResult width $ calculate line
+
+-- | Prints the shell prompt
 prompt :: IO ()
 prompt = putStr "x> "

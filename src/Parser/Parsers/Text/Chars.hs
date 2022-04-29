@@ -10,13 +10,13 @@ import Control.Applicative
 -- ## __Examples__
 --
 -- >>> import Data.Char
--- >>> parse (chars isAlpha "alpha characters") "hello world"
--- Just (" world","hello")
+-- >>> parse (chars isAlpha) "hello world"
+-- Right (" world","hello")
 --
--- >>> parse (chars (const False) "never") "hello world"
--- Just ("hello world","")
+-- >>> parse (chars $ const False) "hello world"
+-- Right ("hello world","")
 --
--- >>> parse (chars (const True) "always") ""
--- Just ("","")
+-- >>> parse (chars $ const True) ""
+-- Right ("","")
 chars :: (Char -> Bool) -> Parser String
 chars predicate = many $ conditional predicate char

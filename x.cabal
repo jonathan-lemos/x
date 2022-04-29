@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      IO.IOCmd
       Lib
       Parser.Error
       Parser.Parser

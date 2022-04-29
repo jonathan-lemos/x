@@ -9,12 +9,12 @@ import Parser.Parsers.Text.Chars
 -- ## __Examples__
 --
 -- >>> parse whitespace "   foo bar"
--- Just ("foo bar","   ")
+-- Right ("foo bar","   ")
 --
 -- >>> parse whitespace "foo bar"
--- Just ("foo bar","")
+-- Right ("foo bar","")
 --
 -- >>> parse whitespace ""
--- Just ("","")
+-- Right ("","")
 whitespace :: Parser String
 whitespace = chars isSpace

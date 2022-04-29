@@ -11,7 +11,7 @@ import Parser.Parser
  Right ("bc",'a')
 
  >>> parse char ""
- Left (ParseError "Expected any character" "")
+ Left (ParseError {reason = "Expected any character", currentInput = ""})
 -}
 char :: Parser Char
 char =

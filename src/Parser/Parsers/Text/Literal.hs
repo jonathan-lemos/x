@@ -12,19 +12,19 @@ import Utils.String
  ## __Examples__
 
  >>> parse (literal "hello") "hello world"
- Just (" world","hello")
+ Right (" world","hello")
 
  >>> parse (literal "abc") "ab c"
- Nothing
+ Left (ParseError {reason = "Expected \"abc\"", currentInput = "ab c"})
 
  >>> parse (literal "abc") ""
- Nothing
+ Left (ParseError {reason = "Expected \"abc\"", currentInput = ""})
 
  >>> parse (literal "") "abc"
- Just ("abc","")
+ Right ("abc","")
 
  >>> parse (literal "") ""
- Just ("","")
+ Right ("","")
 -}
 literal :: String -> Parser String
-literal s = mconcat (fmap (fmap (: []) . charEq) s) <|> fail ("Expected " <> quote s)
+literal s = mconcat (fmap (fmap (: []) . charEq) s) <|> fail ("Expected " <> show s)
