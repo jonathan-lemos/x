@@ -10,12 +10,12 @@ import Utils.String
 -- ## __Examples__
 --
 -- >>> parse (charEq 'a') "abc"
--- Just ("bc",'a')
+-- Right ("bc",'a')
 --
 -- >>> parse (charEq 'a') "bc"
--- Nothing
+-- Left (ParseError {reason = "Expected 'a'", currentInput = "bc"})
 --
 -- >>> parse (charEq 'a') ""
--- Nothing
+-- Left (ParseError {reason = "Expected 'a'", currentInput = ""})
 charEq :: Char -> Parser Char
-charEq c = charAny [c] <|> fail ("Expected " <> quoteShow c)
+charEq c = charAny [c] <|> fail ("Expected " <> show c)
