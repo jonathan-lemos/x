@@ -7,6 +7,7 @@ import Parser.Parser
 import Types.Expression
 import Data.Bifunctor
 import Data.Number.CReal
+import Parser.Error (ParseError(ParseError))
 
 
 eval :: (Expression e) => Parser e -> Parser CReal
@@ -18,39 +19,39 @@ spec = do
         let ae = parse $ eval arithmeticExpression
 
         it "evaluates a single number" $ do
-            ae "2" `shouldBe` Just ("", 2)
+            ae "2" `shouldBe` Right ("", 2)
 
         it "evaluates a basic power expression" $ do
-            ae "3^2" `shouldBe` Just ("", 9)
+            ae "3^2" `shouldBe` Right ("", 9)
 
         it "evaluates a basic multiplication expression" $ do
-            ae "3*2" `shouldBe` Just ("", 6)
+            ae "3*2" `shouldBe` Right ("", 6)
 
         it "evaluates a basic addition expression" $ do
-            ae "2+2" `shouldBe` Just ("", 4)
+            ae "2+2" `shouldBe` Right ("", 4)
 
         it "evaluates multi power expression" $ do
-            ae "4^3^2" `shouldBe` Just ("", 262144)
+            ae "4^3^2" `shouldBe` Right ("", 262144)
 
         it "evaluates multi divide expression" $ do
-            ae "100/2/5" `shouldBe` Just ("", 10)
+            ae "100/2/5" `shouldBe` Right ("", 10)
 
         it "evaluates multi subtract expression" $ do
-            ae "3-2-1" `shouldBe` Just ("", 0)
+            ae "3-2-1" `shouldBe` Right ("", 0)
 
         it "evaluates expression with parentheses" $ do
-            ae "2+(5*10)" `shouldBe` Just ("", 52)
-            ae "(2+2)" `shouldBe` Just ("", 4)
+            ae "2+(5*10)" `shouldBe` Right ("", 52)
+            ae "(2+2)" `shouldBe` Right ("", 4)
 
         it "evaluates complex expression" $ do
-            ae "2+3*4^(1/2)" `shouldBe` Just ("", 8)
+            ae "2+3*4^(1/2)" `shouldBe` Right ("", 8)
 
         it "evaluates expression with whitespace" $ do
-            ae "2 + 3 * 4 ^ ( 1 / 2 )" `shouldBe` Just ("", 8)
+            ae "2 + 3 * 4 ^ ( 1 / 2 )" `shouldBe` Right ("", 8)
 
         it "stops evaluating when expression is done" $ do
-            ae "2+2 foobar" `shouldBe` Just (" foobar", 4)
+            ae "2+2 foobar" `shouldBe` Right (" foobar", 4)
 
         it "parses nothing on invalid expression" $ do
-            ae "+" `shouldBe` Nothing
-            ae "(2+2" `shouldBe` Nothing
+            ae "+" `shouldBe` Left (ParseError "" "")
+            ae "(2+2" `shouldBe` Left (ParseError "" "")
