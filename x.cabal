@@ -79,14 +79,6 @@ test-suite x-test
   main-is: Spec.hs
   other-modules:
       Parser.Parsers.AST.ArithmeticExpressionSpec
-      Parser.Parsers.Combinator.ConditionalSpec
-      Parser.Parsers.Combinator.ParseWhileAggregateSpec
-      Parser.Parsers.Numeric.CRealSpec
-      Parser.Parsers.Numeric.DigitSpec
-      Parser.Parsers.Numeric.NumberSpec
-      Parser.Parsers.Text.CharEqSpec
-      Parser.Parsers.Text.CharSpec
-      Parser.Parsers.Text.LiteralSpec
       Parser.ParserSpec
       ShellSpec
       Paths_x

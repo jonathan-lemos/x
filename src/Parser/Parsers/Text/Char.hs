@@ -3,7 +3,7 @@ module Parser.Parsers.Text.Char where
 import Parser.Error
 import Parser.Parser
 
-{- | A Parser that reads a single character from the input, failing if EOF is reached.
+{- | Parses a single character, failing if EOF is reached.
 
  ## __Examples__
 

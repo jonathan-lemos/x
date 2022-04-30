@@ -30,7 +30,7 @@ calculate statement =
 
         parseTree = parse parser statement
      in case parseTree of
-            Right ("", value) -> Right $ show value
+            Right ("", value) -> Right $ show (evaluate value)
             Right (remaining, _) -> Left $ ParseError "Unexpected end of parse" remaining
             Left pe -> Left pe
 

@@ -11,7 +11,26 @@ import Data.Char
 import Parser.Parsers.Combinator.Conditional
 import Control.Monad
 
+{- |
+ Parses a real number
 
+ ## Examples
+
+ >>> parse creal "45"
+ Right ("",45.0)
+
+ >>> parse creal "-123.456"
+ Right ("",-123.456)
+
+ >>> parse creal "2e-2"
+ Right ("",0.02)
+
+ >>> parse creal "foo"
+ Left (ParseError {reason = "Expected a sequence of digits", currentInput = "foo"})
+
+ >>> parse creal ""
+ Left (ParseError {reason = "Expected a sequence of digits", currentInput = ""})
+-}
 creal :: Parser CReal
 creal = do
     let asList = ((:[]) <$>)

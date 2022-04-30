@@ -10,9 +10,9 @@ import Parser.Error
 defaultErrMsg :: String
 defaultErrMsg = "Syntax Error"
 
-newtype Parser a = Parser {
-    parse :: String -> Either ParseError (String, a)
-}
+newtype Parser a = Parser
+    { parse :: String -> Either ParseError (String, a)
+    }
 
 instance Functor Parser where
     fmap f p = Parser $ fmap (second f) . parse p
@@ -41,4 +41,3 @@ instance Alternative Parser where
     empty = Parser $ Left . ParseError defaultErrMsg
     f <|> g =
         Parser $ \s -> parse f s <> parse g s
-
