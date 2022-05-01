@@ -40,7 +40,6 @@ instance Expression ArithmeticExpression where
             in evaluateExpression x opList
 
 
-
 data MultiplicationOperator = Multiply | Divide
     deriving Eq
 
@@ -56,7 +55,7 @@ instance Show Multiplication where
     show (Multiplication x xs) = stringifyExpression x xs
 
 instance Expression Multiplication where
-    evaluate (Multiplication x xs) = 
+    evaluate (Multiplication x xs) =
         let mapOp Multiply = (*)
             mapOp Divide   = (/)
             opList = first mapOp <$> xs
@@ -83,4 +82,4 @@ instance Show Factor where
 
 instance Expression Factor where
     evaluate (FactorNumber n) = n
-    evaluate (Parentheses p)  = evaluate p 
+    evaluate (Parentheses p)  = evaluate p

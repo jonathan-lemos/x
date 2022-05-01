@@ -2,13 +2,19 @@ module Parser.Parsers.AST.ArithmeticExpression where
 
 import Control.Applicative
 import Control.Monad
+import Data.Char (isDigit)
 import Parser.Parser
+import Parser.Parsers.Combinator.ManyMaybe
+import Parser.Parsers.Combinator.Peek
+import Parser.Parsers.Combinator.Precondition (precondition)
+import Parser.Parsers.Numeric.CReal
 import Parser.Parsers.Text.Char
+import Parser.Parsers.Text.CharEq
+import Parser.Parsers.Text.Whitespace
 import Types.AST.ArithmeticExpression
 import Utils.Monad
-import Parser.Parsers.Text.CharEq
-import Parser.Parsers.Numeric.CReal
-import Parser.Parsers.Text.Whitespace
+import Parser.Parsers.Combinator.LookaheadN (lookaheadN)
+import Data.List
 
 {- | Parses a left-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from left operator to right operator.
 
@@ -22,8 +28,8 @@ The `subexpressionParser` parses a subexpression. Preceeding whitespace is parse
 -}
 leftAssociativeExpression :: (sub -> [(op, sub)] -> expr) -> Parser op -> Parser sub -> Parser expr
 leftAssociativeExpression constructor operator subexpressionParser =
-    let predicate = liftA2 (,) (whitespace >> operator) (whitespace >> subexpressionParser)
-    in liftA2 constructor subexpressionParser (many predicate)
+    let predicates = manyMaybe $ precondition (whitespace >> operator) (whitespace >> subexpressionParser)
+     in liftA2 constructor subexpressionParser predicates
 
 {- | Parses a right-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from right operator to left operator.
 
@@ -39,11 +45,10 @@ The `subexpressionParser` parses a subexpression. Preceeding whitespace is parse
 -}
 rightAssociativeExpression :: (sub -> expr) -> (sub -> op -> expr -> expr) -> Parser op -> Parser sub -> Parser expr
 rightAssociativeExpression noRight right operator subexpressionParser =
-    let rhsParser = liftA2 (,) (whitespace >> operator) (whitespace >> rightAssociativeExpression noRight right operator subexpressionParser)
-    in do
-        left <- subexpressionParser
-        fmap (uncurry (right left)) rhsParser <|> pure (noRight left)
-
+    let rhsParser = precondition (whitespace >> operator) (whitespace >> rightAssociativeExpression noRight right operator subexpressionParser)
+     in do
+            left <- subexpressionParser
+            maybe (noRight left) (uncurry (right left)) <$> rhsParser
 
 {- | Parses an arithmetic expression, which is some combination of addition, subtraction, multiplication, division, exponentiation, and parentheses.
 
@@ -59,42 +64,45 @@ multiplication       -> multiplication * power | multiplication / power | power
 power                -> factor ^ power | factor
 factor               -> creal | ( arithmeticExpression )
 ```
-
 -}
 arithmeticExpression :: Parser ArithmeticExpression
 arithmeticExpression =
     let operator =
             let mapOp '+' = Just Add
                 mapOp '-' = Just Subtract
-                mapOp _  = Nothing
-            in mapOp <$?> char
-
-    in leftAssociativeExpression ArithmeticExpression operator multiplication
+                mapOp _ = Nothing
+             in mapOp <$?> char
+     in leftAssociativeExpression ArithmeticExpression operator multiplication
 
 multiplication :: Parser Multiplication
 multiplication =
     let operator =
             let mapOp '*' = Just Multiply
                 mapOp '/' = Just Divide
-                mapOp _   = Nothing
-            in mapOp <$?> char
-
-    in leftAssociativeExpression Multiplication operator power
+                mapOp _ = Nothing
+             in mapOp <$?> char
+     in leftAssociativeExpression Multiplication operator power
 
 power :: Parser Power
 power =
     let mkPower left _op = Power left
-    in rightAssociativeExpression NoPower mkPower (charEq '^') factor
+     in rightAssociativeExpression NoPower mkPower (charEq '^') factor
 
 factor :: Parser Factor
 factor =
-    let parenExpr = do
-            whitespace
-            charEq '('
-            whitespace
-            e <- arithmeticExpression
-            whitespace
-            charEq ')'
-            return e
+    let f x
+          | "(" `isPrefixOf` x =
+              do
+                charEq '('
+                whitespace
+                e <- arithmeticExpression
+                whitespace
+                charEq ')'
+                return $ Parentheses e
 
-    in (FactorNumber <$> (whitespace >> creal)) <|> (Parentheses <$> parenExpr)
+          | (length x >= 2 && head x `elem` "+-" && isDigit (x !! 1) ) ||
+            (not (null x) && isDigit (head x)) =
+                FactorNumber <$> creal
+
+          | otherwise = fail "Expected a number or ( expression )"
+     in whitespace >> lookaheadN 2 f

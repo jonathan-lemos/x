@@ -7,7 +7,10 @@ import System.Console.Terminal.Size
  Feed these to `printCmd` to actually execute them.
 -}
 data IOCmd = IOCmd [SGR] String
-    deriving (Eq, Show)
+    deriving (Eq)
+
+instance Show IOCmd where
+    show (IOCmd _ s) = s
 
 -- | Makes a command that prints text with the given ANSI metadata. No newline is included.
 coloredText :: [SGR] -> String -> IOCmd

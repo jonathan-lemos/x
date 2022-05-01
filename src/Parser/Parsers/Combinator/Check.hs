@@ -11,7 +11,6 @@ import Parser.Parser
 
  ## Examples
 
- $setup
  >>> import Data.Char
  >>> import Parser.Parsers.Text.Char
 
