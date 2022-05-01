@@ -7,7 +7,6 @@ import Parser.Parsers.Combinator.Check
 
  ## Examples
 
- $setup
  >>> import Data.Char
  >>> import Parser.Parsers.Text.Char
 

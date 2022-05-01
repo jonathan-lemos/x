@@ -1,7 +1,6 @@
 module ShellSpec where
 import Test.Hspec
 import Shell
-import Shell (calculate)
 import Parser.Error
 
 spec :: Spec
@@ -16,4 +15,4 @@ spec = do
             calculate "2+3 " `shouldBe` Right "5.0"
 
         it "reports syntax error on invalid expressions" $ do
-            calculate "2+" `shouldBe` Left (ParseError "Unexpected end of parse" "+")
+            calculate "2+" `shouldBe` Left (ParseError "Expected a number or ( expression )" "")

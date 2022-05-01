@@ -15,6 +15,24 @@ eval = fmap evaluate
 
 spec :: Spec
 spec = do
+    describe "factor tests" $ do
+        let f = parse $ eval factor
+
+        it "evaluates a single number" $ do
+            f "2" `shouldBe` Right ("", 2)
+
+        it "evaluates a single number with whitespace" $ do
+            f " 2" `shouldBe` Right ("", 2)
+
+        it "evaluates a parenthesized number" $ do
+            f "(2)" `shouldBe` Right ("", 2)
+
+        it "evaluates a parenthesized number w/ whitespace" $ do
+            f " ( 2 )" `shouldBe` Right ("", 2)
+
+        it "gives expected error message on unknown char" $ do
+            f "@" `shouldBe` Left (ParseError "Expected a number or ( expression )" "@")
+
     describe "evaluates expressions properly" $ do
         let ae = parse $ eval arithmeticExpression
 
@@ -53,5 +71,5 @@ spec = do
             ae "2+2 foobar" `shouldBe` Right (" foobar", 4)
 
         it "parses nothing on invalid expression" $ do
-            ae "+" `shouldBe` Left (ParseError "" "")
-            ae "(2+2" `shouldBe` Left (ParseError "" "")
+            ae "+" `shouldBe` Left (ParseError "Expected a number or ( expression )" "+")
+            ae "(2+2" `shouldBe` Left (ParseError "Expected ')'" "")

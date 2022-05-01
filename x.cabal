@@ -32,7 +32,13 @@ library
       Parser.Parsers.AST.ArithmeticExpression
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Conditional
+      Parser.Parsers.Combinator.FirstThatParses
+      Parser.Parsers.Combinator.Lookahead
+      Parser.Parsers.Combinator.LookaheadN
+      Parser.Parsers.Combinator.ManyMaybe
       Parser.Parsers.Combinator.ParseWhileAggregate
+      Parser.Parsers.Combinator.Peek
+      Parser.Parsers.Combinator.Precondition
       Parser.Parsers.Numeric.CReal
       Parser.Parsers.Numeric.Digit
       Parser.Parsers.Numeric.Number

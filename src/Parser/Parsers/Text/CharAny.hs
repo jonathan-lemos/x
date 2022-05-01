@@ -6,6 +6,7 @@ import Parser.Parser
 import Parser.Parsers.Combinator.Check
 import Parser.Parsers.Combinator.Conditional
 import Parser.Parsers.Text.Char
+import Utils.String (pluralize)
 
 {- | Reads a character that matches any of the characters in the given string, failing on EOF or a character not in the string
 
@@ -15,14 +16,14 @@ import Parser.Parsers.Text.Char
  Right ("bc",'a')
 
  >>> parse (charAny "bc") "abc"
- Left (ParseError {reason = "Expected any of 'b', 'c'", currentInput = "bc"})
+ Left (ParseError {reason = "Expected 'b' or 'c'", currentInput = "bc"})
 
  >>> parse (charAny "ab") ""
- Left (ParseError {reason = "Expected any of 'a', 'b'", currentInput = ""})
+ Left (ParseError {reason = "Expected 'a' or 'b'", currentInput = ""})
 -}
 charAny :: String -> Parser Char
 charAny s =
-    let errMsg = "Expected any of " <> intercalate ", " (fmap show s)
+    let errMsg = "Expected " <> pluralize (fmap show s)
     in check
         (`elem` s)
         (const errMsg)

@@ -88,13 +88,13 @@ spec = do
             f "helloworldbar" `shouldBe` Right ("bar", "helloworld")
 
         it "<> fails if left doesn't match" $ do
-            f "helworldbar" `shouldBe` Left (ParseError "Syntax Error" "helworldbar")
+            f "helworldbar" `shouldBe` Left (ParseError "Expected \"hello\"" "helworldbar")
 
         it "<> fails if right doesn't match" $ do
-            f "helloworbar" `shouldBe` Left (ParseError "Syntax Error" "worbar")
+            f "helloworbar" `shouldBe` Left (ParseError "Expected \"world\"" "worbar")
 
         it "<> fails if neither matches" $ do
-            f "bar" `shouldBe` Left (ParseError "Syntax Error" "bar")
+            f "bar" `shouldBe` Left (ParseError "Expected \"hello\"" "bar")
 
         it "mempty does nothing" $ do
             let g = parse (mempty :: Parser String)

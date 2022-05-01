@@ -15,7 +15,7 @@ import Utils.String
  Right (" world","hello")
 
  >>> parse (literal "abc") "ab c"
- Left (ParseError {reason = "Expected \"abc\"", currentInput = "ab c"})
+ Left (ParseError {reason = "Expected \"abc\"", currentInput = " c"})
 
  >>> parse (literal "abc") ""
  Left (ParseError {reason = "Expected \"abc\"", currentInput = ""})
@@ -27,4 +27,6 @@ import Utils.String
  Right ("","")
 -}
 literal :: String -> Parser String
-literal s = mconcat (fmap (fmap (: []) . charEq) s) <|> fail ("Expected " <> show s)
+literal s =
+    let parsers = (\c -> (:[]) <$> charEq c <|> fail ("Expected " <> show s)) <$> s
+    in mconcat parsers
