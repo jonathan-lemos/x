@@ -1,4 +1,6 @@
 # x
+[![ci](https://github.com/jonathan-lemos/x/actions/workflows/ci.yaml/badge.svg)](https://github.com/jonathan-lemos/x/actions/workflows/ci.yaml)
+
 A CLI calculator. It will be great some day, but right now it's just a basic arithmetic calculator.
 
 ## Roadmap
@@ -9,9 +11,10 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * Better number formatting
     * Rational
     * Integer
-* better REPL functionality
+* Better REPL functionality
+    * quit with `:q`
     * (up arrow to see previous commands)
     * tab completion
-* Flesh out error messages
+    * Flesh out error messages
 * Matrices
 * Algebra/calculus solver?
