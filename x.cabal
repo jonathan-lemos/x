@@ -5,14 +5,14 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           x
-version:        0.0.1.0
+version:        0.0.2.0
 description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
 homepage:       https://github.com/jonathan-lemos/x#readme
 bug-reports:    https://github.com/jonathan-lemos/x/issues
 author:         Jonathan Lemos
 maintainer:     jonathanlemos@protonmail.com
 copyright:      2022 Jonathan Lemos
-license:        BSD3
+license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -48,12 +48,15 @@ library
       Parser.Parsers.Text.Chars
       Parser.Parsers.Text.Literal
       Parser.Parsers.Text.Whitespace
-      Shell
+      Shell.Formatting
+      Shell.Shell
       Types.AST.ArithmeticExpression
       Types.Expression
       Utils.Either
+      Utils.List
       Utils.Monad
       Utils.String
+      Utils.Trim
   other-modules:
       Paths_x
   hs-source-dirs:
@@ -86,7 +89,7 @@ test-suite x-test
   other-modules:
       Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.ParserSpec
-      ShellSpec
+      Shell.ShellSpec
       Paths_x
   hs-source-dirs:
       test

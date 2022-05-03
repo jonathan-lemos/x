@@ -73,3 +73,4 @@ spec = do
         it "parses nothing on invalid expression" $ do
             ae "+" `shouldBe` Left (ParseError "Expected a number or ( expression )" "+")
             ae "(2+2" `shouldBe` Left (ParseError "Expected ')'" "")
+            ae "2*" `shouldBe` Left (ParseError "Expected a number or ( expression )" "")

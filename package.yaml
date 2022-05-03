@@ -1,7 +1,7 @@
 name:                x
-version:             0.0.1.0
+version:             0.0.2.0
 github:              "jonathan-lemos/x"
-license:             BSD3
+license:             Apache-2.0
 author:              "Jonathan Lemos"
 maintainer:          "jonathanlemos@protonmail.com"
 copyright:           "2022 Jonathan Lemos"

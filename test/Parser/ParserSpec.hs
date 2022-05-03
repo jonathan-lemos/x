@@ -88,10 +88,10 @@ spec = do
             f "helloworldbar" `shouldBe` Right ("bar", "helloworld")
 
         it "<> fails if left doesn't match" $ do
-            f "helworldbar" `shouldBe` Left (ParseError "Expected \"hello\"" "helworldbar")
+            f "helworldbar" `shouldBe` Left (ParseError "Expected \"hello\"" "worldbar")
 
         it "<> fails if right doesn't match" $ do
-            f "helloworbar" `shouldBe` Left (ParseError "Expected \"world\"" "worbar")
+            f "helloworbar" `shouldBe` Left (ParseError "Expected \"world\"" "bar")
 
         it "<> fails if neither matches" $ do
             f "bar" `shouldBe` Left (ParseError "Expected \"hello\"" "bar")

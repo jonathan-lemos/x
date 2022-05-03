@@ -1,5 +1,5 @@
 module Lib where
-import Shell
+import Shell.Shell
 import System.Console.Terminal.Size
 import Data.Maybe
 import IO.IOCmd (printCmd)
