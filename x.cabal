@@ -30,6 +30,9 @@ library
       Parser.Error
       Parser.Parser
       Parser.Parsers.AST.ArithmeticExpression
+      Parser.Parsers.AST.Assignment
+      Parser.Parsers.AST.Statement
+      Parser.Parsers.AST.XValue
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.FirstThatParses
@@ -50,8 +53,12 @@ library
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
       Shell.Shell
+      Shell.State
       Types.AST.ArithmeticExpression
+      Types.AST.Assignment
+      Types.AST.Statement
       Types.Expression
+      Types.XValue
       Utils.Either
       Utils.List
       Utils.Monad
@@ -64,6 +71,7 @@ library
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
+    , containers
     , numbers
     , terminal-size
   default-language: Haskell2010
@@ -78,6 +86,7 @@ executable x-exe
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
+    , containers
     , numbers
     , terminal-size
     , x
@@ -97,6 +106,7 @@ test-suite x-test
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
+    , containers
     , hspec
     , numbers
     , terminal-size
