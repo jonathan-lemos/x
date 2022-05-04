@@ -21,8 +21,9 @@ description:         Please see the README on GitHub at <https://github.com/jona
 
 dependencies:
 - base >= 4.7 && < 5
-- numbers
 - ansi-terminal
+- containers
+- numbers
 - terminal-size
 
 library:
