@@ -46,7 +46,7 @@ jobs:
       run: cabal update
 
     - name: Install Doctest
-      run: cabal install doctest
+      run: cabal install doctest || true
 
     - uses: haskell/actions/hlint-setup@v2
       name: Setup hLint
