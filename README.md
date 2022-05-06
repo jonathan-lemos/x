@@ -7,7 +7,10 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Get basic calculator done~~
 * ~~Error message display~~
 * Variables
+* Units
+* Boolean Expressions
 * Functions
+    * Piecewise
 * Better number formatting
     * Rational
     * Integer

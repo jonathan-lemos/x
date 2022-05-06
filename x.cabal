@@ -31,6 +31,7 @@ library
       Parser.Parser
       Parser.Parsers.AST.ArithmeticExpression
       Parser.Parsers.AST.Assignment
+      Parser.Parsers.AST.Identifier
       Parser.Parsers.AST.Statement
       Parser.Parsers.AST.XValue
       Parser.Parsers.Combinator.Check
@@ -57,7 +58,7 @@ library
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement
-      Types.Expression
+      Types.Evaluatable.Evaluatable
       Types.XValue
       Utils.Either
       Utils.List
