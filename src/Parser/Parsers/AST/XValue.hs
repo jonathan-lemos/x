@@ -2,9 +2,10 @@ module Parser.Parsers.AST.XValue where
 
 import Parser.Parsers.Combinator.FirstThatParses
 import Types.XValue
-
-identifier :: Parser String
-identifier = some (char isAlpha)
+import Parser.Parser
+import Parser.Parsers.Numeric.CReal
+import Parser.Parsers.AST.Identifier
+import Control.Applicative
 
 xvalue :: Parser XValue
 xvalue =
@@ -12,4 +13,4 @@ xvalue =
         [ XNumber <$> creal
         , XVariable <$> identifier
         ]
-        <|> fail "Expected a number or a variable name"
+        "Expected a number or a variable name"

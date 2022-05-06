@@ -4,18 +4,19 @@ import Data.Number.CReal
 import Control.Monad
 import Data.List
 import Data.Bifunctor
-import Types.Expression
+import Types.Evaluatable.Evaluatable
+import Shell.State
 
 
-stringifyExpression :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
-stringifyExpression x xs =
+stringifyEvaluatable :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
+stringifyEvaluatable x xs =
     let toList (a, b) = [a, b]
         in unwords $ show x : ((toList . bimap show show) =<< xs)
 
-evaluateExpression :: (Expression a) => a -> [(CReal -> CReal -> CReal, a)] -> CReal
-evaluateExpression x =
-    let apply a (f, b) = f a $ evaluate b
-        in foldl' apply (evaluate x)
+evaluateEvaluatable :: (Evaluatable a) => a -> XState -> [(CReal -> CReal -> CReal, a)] -> Either String CReal
+evaluateEvaluatable x state =
+    let apply a (f, b) = f <$> a <*> evaluate b state
+        in foldl' apply (evaluate x state)
 
 
 data AdditionOperator = Add | Subtract
@@ -30,14 +31,14 @@ data ArithmeticExpression = ArithmeticExpression Multiplication [(AdditionOperat
     deriving Eq
 
 instance Show ArithmeticExpression where
-    show (ArithmeticExpression x xs) = stringifyExpression x xs
+    show (ArithmeticExpression x xs) = stringifyEvaluatable x xs
 
-instance Expression ArithmeticExpression where
-    evaluate (ArithmeticExpression x xs) =
+instance Evaluatable ArithmeticExpression where
+    evaluate (ArithmeticExpression x xs) state =
         let mapOp Add      = (+)
             mapOp Subtract = (-)
             opList = first mapOp <$> xs
-            in evaluateExpression x opList
+            in evaluateEvaluatable x state opList
 
 
 data MultiplicationOperator = Multiply | Divide
@@ -52,14 +53,14 @@ data Multiplication = Multiplication Power [(MultiplicationOperator, Power)]
     deriving Eq
 
 instance Show Multiplication where
-    show (Multiplication x xs) = stringifyExpression x xs
+    show (Multiplication x xs) = stringifyEvaluatable x xs
 
-instance Expression Multiplication where
-    evaluate (Multiplication x xs) =
+instance Evaluatable Multiplication where
+    evaluate (Multiplication x xs) state =
         let mapOp Multiply = (*)
             mapOp Divide   = (/)
             opList = first mapOp <$> xs
-            in evaluateExpression x opList
+            in evaluateEvaluatable x state opList
 
 data Power = Power Factor Power | NoPower Factor
     deriving Eq
@@ -68,9 +69,9 @@ instance Show Power where
     show (Power f p) = concat [show f, " ^ ", show p]
     show (NoPower f) = show f
 
-instance Expression Power where
-    evaluate (Power f p) = evaluate f ** evaluate p
-    evaluate (NoPower f) = evaluate f
+instance Evaluatable Power where
+    evaluate (Power f p) state = (**) <$> evaluate f state <*> evaluate p state
+    evaluate (NoPower f) state = evaluate f state
 
 
 data Factor = FactorNumber CReal | Parentheses ArithmeticExpression
@@ -80,6 +81,6 @@ instance Show Factor where
     show (FactorNumber r) = show r
     show (Parentheses ae) = concat ["(", show ae, ")"]
 
-instance Expression Factor where
-    evaluate (FactorNumber n) = n
-    evaluate (Parentheses p)  = evaluate p
+instance Evaluatable Factor where
+    evaluate (FactorNumber n) _ = Right n
+    evaluate (Parentheses p) state = evaluate p state

@@ -3,7 +3,7 @@ module Parser.Parsers.Combinator.FirstThatParses where
 import Parser.Error
 import Parser.Parser
 
-{- | Returns the result of the first parser that parses at least one character (doesn't have to succeed).
+{- | Returns the result of the first parser that succeeds or parses at least one character (doesn't have to succeed).
 Returns the given error message if none of them parse.
 
 ## Examples
@@ -24,6 +24,9 @@ Left (ParseError {reason = "Expected \"def\"", currentInput = "gzzz"})
 
 >>> parse (firstThatParses [literal "abc", literal "def"] "errmsg") "zzzzzz"
 Left (ParseError {reason = "errmsg", currentInput = "zzzzzz"})
+
+>>> parse (firstThatParses [fail "test", pure 1, fail "test2"] "errmsg") "zzzzzz"
+Right ("zzzzzz", 1)
 -}
 firstThatParses :: [Parser a] -> String -> Parser a
 firstThatParses (p : ps) msg = Parser $ \s ->
