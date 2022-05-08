@@ -29,4 +29,4 @@ import Parser.Parser
  Right ("",4)
 -}
 lookahead :: (String -> Parser a) -> Parser a
-lookahead f = join . Parser $ \s -> Right (s, f s)
+lookahead f = join . Parser $ \state input -> Right (input, f input)
