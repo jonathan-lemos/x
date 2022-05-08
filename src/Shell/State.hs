@@ -1,4 +1,4 @@
-module State.State where
+module Shell.State where
 
 import qualified Data.Map as DM
 import Data.Number.CReal

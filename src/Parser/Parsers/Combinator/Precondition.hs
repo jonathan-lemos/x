@@ -19,7 +19,7 @@ import Data.Bifunctor
  Left (ParseError {reason = "Expected 'b'", currentInput = "cd"})
 -}
 precondition :: Parser a -> Parser b -> Parser (Maybe (a, b))
-precondition pa pb = Parser $ \state input ->
-    case parse pa state input of
-        Left _ -> Right (input, Nothing)
-        Right (newInput, value) -> second (Just . (value,)) <$> parse pb state newInput
+precondition pa pb = Parser $ \s ->
+    case parse pa s of
+        Left _ -> Right (s, Nothing)
+        Right (sa, v) -> second (Just . (v,)) <$> parse pb sa

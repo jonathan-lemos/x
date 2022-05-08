@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           x
-version:        0.0.3.0
+version:        0.0.2.0
 description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
 homepage:       https://github.com/jonathan-lemos/x#readme
 bug-reports:    https://github.com/jonathan-lemos/x/issues
@@ -31,18 +31,15 @@ library
       Parser.Parser
       Parser.Parsers.AST.ArithmeticExpression
       Parser.Parsers.AST.Assignment
-      Parser.Parsers.AST.Primitive.Identifier
-      Parser.Parsers.AST.Primitive.KnownIdentifier
+      Parser.Parsers.AST.Identifier
       Parser.Parsers.AST.Statement
       Parser.Parsers.AST.XValue
-      Parser.Parsers.Combinator.Atomic
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.FirstThatParses
       Parser.Parsers.Combinator.Lookahead
       Parser.Parsers.Combinator.LookaheadN
       Parser.Parsers.Combinator.ManyMaybe
-      Parser.Parsers.Combinator.MapResult
       Parser.Parsers.Combinator.ParseWhileAggregate
       Parser.Parsers.Combinator.Peek
       Parser.Parsers.Combinator.Precondition
@@ -57,7 +54,7 @@ library
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
       Shell.Shell
-      State.State
+      Shell.State
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement

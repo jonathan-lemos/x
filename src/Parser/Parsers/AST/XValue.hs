@@ -4,7 +4,7 @@ import Parser.Parsers.Combinator.FirstThatParses
 import Types.XValue
 import Parser.Parser
 import Parser.Parsers.Numeric.CReal
-import Parser.Parsers.AST.Primitive.Identifier
+import Parser.Parsers.AST.Identifier
 import Control.Applicative
 
 xvalue :: Parser XValue

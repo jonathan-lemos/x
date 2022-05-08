@@ -6,45 +6,38 @@ import Control.Applicative
 import Control.Monad
 import Data.Bifunctor
 import Parser.Error
-import State.State
 
 defaultErrMsg :: String
 defaultErrMsg = "Syntax Error"
 
 newtype Parser a = Parser
-    { parse :: XState -> String -> Either ParseError (String, a)
+    { parse :: String -> Either ParseError (String, a)
     }
 
 instance Functor Parser where
-    fmap f p = Parser $ fmap (second $ second f) . parse p
+    fmap f p = Parser $ fmap (second f) . parse p
 
 instance Applicative Parser where
-    pure x = Parser $ \state input -> Right (input, x)
+    pure x = Parser $ Right . (,x)
 
     ab <*> a =
-        Parser $ \state input ->
-            parse ab state input
-                >>= \(newInput, func) -> second func <$> parse a state newInput
+        Parser $ parse ab >=> \(r, f) -> second f <$> parse a r
 
 instance Monad Parser where
     a >>= f =
-        Parser $ \state input ->
-            parse a state input
-                >>= \(newInput, aValue) -> parse (f aValue) state newInput
+        Parser $ parse a >=> \(newInput, aValue) -> parse (f aValue) newInput
 
 instance MonadFail Parser where
-    fail msg = Parser $ const (Left . ParseError msg)
+    fail msg = Parser $ Left . ParseError msg
 
 instance Semigroup t => Semigroup (Parser t) where
     a <> b =
-        Parser $ \state input ->
-            parse a state input
-                >>= \(newInput, aValue) -> second (aValue <>) <$> parse b state newInput
+        Parser $ parse a >=> \(newInput, aValue) -> second (aValue <>) <$> parse b newInput
 
 instance Monoid t => Monoid (Parser t) where
     mempty = pure mempty
 
 instance Alternative Parser where
-    empty = Parser $ const (Left . ParseError defaultErrMsg)
+    empty = Parser $ Left . ParseError defaultErrMsg
     f <|> g =
         Parser $ \s -> parse f s <> parse g s

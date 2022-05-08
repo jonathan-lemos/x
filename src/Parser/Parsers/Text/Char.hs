@@ -17,4 +17,4 @@ char :: Parser Char
 char =
     let f (x : xs) = Right (xs, x)
         f [] = Left $ ParseError "Expected any character" ""
-     in Parser $ const f
+     in Parser f
