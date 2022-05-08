@@ -29,8 +29,8 @@ Left (ParseError {reason = "errmsg", currentInput = "zzzzzz"})
 Right ("zzzzzz", 1)
 -}
 firstThatParses :: [Parser a] -> String -> Parser a
-firstThatParses (p : ps) msg = Parser $ \state input ->
-    case parse p state input of
-        Left pe | currentInput pe == input -> parse (firstThatParses ps msg) state input
+firstThatParses (p : ps) msg = Parser $ \s ->
+    case parse p s of
+        Left pe | currentInput pe == s -> parse (firstThatParses ps msg) s
         x -> x
 firstThatParses [] msg = fail msg

@@ -4,24 +4,19 @@ import Types.AST.ArithmeticExpression
 import Test.Hspec
 import Parser.Parsers.AST.ArithmeticExpression
 import Parser.Parser
-import Types.Evaluatable.Evaluatable
+import Types.Expression
 import Data.Bifunctor
 import Data.Number.CReal
-import Parser.Error
-import Shell.State
-
-mkState :: [(String, CReal)] -> XState
-mkState = foldr (\(k, v) state -> putVar state k v) newState
+import Parser.Error (ParseError(ParseError))
 
 
-eval :: (Evaluatable e) => XState -> Parser e -> Parser (Either String CReal)
-eval state = fmap (`evaluate` state)
+eval :: (Expression e) => Parser e -> Parser CReal
+eval = fmap evaluate
 
 spec :: Spec
 spec = do
     describe "factor tests" $ do
-        let demoState = mkState [("a", 4),("b", 100)]
-        let f = parse $ eval demoState factor
+        let f = parse $ eval factor
 
         it "evaluates a single number" $ do
             f "2" `shouldBe` Right ("", 2)
@@ -37,13 +32,6 @@ spec = do
 
         it "gives expected error message on unknown char" $ do
             f "@" `shouldBe` Left (ParseError "Expected a number or ( expression )" "@")
-
-        it "evaluates variable" $ do
-            f "a" `shouldBe` Right ("", 4)
-            f "b" `shouldBe` Right ("", 100)
-
-        it "errors on unknown variable" $ do
-            f "noExist" `shouldBe` Left (ParseError "Use of ")
 
     describe "evaluates expressions properly" $ do
         let ae = parse $ eval arithmeticExpression

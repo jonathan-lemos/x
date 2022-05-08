@@ -11,7 +11,7 @@ import Parser.Parsers.AST.ArithmeticExpression
 import Parser.Parsers.AST.Statement
 import Parser.Parsers.Text.Whitespace
 import Shell.Formatting
-import State.State
+import Shell.State
 import System.Console.ANSI
 import System.Console.Terminal.Size
 import Types.AST.Assignment
