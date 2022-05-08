@@ -4,6 +4,7 @@ import Control.Monad
 import Data.Bifunctor
 import Parser.Error
 import Parser.Parser
+import Parser.Parsers.Combinator.MapResult
 
 
 
@@ -24,9 +25,8 @@ import Parser.Parser
  Left (ParseError {reason = "Expected any character", currentInput = ""})
 -}
 check :: (a -> Bool) -> (a -> String) -> Parser a -> Parser a
-check predicate valueToMsg p =
-    Parser $
-        parse p >=> \(input, value) ->
+check predicate valueToMsg = mapResultWithInput $
+    \input e -> e >>= \(newInput, value) ->
             if predicate value
                 then Right (input, value)
                 else Left $ ParseError (valueToMsg value) input
