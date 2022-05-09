@@ -5,7 +5,9 @@ import Control.Monad
 import Data.List
 import Data.Bifunctor
 import Types.Evaluatable.Evaluatable
-import Shell.State
+import Types.State
+import Types.XValue
+import Utils.Either
 
 
 stringifyEvaluatable :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -74,13 +76,14 @@ instance Evaluatable Power where
     evaluate (NoPower f) state = evaluate f state
 
 
-data Factor = FactorNumber CReal | Parentheses ArithmeticExpression
+data Factor = FactorValue XValue | Parentheses ArithmeticExpression
     deriving Eq
 
 instance Show Factor where
-    show (FactorNumber r) = show r
+    show (FactorValue v) = show v
     show (Parentheses ae) = concat ["(", show ae, ")"]
 
 instance Evaluatable Factor where
-    evaluate (FactorNumber n) _ = Right n
+    evaluate (FactorValue (XNumber n)) _ = Right n
+    evaluate (FactorValue (XVariable v)) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
     evaluate (Parentheses p) state = evaluate p state

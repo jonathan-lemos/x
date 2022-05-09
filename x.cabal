@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           x
-version:        0.0.2.0
+version:        0.0.3.0
 description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
 homepage:       https://github.com/jonathan-lemos/x#readme
 bug-reports:    https://github.com/jonathan-lemos/x/issues
@@ -54,11 +54,11 @@ library
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
       Shell.Shell
-      Shell.State
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement
       Types.Evaluatable.Evaluatable
+      Types.State
       Types.XValue
       Utils.Either
       Utils.List
