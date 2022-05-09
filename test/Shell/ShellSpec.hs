@@ -1,37 +1,57 @@
 module Shell.ShellSpec where
-import Test.Hspec
-import Shell.Shell
-import Parser.Error
-import IO.IOCmd
+
+import Control.Monad
+import Data.Bifunctor
+import Data.Either
 import Data.List
+import IO.IOCmd
+import Parser.Error
+import Parser.Parsers.AST.ArithmeticExpressionSpec
+import Shell.Shell
+import Test.Hspec
 
 ioListToString :: [IOCmd] -> String
 ioListToString = intercalate "" . fmap show
 
 spec :: Spec
 spec = do
-    describe "calculate tests" $ do
+    let sState = mkState [("a", 4), ("foo", 9)]
+
+    describe "parseCommand tests" $ do
+        it "parses basic expressions" $ do
+            parseCommand "2 + 2" `shouldSatisfy` isRight
+            parseCommand "2 + 2 ^ 7" `shouldSatisfy` isRight
+
+        it "errors on invalid expressions" $ do
+            parseCommand "2 +" `shouldSatisfy` isLeft
+            parseCommand "" `shouldSatisfy` isLeft
+
+    describe "executeStatement tests" $ do
+        let es = first show . parseCommand >=> executeStatement sState
+        let esRes = second snd . es
+        let esState = second fst . es
+
         it "calculates basic expressions properly" $ do
-            calculate "2 + 3" `shouldBe` Right "5.0"
-            calculate "    2     +     3" `shouldBe` Right "5.0"
-            calculate "2+3" `shouldBe` Right "5.0"
+            esRes "2 + 3" `shouldBe` Right "5.0"
+            esRes "    2     +     3" `shouldBe` Right "5.0"
+            esRes "2+3" `shouldBe` Right "5.0"
 
         it "executes expression with trailing whitespace" $ do
-            calculate "2+3 " `shouldBe` Right "5.0"
+            esRes "2+3 " `shouldBe` Right "5.0"
 
         it "reports syntax error on invalid expressions" $ do
-            calculate "2+" `shouldBe` Left (ParseError "Expected a number or ( expression )" "")
+            esRes "2+" `shouldBe` Left "ParseError {reason = \"Expected a number, variable, or ( expression )\", currentInput = \"\""
 
-    describe "printResult tests" $ do
+    describe "execute tests" $ do
+        let execLines a b c = snd (second (fmap show) $ execute a b c)
+
         it "prints value if value is present" $ do
-            show <$> printResult 80 "123.45" (Right "123.45") `shouldBe` ["123.45\n"]
+            execLines sState 80 "123.45" `shouldBe` ["123.45\n"]
 
         it "prints error if error is present" $ do
-            ioListToString (printResult 80 "2 + 2" $ Left (ParseError "it failed" "+ 2"))
-            `shouldBe`
-            unlines [
-                "error: it failed",
-                "",
-                "2 + 2",
-                "  ^"
-            ]
+            execLines sState 80 "2 + 2"
+                `shouldBe` [ "error: it failed"
+                           , ""
+                           , "2 + 2"
+                           , "  ^"
+                           ]

@@ -15,6 +15,7 @@ import Types.AST.ArithmeticExpression
 import Utils.Monad
 import Parser.Parsers.Combinator.LookaheadN (lookaheadN)
 import Data.List
+import Types.XValue
 
 {- | Parses a left-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from left operator to right operator.
 
@@ -102,7 +103,7 @@ factor =
 
           | (length x >= 2 && head x `elem` "+-" && isDigit (x !! 1) ) ||
             (not (null x) && isDigit (head x)) =
-                FactorNumber <$> creal
+                FactorValue . XNumber <$> creal
 
-          | otherwise = fail "Expected a number or ( expression )"
+          | otherwise = fail "Expected a number, variable, or ( expression )"
      in whitespace >> lookaheadN 2 f
