@@ -1,7 +1,6 @@
 module Types.AST.ArithmeticExpression where
 
 import Data.Number.CReal
-import Control.Monad
 import Data.List
 import Data.Bifunctor
 import Types.Evaluatable.Evaluatable

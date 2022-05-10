@@ -1,11 +1,8 @@
 module Parser.Parsers.Combinator.Check where
 
-import Control.Monad
-import Data.Bifunctor
 import Parser.Error
 import Parser.Parser
-
-
+import Parser.Parsers.Combinator.MapResult
 
 {- | If the given parser succeeds, but the `predicate` returns `False`, fails with the message returned by `valueToMsg`, otherwise passes `p` through.
 
@@ -24,9 +21,8 @@ import Parser.Parser
  Left (ParseError {reason = "Expected any character", currentInput = ""})
 -}
 check :: (a -> Bool) -> (a -> String) -> Parser a -> Parser a
-check predicate valueToMsg p =
-    Parser $
-        parse p >=> \(input, value) ->
-            if predicate value
-                then Right (input, value)
-                else Left $ ParseError (valueToMsg value) input
+check predicate valueToMsg = mapResultWithInput $ \input e ->
+    e >>= \(_, value) ->
+        if predicate value
+            then Right (input, value)
+            else Left $ ParseError (valueToMsg value) input
