@@ -1,7 +1,6 @@
 module IO.IOCmd where
 
 import System.Console.ANSI
-import System.Console.Terminal.Size
 
 {- | Represents a print to be done.
  Feed these to `printCmd` to actually execute them.
@@ -22,7 +21,7 @@ text = IOCmd []
 
 -- | Makes a command that prints text and a newline with the given ANSI metadata.
 coloredLine :: [SGR] -> String -> IOCmd
-coloredLine sgr text = coloredText sgr (text <> "\n")
+coloredLine sgr txt = coloredText sgr (txt <> "\n")
 
 -- | Makes a command that prints text and a newline.
 line :: String -> IOCmd
@@ -34,7 +33,7 @@ newline = line ""
 
 -- | Prints a command
 printCmd :: IOCmd -> IO ()
-printCmd (IOCmd sgr text) = do
+printCmd (IOCmd sgr txt) = do
     setSGR sgr
-    putStr text
+    putStr txt
     setSGR [Reset]

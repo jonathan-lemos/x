@@ -34,12 +34,14 @@ library
       Parser.Parsers.AST.Identifier
       Parser.Parsers.AST.Statement
       Parser.Parsers.AST.XValue
+      Parser.Parsers.Combinator.Atomic
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.FirstThatParses
       Parser.Parsers.Combinator.Lookahead
       Parser.Parsers.Combinator.LookaheadN
       Parser.Parsers.Combinator.ManyMaybe
+      Parser.Parsers.Combinator.MapResult
       Parser.Parsers.Combinator.ParseWhileAggregate
       Parser.Parsers.Combinator.Peek
       Parser.Parsers.Combinator.Precondition
@@ -83,7 +85,7 @@ executable x-exe
       Paths_x
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
