@@ -1,6 +1,6 @@
-module Parser.Parsers.Combinator.LookaheadN where
+module Parser.Parsers.Combinator.Choice.LookaheadN where
 
-import Parser.Parsers.Combinator.Lookahead
+import Parser.Parsers.Combinator.Choice.Lookahead
 import Parser.Parser
 
 {- | Looks at the remaining input (up to N characters) and chooses a Parser based on it

@@ -30,8 +30,8 @@ parseCommand input =
         parseTree = parse parser input
      in parseTree >>= \(r, v) ->
             if null r
-                then Left $ ParseError "Unexpected end of parse" r
-                else Right v
+                then Right v
+                else Left $ ParseError "Unexpected end of parse" r
 
 -- | Executes a parsed Statement, returning either an error message or the new state and string output
 executeStatement :: XState -> Statement -> Either String (XState, String)

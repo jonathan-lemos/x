@@ -1,7 +1,7 @@
-module Parser.Parsers.Combinator.Peek where
+module Parser.Parsers.Combinator.Choice.Peek where
 import Parser.Parser
 import Data.Maybe
-import Parser.Parsers.Combinator.LookaheadN
+import Parser.Parsers.Combinator.Choice.LookaheadN
 
 {- | Peeks the next character (or Nothing if EOF) and chooses a Parser based on it
 

@@ -2,13 +2,12 @@ module Parser.Parsers.AST.ArithmeticExpression where
 
 import Control.Applicative
 import Control.Monad
-import Data.Char (isDigit)
+import Data.Char (isDigit, isAlpha)
 import Data.List
 import Parser.Parser
-import Parser.Parsers.Combinator.LookaheadN (lookaheadN)
 import Parser.Parsers.Combinator.ManyMaybe
-import Parser.Parsers.Combinator.Peek
-import Parser.Parsers.Combinator.Precondition (precondition)
+import Parser.Parsers.Combinator.Choice.Peek
+import Parser.Parsers.Combinator.Precondition
 import Parser.Parsers.Numeric.CReal
 import Parser.Parsers.Text.Char
 import Parser.Parsers.Text.CharEq
@@ -18,6 +17,12 @@ import Types.XValue
 import Utils.Monad
 import Parser.Parsers.AST.Identifier
 import Parser.Parsers.Combinator.FirstThatParses
+import Parser.Parsers.Combinator.Atomic
+import Parser.Parsers.Combinator.Choice.LookaheadParse
+import Parser.Parsers.Combinator.Conditional
+import Parser.Parsers.Combinator.Possibly
+import Parser.Parsers.Text.CharAny
+import Data.Foldable
 
 {- | Parses a left-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from left operator to right operator.
 
@@ -93,16 +98,19 @@ power =
 
 factor :: Parser Factor
 factor =
-    whitespace
-        >> firstThatParses
-            [ do
+    let parenExpr = do
                 charEq '('
                 whitespace
                 e <- arithmeticExpression
                 whitespace
                 charEq ')'
                 return $ Parentheses e
-            , FactorValue . XNumber <$> creal
-            , FactorValue . XVariable <$> identifier
+    in
+    whitespace >>
+        lookaheadParse
+            [
+                charEq '(' >> pure parenExpr,
+                possibly (charAny "-+") >> conditional isDigit char >> pure (FactorValue . XNumber <$> creal),
+                conditional isAlpha char >> pure (FactorValue . XVariable <$> identifier),
+                fail "Expected a number, variable, or ( expression )"
             ]
-            "Expected a number, variable, or ( expression )"

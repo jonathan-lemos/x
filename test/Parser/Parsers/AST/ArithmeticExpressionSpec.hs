@@ -84,9 +84,9 @@ spec = do
             ae "2+2 foobar" `shouldBe` Right (" foobar", Right 4)
 
         it "parses nothing on invalid expression" $ do
-            ae "+" `shouldBe` Left (ParseError "Expected a number or ( expression )" "+")
+            ae "+" `shouldBe` Left (ParseError "Expected a number, variable, or ( expression )" "+")
             ae "(2+2" `shouldBe` Left (ParseError "Expected ')'" "")
-            ae "2*" `shouldBe` Left (ParseError "Expected a number or ( expression )" "")
+            ae "2*" `shouldBe` Left (ParseError "Expected a number, variable, or ( expression )" "")
 
         it "correctly parses variable" $ do
             ae "a" `shouldBe` Right ("", Right 4)
@@ -94,4 +94,4 @@ spec = do
             ae "a + foo" `shouldBe` Right ("", Right 13)
 
         it "errors on invalid variable" $ do
-            ae "bar" `shouldBe` Right ("", Left "Use of undeclared variable 'bar'")
+            ae "bar" `shouldBe` Right ("", Left "Use of undeclared variable \"bar\"")
