@@ -10,6 +10,7 @@ import Parser.Parsers.Text.Char
 import Data.Char
 import Parser.Parsers.Combinator.Conditional
 import Control.Monad
+import Parser.Parsers.Combinator.Plus
 
 {- |
  Parses a real number
@@ -35,7 +36,7 @@ creal :: Parser CReal
 creal = do
     let asList = ((:[]) <$>)
 
-    let digitSeq = some (conditional isDigit char) <|> fail "Expected a sequence of digits"
+    let digitSeq = plus (conditional isDigit char) <|> fail "Expected a sequence of digits"
     let sign = charAny "+-"
 
     let decPart = asList (charEq '.') <> digitSeq

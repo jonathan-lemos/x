@@ -40,7 +40,7 @@ spec = do
             esRes "2+3 " `shouldBe` Right "5.0"
 
         it "reports syntax error on invalid expressions" $ do
-            esRes "2+" `shouldBe` Left "ParseError {reason = \"Expected a number, variable, or ( expression )\", currentInput = \"\""
+            esRes "2+" `shouldBe` Left "ParseError {reason = \"Expected a number, variable, or ( expression )\", currentInput = \"\"}"
 
     describe "execute tests" $ do
         let execLines a b c = snd (second (fmap show) $ execute a b c)
@@ -49,9 +49,9 @@ spec = do
             execLines sState 80 "123.45" `shouldBe` ["123.45\n"]
 
         it "prints error if error is present" $ do
-            execLines sState 80 "2 + 2"
-                `shouldBe` [ "error: it failed"
+            execLines sState 80 "2 + _ + 7"
+                `shouldBe` [ "error: Expected a number, variable, or ( expression )"
                            , ""
-                           , "2 + 2"
-                           , "  ^"
+                           , "2 + _ + 7"
+                           , "    ^"
                            ]

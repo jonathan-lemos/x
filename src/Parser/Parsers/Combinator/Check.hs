@@ -22,7 +22,7 @@ import Parser.Parsers.Combinator.MapResult
 -}
 check :: (a -> Bool) -> (a -> String) -> Parser a -> Parser a
 check predicate valueToMsg = mapResultWithInput $ \input e ->
-    e >>= \(_, value) ->
+    e >>= \(newInput, value) ->
         if predicate value
-            then Right (input, value)
-            else Left $ ParseError (valueToMsg value) input
+            then Right (newInput, value)
+            else Left $ ParseError (valueToMsg value) newInput

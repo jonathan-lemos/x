@@ -26,7 +26,7 @@ Left (ParseError {reason = "Expected \"def\"", currentInput = "gzzz"})
 Left (ParseError {reason = "errmsg", currentInput = "zzzzzz"})
 
 >>> parse (firstThatParses [fail "test", pure 1, fail "test2"] "errmsg") "zzzzzz"
-Right ("zzzzzz", 1)
+Right ("zzzzzz",1)
 -}
 firstThatParses :: [Parser a] -> String -> Parser a
 firstThatParses (p : ps) msg = Parser $ \s ->

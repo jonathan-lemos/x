@@ -1,4 +1,4 @@
-module Parser.Parsers.Combinator.Lookahead where
+module Parser.Parsers.Combinator.Choice.Lookahead where
 
 import Control.Monad
 import Parser.Parser

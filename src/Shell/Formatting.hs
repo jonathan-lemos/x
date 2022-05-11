@@ -20,19 +20,19 @@ _makeSurroundingErrorContextCmds width lines =
 
 >>> uprint (a, b) = putStrLn a <> putStrLn b
 
->>> uprint $ makeErroringLines 80 2 "abcde"
+>>> uprint $ _makeErroringLines 80 2 "abcde"
 abcde
   ^
 
->>> uprint $ makeErroringLines 5 2 "abcdef"
+>>> uprint $ _makeErroringLines 5 2 "abcdef"
 abcde
   ^
 
->>> uprint $ makeErroringLines 5 3 "abcdefg"
+>>> uprint $ _makeErroringLines 5 3 "abcdefg"
 bcdef
   ^
 
->>> uprint $ makeErroringLines 5 10 "abcdefghijklmno"
+>>> uprint $ _makeErroringLines 5 10 "abcdefghijklmno"
 ijklm
   ^
 -}

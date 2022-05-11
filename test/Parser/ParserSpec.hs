@@ -77,9 +77,9 @@ spec = do
             let f = parse $ empty <|> integer
             f "123abc" `shouldBe` Right ("abc", 123)
 
-        it "returns nothing if both fail" $ do
-            let f = parse $ empty <|> (empty :: Parser Int)
-            f "abc" `shouldBe` Left (ParseError "Syntax Error" "abc")
+        it "returns right error if both fail" $ do
+            let f = parse $ empty <|> (fail "foo bar" :: Parser Int)
+            f "abc" `shouldBe` Left (ParseError "foo bar" "abc")
 
     describe "parser monoid" $ do
         let f = parse $ literal "hello" <> literal "world"

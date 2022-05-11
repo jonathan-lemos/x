@@ -36,14 +36,18 @@ library
       Parser.Parsers.AST.XValue
       Parser.Parsers.Combinator.Atomic
       Parser.Parsers.Combinator.Check
+      Parser.Parsers.Combinator.Choice.Lookahead
+      Parser.Parsers.Combinator.Choice.LookaheadN
+      Parser.Parsers.Combinator.Choice.LookaheadParse
+      Parser.Parsers.Combinator.Choice.MetaParse
+      Parser.Parsers.Combinator.Choice.Peek
       Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.FirstThatParses
-      Parser.Parsers.Combinator.Lookahead
-      Parser.Parsers.Combinator.LookaheadN
       Parser.Parsers.Combinator.ManyMaybe
       Parser.Parsers.Combinator.MapResult
       Parser.Parsers.Combinator.ParseWhileAggregate
-      Parser.Parsers.Combinator.Peek
+      Parser.Parsers.Combinator.Plus
+      Parser.Parsers.Combinator.Possibly
       Parser.Parsers.Combinator.Precondition
       Parser.Parsers.Numeric.CReal
       Parser.Parsers.Numeric.Digit
