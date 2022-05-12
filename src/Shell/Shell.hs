@@ -36,7 +36,7 @@ parseCommand input =
 -- | Executes a parsed Statement, returning either an error message or the new state and string output
 executeStatement :: XState -> Statement -> Either String (XState, String)
 executeStatement state (StmtAssignment (Assignment a expr)) =
-    liftA2 (,) (putVar state a) (((a <> " = ") <>) . show) <$> evaluate expr state
+    liftA2 (,) (putVar state a) (((a <> " <- ") <>) . show) <$> evaluate expr state
 executeStatement state (StmtExpr expr) =
     liftA2 (,) (Right state) (show <$> evaluate expr state)
 

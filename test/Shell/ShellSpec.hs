@@ -3,12 +3,14 @@ module Shell.ShellSpec where
 import Control.Monad
 import Data.Bifunctor
 import Data.Either
-import Data.List
 import IO.IOCmd
 import Parser.Error
 import Parser.Parsers.AST.ArithmeticExpressionSpec
 import Shell.Shell
 import Test.Hspec
+import Data.List
+import Data.List.Split
+import Parser.Parsers.AST.ArithmeticExpressionTestUtils
 
 ioListToString :: [IOCmd] -> String
 ioListToString = intercalate "" . fmap show
@@ -43,10 +45,10 @@ spec = do
             esRes "2+" `shouldBe` Left "ParseError {reason = \"Expected a number, variable, or ( expression )\", currentInput = \"\"}"
 
     describe "execute tests" $ do
-        let execLines a b c = snd (second (fmap show) $ execute a b c)
+        let execLines a b c = init . splitOn "\n" . intercalate "" . snd $ second (fmap show) (execute a b c)
 
         it "prints value if value is present" $ do
-            execLines sState 80 "123.45" `shouldBe` ["123.45\n"]
+            execLines sState 80 "123.45" `shouldBe` ["123.45"]
 
         it "prints error if error is present" $ do
             execLines sState 80 "2 + _ + 7"

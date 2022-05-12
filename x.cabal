@@ -104,6 +104,9 @@ test-suite x-test
   main-is: Spec.hs
   other-modules:
       Parser.Parsers.AST.ArithmeticExpressionSpec
+      Parser.Parsers.AST.ArithmeticExpressionTestUtils
+      Parser.Parsers.AST.AssignmentSpec
+      Parser.Parsers.AST.StatementSpec
       Parser.ParserSpec
       Shell.ShellSpec
       Paths_x
@@ -116,6 +119,7 @@ test-suite x-test
     , containers
     , hspec
     , numbers
+    , split
     , terminal-size
     , x
   default-language: Haskell2010
