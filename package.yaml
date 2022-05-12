@@ -53,3 +53,4 @@ tests:
     dependencies:
     - x
     - hspec
+    - split

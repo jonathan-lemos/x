@@ -10,12 +10,7 @@ import Parser.Error
 import Types.XValue
 import Types.Evaluatable.Evaluatable
 import Types.State
-
-mkState :: [(String, CReal)] -> XState
-mkState = foldr (\(var, value) state -> putVar state var value) newState
-
-eval :: (Evaluatable e) => XState -> Parser e -> Parser (Either String CReal)
-eval s = fmap (`evaluate` s)
+import Parser.Parsers.AST.ArithmeticExpressionTestUtils
 
 isParentheses :: Either ParseError (String, Factor) -> Bool
 isParentheses (Right (_, Parentheses _)) = True
@@ -47,7 +42,7 @@ spec = do
 
     describe "evaluates expressions properly" $ do
         let state = mkState [("a", 4), ("foo", 9)]
-        let ae = parse $ eval state arithmeticExpression
+        let ae = eval state arithmeticExpression
 
         it "evaluates a single number" $ do
             ae "2" `shouldBe` Right ("", Right 2)
