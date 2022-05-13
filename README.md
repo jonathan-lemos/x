@@ -6,7 +6,7 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 ## Roadmap
 * ~~Get basic calculator done~~
 * ~~Error message display~~
-* Variables
+* ~~Variables~~
 * Units
 * Boolean Expressions
 * Functions
