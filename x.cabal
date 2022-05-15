@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           x
-version:        0.0.3.0
+version:        0.0.4.0
 description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
 homepage:       https://github.com/jonathan-lemos/x#readme
 bug-reports:    https://github.com/jonathan-lemos/x/issues
@@ -31,9 +31,12 @@ library
       Parser.Parser
       Parser.Parsers.AST.ArithmeticExpression
       Parser.Parsers.AST.Assignment
-      Parser.Parsers.AST.Identifier
       Parser.Parsers.AST.Statement
-      Parser.Parsers.AST.XValue
+      Parser.Parsers.AST.Token.Identifier
+      Parser.Parsers.AST.UnitExpression
+      Parser.Parsers.AST.Value.UnitExpression
+      Parser.Parsers.AST.Value.UnitFactor
+      Parser.Parsers.AST.Value.XValue
       Parser.Parsers.Combinator.Atomic
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Choice.Lookahead
@@ -42,6 +45,7 @@ library
       Parser.Parsers.Combinator.Choice.MetaParse
       Parser.Parsers.Combinator.Choice.Peek
       Parser.Parsers.Combinator.Conditional
+      Parser.Parsers.Combinator.Expression
       Parser.Parsers.Combinator.FirstThatParses
       Parser.Parsers.Combinator.ManyMaybe
       Parser.Parsers.Combinator.MapResult
@@ -63,8 +67,15 @@ library
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement
+      Types.AST.UnitExpression
       Types.Evaluatable.Evaluatable
-      Types.State
+      Types.Graph.Graph
+      Types.State.Units
+      Types.State.Variables
+      Types.State.XState
+      Types.Unit.Graph
+      Types.Unit.Prelude
+      Types.Unit.Unit
       Types.XValue
       Utils.Either
       Utils.List

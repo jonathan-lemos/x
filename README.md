@@ -7,13 +7,14 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Get basic calculator done~~
 * ~~Error message display~~
 * ~~Variables~~
-* Units
-* Boolean Expressions
-* Functions
-    * Piecewise
+* ~~Units~~
+    * Unit aliases
 * Better number formatting
     * Rational
     * Integer
+* Boolean Expressions
+* Functions
+    * Piecewise
 * Better REPL functionality
     * quit with `:q`
     * (up arrow to see previous commands)

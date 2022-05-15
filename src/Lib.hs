@@ -3,7 +3,6 @@ import Shell.Shell
 import System.Console.Terminal.Size
 import Data.Maybe
 import IO.IOCmd
-import Types.State
 
 repl :: IO ()
 repl =

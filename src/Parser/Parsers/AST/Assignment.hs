@@ -2,7 +2,7 @@ module Parser.Parsers.AST.Assignment where
 
 import Types.AST.Assignment
 import Parser.Parser
-import Parser.Parsers.AST.Identifier
+import Parser.Parsers.AST.Token.Identifier
 import Parser.Parsers.Text.Whitespace
 import Parser.Parsers.Text.CharEq
 import Parser.Parsers.AST.ArithmeticExpression
