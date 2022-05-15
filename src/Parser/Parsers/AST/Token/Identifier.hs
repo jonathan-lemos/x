@@ -1,4 +1,4 @@
-module Parser.Parsers.AST.Identifier where
+module Parser.Parsers.AST.Token.Identifier where
 
 import Control.Applicative
 import Data.Char
