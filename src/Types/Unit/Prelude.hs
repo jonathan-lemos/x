@@ -2,6 +2,7 @@ module Types.Unit.Prelude (preludeUnits) where
 
 import Types.Unit.Unit
 import Data.Map
+import Types.Unit.Utils
 
 b = BaseUnit "b"
 kb = DerivedUnit "kb" 1000 [(b, 1)]
@@ -21,10 +22,11 @@ mm = DerivedUnit "cm" (1 / 1000) [(m, 1)]
 um = DerivedUnit "cm" (1 / 1000) [(mm, 1)]
 
 s = BaseUnit "s"
+ms = DerivedUnit "ms" (1 / 1000) [(s, 1)]
 
-n = DerivedUnit "N" 1 [(kg, 1), (m, 1), (s, -2)]
+ns = metric $ DerivedUnit "N" 1 [(kg, 1), (m, 1), (s, -2)]
 
-preludeUnits :: Map String Unit
+preludeUnits :: [Unit]
 preludeUnits =
     [ b
     , kb
@@ -41,5 +43,6 @@ preludeUnits =
     , mm
     , um
     , s
-    , n
+    , ms
     ]
+    ++ ns

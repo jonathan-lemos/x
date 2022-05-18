@@ -68,17 +68,20 @@ library
       Types.AST.Assignment
       Types.AST.Statement
       Types.AST.UnitExpression
+      Types.BiMap.BiMap
       Types.Evaluatable.Evaluatable
       Types.Graph.Graph
       Types.State.Units
       Types.State.Variables
       Types.State.XState
-      Types.Unit.Graph
+      Types.Unit.Context
       Types.Unit.Prelude
       Types.Unit.Unit
+      Types.Unit.Utils
       Types.XValue
       Utils.Either
       Utils.List
+      Utils.Map
       Utils.Monad
       Utils.String
       Utils.Trim
