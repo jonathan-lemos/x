@@ -4,31 +4,38 @@ module Types.Graph.Graph where
 
 import Control.Applicative
 import Data.Bifunctor
+import Data.Foldable
 import qualified Data.Map as DM
 import Data.Maybe
 import qualified Data.Set as DS
 
+type AdjMatrix a = DM.Map a (DS.Set a)
+
 newtype Graph a = Graph
-    { adjMatrix :: DM.Map a [a]
+    { adjMatrix :: AdjMatrix a
     }
 
-instance Functor Graph where
-    fmap f = Graph . DM.mapKeys f . (fmap . fmap) f . adjMatrix
-
-_mapAdjMatrix :: (DM.Map a [a] -> DM.Map a [a]) -> Graph a -> Graph a
+_mapAdjMatrix :: (AdjMatrix a -> AdjMatrix a) -> Graph a -> Graph a
 _mapAdjMatrix f = Graph . f . adjMatrix
+
+emptyGraph :: Graph a
+emptyGraph = Graph DM.empty
 
 -- | Inserts a node into the graph if it doesn't already exist.
 putNode :: (Ord a) => a -> Graph a -> Graph a
-putNode a = _mapAdjMatrix (DM.insertWith (const id) a [])
+putNode a = _mapAdjMatrix (DM.insertWith (const id) a DS.empty)
 
--- | Inserts an edge into the graph. If either node doesn't already exist, it is created.
+-- | Inserts an edge from `a` to `b` into the graph. If either node doesn't already exist, it is created.
 putEdge :: (Ord a) => a -> a -> Graph a -> Graph a
-putEdge a b = _mapAdjMatrix (DM.adjust (b :) a) . putNode a . putNode b
+putEdge a b = _mapAdjMatrix (DM.adjust (DS.insert b) a) . putNode a . putNode b
+
+-- | Inserts an edge and its reverse into the graph.
+putBiEdge :: (Ord a) => a -> a -> Graph a -> Graph a
+putBiEdge a b = putEdge b a . putEdge a b
 
 -- | Returns `True` if the node is present in the graph.
-has :: (Ord a) => a -> Graph a -> Bool
-has a = isJust . DM.lookup a . adjMatrix
+hasNode :: (Ord a) => a -> Graph a -> Bool
+hasNode a = isJust . DM.lookup a . adjMatrix
 
 -- | Returns `True` if there is an edge from `a` to `b` in the graph.
 hasEdge :: (Ord a) => a -> a -> Graph a -> Bool
@@ -36,6 +43,10 @@ hasEdge a b graph =
     isJust $
         DM.lookup a (adjMatrix graph)
             >>= \l -> if b `elem` l then Just () else Nothing
+
+-- | Converts an edge list into a graph
+fromEdgeList :: (Ord a) => [(a, a)] -> Graph a
+fromEdgeList = foldl' (\graph (a, b) -> putEdge a b graph) emptyGraph
 
 {- | Performs a depth-first search, keeping track of state like `foldr`.
 Returns a list of paths for which `isMatch` returns `True` from first node to last node. Each path will have at least one node.
@@ -55,7 +66,7 @@ dfs shouldExplore isMatch initialState startNode graph =
             fmap (currentNode :)
                 . ($ graph)
                 . uncurry (dfs shouldExplore isMatch)
-                <$> catMaybes (liftA2 fmap (flip (,)) (shouldExplore currentState currentNode) <$> neighbors)
+                <$> catMaybes (liftA2 fmap (flip (,)) (shouldExplore currentState currentNode) <$> toList neighbors)
         exploration = case DM.lookup startNode (adjMatrix graph) of
             Just neighbors -> concat $ exploreLevel initialState startNode neighbors
             Nothing -> []
