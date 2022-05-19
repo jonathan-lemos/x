@@ -15,29 +15,24 @@ data Unit
         , duQuantity :: CReal
         , duUnitPowers :: [(Unit, CReal)]
         }
-    | AdHocUnit
-        { ahUnitPowers :: [(Unit, CReal)]
-        }
     deriving (Ord)
-
-unitName :: Unit -> String
-unitName (BaseUnit s) = s
-unitName (DerivedUnit s _ _) = s
 
 renameUnit :: String -> Unit -> Unit
 renameUnit s (BaseUnit b) = BaseUnit s
-renameUnit s du = du{derivedUnitName = s}
+renameUnit s du = du{duName = s}
 
 {- | Reduces a unit to its base units and powers.
 For example, a kN would become (1000, [("kg", 1), ("m", 1), ("s", -2)])
 -}
 reduceUnit :: Unit -> (CReal, [(String, CReal)])
 reduceUnit u =
-    let _reduceUnitMap :: Unit -> (CReal, DM.Map String CReal)
-        _reduceUnitMap (BaseUnit s) = (1, DM.singleton s 1)
-        _reduceUnitMap (DerivedUnit _ q l) =
-            let reduced = first _reduceUnitMap <$> l
-                quantity = product (fst . fst <$> reduced)
+    let _reduceBaseUnit :: String -> (CReal, DM.Map String CReal)
+        _reduceBaseUnit name = (1, DM.singleton name 1)
+
+        _reduceDerivedUnit :: CReal -> [(Unit, CReal)] -> (CReal, DM.Map String CReal)
+        _reduceDerivedUnit quant subunits =
+            let reducedSubunits = first _reduceUnitMap <$> subunits
+                newQuantity = product (fst . fst <$> reducedSubunits)
                 newUnits =
                     foldr
                         ( \((_, thisUnits), exponent) totalUnits ->
@@ -45,23 +40,15 @@ reduceUnit u =
                              in DM.unionWith (+) totalUnits adjustedUnits
                         )
                         DM.empty
-                        reduced
-             in (quantity, newUnits)
-     in second DM.assocs $ _reduceUnitMap u
+                        reducedSubunits
+             in (newQuantity, newUnits)
 
-unitMul :: Unit -> Unit -> Unit
-unitMul a b =
-    let name = unitName a <> "*" <> unitName b
-        q (BaseUnit _) = 1
-        q (DerivedUnit{quantity = quan}) = quan
-     in DerivedUnit name (q a * q b) [(a, 1), (b, 1)]
+        _reduceUnitMap :: Unit -> (CReal, DM.Map String CReal)
+        _reduceUnitMap unit = case unit of
+            BaseUnit name -> _reduceBaseUnit name
+            DerivedUnit {duQuantity=q, duUnitPowers=up} -> _reduceDerivedUnit q up
 
-unitDiv :: Unit -> Unit -> Unit
-unitDiv a b =
-    let name = unitName a <> "/" <> unitName b
-        q (BaseUnit _) = 1
-        q (DerivedUnit{quantity = quan}) = quan
-     in DerivedUnit name (q a * q b) [(a, 1), (b, 1)]
+     in second (filter ((/= 0) . snd) . DM.assocs) $ _reduceUnitMap u
 
 {- | Divides the first base units by the second
 
@@ -75,7 +62,7 @@ baseUnitDiv a b = DM.assocs $ DM.unionWith (+) (DM.fromList a) (negate <$> DM.fr
 
 instance Eq Unit where
     a == b =
-        let stableReduceUnit = second sort . reduceUnit
+        let stableReduceUnit = second (sort . filter ((/= 0) . snd)) . reduceUnit
          in stableReduceUnit a == stableReduceUnit b
 
 instance Show Unit where
