@@ -12,6 +12,8 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * Better number formatting
     * Rational
     * Integer
+    * Scientific notation
+        * Way to choose number of sig figs
 * Boolean Expressions
 * Functions
     * Piecewise

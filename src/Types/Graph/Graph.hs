@@ -3,50 +3,48 @@
 module Types.Graph.Graph where
 
 import Control.Applicative
+import Control.Monad
 import Data.Bifunctor
 import Data.Foldable
 import qualified Data.Map as DM
 import Data.Maybe
 import qualified Data.Set as DS
 
-type AdjMatrix a = DM.Map a (DS.Set a)
+type AdjMatrix e v = DM.Map v (DM.Map v e)
 
-newtype Graph a = Graph
-    { adjMatrix :: AdjMatrix a
+newtype Graph e v = Graph
+    { adjMatrix :: AdjMatrix e v
     }
 
-_mapAdjMatrix :: (AdjMatrix a -> AdjMatrix a) -> Graph a -> Graph a
+_mapAdjMatrix :: (AdjMatrix e v -> AdjMatrix e v) -> Graph e v -> Graph e v
 _mapAdjMatrix f = Graph . f . adjMatrix
 
-emptyGraph :: Graph a
+emptyGraph :: Graph e v
 emptyGraph = Graph DM.empty
 
--- | Inserts a node into the graph if it doesn't already exist.
-putNode :: (Ord a) => a -> Graph a -> Graph a
-putNode a = _mapAdjMatrix (DM.insertWith (const id) a DS.empty)
+-- | Inserts a vertex into the graph if it doesn't already exist.
+putVertex :: (Ord v) => v -> Graph e v -> Graph e v
+putVertex a = _mapAdjMatrix (DM.insertWith (const id) a DM.empty)
 
--- | Inserts an edge from `a` to `b` into the graph. If either node doesn't already exist, it is created.
-putEdge :: (Ord a) => a -> a -> Graph a -> Graph a
-putEdge a b = _mapAdjMatrix (DM.adjust (DS.insert b) a) . putNode a . putNode b
+-- | Inserts/updates an edge with data `e` from `a` to `b` into the graph. If either node doesn't already exist, it is created.
+putEdge :: (Ord v) => e -> v -> v -> Graph e v -> Graph e v
+putEdge e a b = _mapAdjMatrix (DM.adjust (DM.insert b e) a) . putVertex a . putVertex b
 
--- | Inserts an edge and its reverse into the graph.
-putBiEdge :: (Ord a) => a -> a -> Graph a -> Graph a
-putBiEdge a b = putEdge b a . putEdge a b
+-- | Inserts an edge and its reverse with the same data into the graph.
+putBiEdge :: (Ord v) => e -> v -> v -> Graph e v -> Graph e v
+putBiEdge e a b = putEdge e b a . putEdge e a b
 
 -- | Returns `True` if the node is present in the graph.
-hasNode :: (Ord a) => a -> Graph a -> Bool
-hasNode a = isJust . DM.lookup a . adjMatrix
+hasVertex :: (Ord v) => v -> Graph e v -> Bool
+hasVertex a = isJust . DM.lookup a . adjMatrix
+
+-- | Returns the value of the edge from `a` to `b` in the graph if there is one.
+getEdgeValue :: (Ord v) => v -> v -> Graph e v -> Maybe e
+getEdgeValue a b = DM.lookup b <=< DM.lookup a . adjMatrix
 
 -- | Returns `True` if there is an edge from `a` to `b` in the graph.
-hasEdge :: (Ord a) => a -> a -> Graph a -> Bool
-hasEdge a b graph =
-    isJust $
-        DM.lookup a (adjMatrix graph)
-            >>= \l -> if b `elem` l then Just () else Nothing
-
--- | Converts an edge list into a graph
-fromEdgeList :: (Ord a) => [(a, a)] -> Graph a
-fromEdgeList = foldl' (\graph (a, b) -> putEdge a b graph) emptyGraph
+hasEdge :: (Ord v) => v -> v -> Graph e v -> Bool
+hasEdge a b = isJust . getEdgeValue a b
 
 {- | Performs a depth-first search, keeping track of state like `foldr`.
 Returns a list of paths for which `isMatch` returns `True` from first node to last node. Each path will have at least one node.
@@ -60,25 +58,23 @@ This function does not have any cycle protection, meaning you can be presented w
 * `initialState`  - The initial state to pass to `shouldExplore`.
 * `startNode`     - The node to start exploring from. If this node doesn't exist, then no searching will occur, and only this initial node will be considered.
 -}
-dfs :: Ord a => (b -> a -> a -> Maybe b) -> (a -> Bool) -> b -> a -> Graph a -> [[a]]
+dfs :: Ord v => (s -> e -> v -> v -> Maybe s) -> (v -> Bool) -> s -> v -> Graph e v -> [[v]]
 dfs shouldExplore isMatch initialState startNode graph =
     let exploreLevel currentState currentNode neighbors =
-            fmap (currentNode :)
+            concatMap (currentNode :)
                 . ($ graph)
                 . uncurry (dfs shouldExplore isMatch)
-                <$> catMaybes (liftA2 fmap (flip (,)) (shouldExplore currentState currentNode) <$> toList neighbors)
-        exploration = case DM.lookup startNode (adjMatrix graph) of
-            Just neighbors -> concat $ exploreLevel initialState startNode neighbors
-            Nothing -> []
+                <$> catMaybes ((\(vertex, edge) -> (,vertex) <$> shouldExplore currentState edge currentNode vertex) <$> DM.assocs neighbors)
+        exploration = maybe [] (exploreLevel initialState startNode) (DM.lookup startNode (adjMatrix graph))
      in (if isMatch startNode then ([startNode] :) else id) exploration
 
 -- | Given a `chooseSuccessor` function, returns a `chooseSuccessor` function that always returns `Nothing` on a node that has already been explored.
-unseen :: Ord a => (b -> a -> a -> Maybe b) -> ((b, DS.Set a) -> a -> a -> Maybe (b, DS.Set a))
-unseen chooseSuccessor (currentState, seen) currentNode nextNode =
+unseen :: Ord v => (b -> e -> v -> v -> Maybe b) -> ((b, DS.Set v) -> e -> v -> v -> Maybe (b, DS.Set v))
+unseen chooseSuccessor (currentState, seen) edgeData currentNode nextNode =
     if DS.member nextNode seen
         then Nothing
-        else (,DS.insert currentNode seen) <$> chooseSuccessor currentState currentNode nextNode
+        else (,DS.insert currentNode seen) <$> chooseSuccessor currentState edgeData currentNode nextNode
 
 -- | Like `dfs`, but does not present a node as a potential next node if it has already been explored.
-dfsUnseen :: Ord a => (b -> a -> a -> Maybe b) -> (a -> Bool) -> b -> a -> Graph a -> [[a]]
+dfsUnseen :: Ord v => (b -> e -> v -> v -> Maybe b) -> (v -> Bool) -> b -> v -> Graph e v -> [[v]]
 dfsUnseen chooseSuccessor isMatch initialState startNode = dfs (unseen chooseSuccessor) isMatch (initialState, DS.singleton startNode) startNode

@@ -12,32 +12,21 @@ import Utils.Map
 import Data.Maybe
 
 newtype UnitContext = UnitContext
-    { unitsByBase :: DM.Map [(String, CReal)] (BM.BiMap CReal Unit)
+    { unitGraph :: Graph (CReal, [(String, CReal)]) Unit
     }
 
-mkContext :: Foldable f => f Unit -> UnitContext
-mkContext foldable =
-    let groups = groupMap (sort . snd . reduceUnit) foldable
-        unitsToBiMap :: [Unit] -> BM.BiMap CReal Unit
-        unitsToBiMap =
-            foldr
-                ( \(unit, (quantity, _)) bm ->
-                    BM.insert quantity unit bm
-                )
-                BM.empty
-                . fmap (liftA2 (,) id reduceUnit)
-     in UnitContext $ unitsToBiMap <$> groups
+_mapGraph :: (Graph (CReal, [(String, CReal)]) Unit -> Graph (CReal, [(String, CReal)]) Unit) -> UnitContext -> UnitContext
+_mapGraph f = UnitContext . f . unitGraph
 
-adjustUnit :: CReal -> Unit -> UnitContext -> Unit
-adjustUnit q u ctx =
-    let adjustedUnit = do
-            let baseUnits = sort . snd . reduceUnit $ u
-            unitClass <- DM.lookup baseUnits (unitsByBase ctx)
-            unitQuantity <- BM.lookupB u unitClass
-            let sameClassUnits = BM.pairs unitClass
-            let candidateUnits = filter (\(xq, xu) -> q * xq / unitQuantity > 1) sameClassUnits
-            if null candidateUnits then Nothing else Just . snd $ minimum candidateUnits
-    in fromMaybe u adjustedUnit
+emptyContext :: UnitContext
+emptyContext = UnitContext emptyGraph
 
-times :: (CReal, Unit) -> (CReal, Unit) -> UnitContext -> (CReal, Unit)
-times = undefined
+addUnit :: Unit -> UnitContext -> UnitContext
+addUnit u =
+    _mapGraph $ putVertex u
+
+unitMultiply :: (CReal, Unit) -> (CReal, Unit) -> UnitContext -> (CReal, Unit)
+unitMultiply = undefined
+
+unitDivide :: (CReal, Unit) -> (CReal, Unit) -> UnitContext -> (CReal, Unit)
+unitDivide = undefined
