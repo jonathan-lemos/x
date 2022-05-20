@@ -4,29 +4,41 @@ import Control.Applicative
 import Data.Foldable
 import Data.List
 import qualified Data.Map as DM
+import Data.Maybe
 import Data.Number.CReal
 import qualified Types.BiMap.BiMap as BM
 import Types.Graph.Graph
-import Types.Unit.Unit
+import Types.Unit.ContextUnit
 import Utils.Map
-import Data.Maybe
+import Types.Unit.Exponential
+import Types.Unit.BaseUnit
 
 newtype UnitContext = UnitContext
-    { unitGraph :: Graph (CReal, [(String, CReal)]) Unit
+    { unitGraph :: Graph CReal ContextUnit
     }
 
-_mapGraph :: (Graph (CReal, [(String, CReal)]) Unit -> Graph (CReal, [(String, CReal)]) Unit) -> UnitContext -> UnitContext
-_mapGraph f = UnitContext . f . unitGraph
+modifyGraph :: (Graph CReal ContextUnit -> Graph CReal ContextUnit) -> UnitContext -> UnitContext
+modifyGraph f = UnitContext . f . unitGraph
 
 emptyContext :: UnitContext
 emptyContext = UnitContext emptyGraph
 
-addUnit :: Unit -> UnitContext -> UnitContext
+addUnit :: ContextUnit -> UnitContext -> UnitContext
 addUnit u =
-    _mapGraph $ putVertex u
+    case u of
+        (ContextBaseUnit _) -> modifyGraph $ putVertex u
+        (ContextDerivedUnit name quantity components) ->
+            let addAllComponents = foldr (.) id $ addUnit . expBase <$> components
+                addRelationships = modifyGraph $
+                    case components of
+                        [Exponential b 1] ->
+                            putEdge (1 / quantity) u b
+                            . putEdge quantity b u
+                        _ -> id
+            in addAllComponents . addRelationships
 
-unitMultiply :: (CReal, Unit) -> (CReal, Unit) -> UnitContext -> (CReal, Unit)
+unitMultiply :: (CReal, ContextUnit) -> (CReal, ContextUnit) -> UnitContext -> (CReal, ContextUnit)
 unitMultiply = undefined
 
-unitDivide :: (CReal, Unit) -> (CReal, Unit) -> UnitContext -> (CReal, Unit)
+unitDivide :: (CReal, ContextUnit) -> (CReal, ContextUnit) -> UnitContext -> (CReal, ContextUnit)
 unitDivide = undefined
