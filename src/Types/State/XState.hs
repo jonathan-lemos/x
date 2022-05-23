@@ -2,24 +2,32 @@ module Types.State.XState where
 
 import qualified Data.Map as DM
 import Data.Number.CReal
-import Types.Unit.Unit
+import Types.Unit.Context
+import Types.Unit.Prelude
+import Types.Unit.ContextUnit
 
 data XState = XState {
     variables :: DM.Map String CReal,
-    units :: DM.Map String Unit
+    units :: UnitContext
 }
 
-mapVariables :: (DM.Map String CReal -> DM.Map String CReal) -> XState -> XState
-mapVariables f s = s { variables = f $ variables s }
+modifyVariables :: (DM.Map String CReal -> DM.Map String CReal) -> XState -> XState
+modifyVariables f s = s { variables = f $ variables s }
 
-mapUnits :: (DM.Map String Unit -> DM.Map String Unit) -> XState -> XState
-mapUnits f s = s { units = f $ units s }
+modifyUnits :: (UnitContext -> UnitContext) -> XState -> XState
+modifyUnits f s = s { units = f $ units s }
 
 newState :: XState
 newState = XState {
     variables = DM.empty,
-    units = DM.empty
+    units = newContext preludeUnits
 }
+
+putUnit :: XState -> ContextUnit -> XState
+putUnit s u = modifyUnits (addUnit u) s
+
+getUnit :: XState -> String -> Maybe ContextUnit
+getUnit s u = getUnitByName u (units s)
 
 putVar :: XState -> String -> CReal -> XState
 putVar s v n = s {

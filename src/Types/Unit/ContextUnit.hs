@@ -6,27 +6,34 @@ import Data.Number.CReal
 import Types.Unit.BaseUnit
 import Types.Unit.Exponential
 import Data.Foldable
+import Types.Unit.Scale.ScaleSequence
 
 data ContextUnit
-    = ContextBaseUnit BaseUnit
-    | ContextDerivedUnit
-        { cduName :: String
-        , cduQuantity :: CReal
-        , cduComponents :: [Exponential ContextUnit]
+    = CtxBaseUnit BaseUnit
+    | ProductUnit
+        { puName :: String
+        , puComponents :: [Exponential ContextUnit]
         }
-    deriving (Ord)
+    | ScaledUnit
+        { suName :: String,
+          suScaler :: ScaleSequence
+        , suBase :: ContextUnit}
+        deriving (Ord)
 
 instance Show ContextUnit where
-    show (ContextBaseUnit bu) = show bu
-    show (ContextDerivedUnit name quantity components) = name
+    show (CtxBaseUnit base) = show base
+    show (ProductUnit name components) = name
+    show (ScaledUnit name scale base) = name
 
 instance Eq ContextUnit where
     a == b = toBaseUnitsAndQuantity a == toBaseUnitsAndQuantity b
 
 instance UnitClass ContextUnit where
-    toBaseUnitsAndQuantity (ContextBaseUnit bu) = toBaseUnitsAndQuantity bu
-    toBaseUnitsAndQuantity (ContextDerivedUnit _ quantity components) =
+    toBaseUnitsAndQuantity (CtxBaseUnit base) = toBaseUnitsAndQuantity base
+    toBaseUnitsAndQuantity (ProductUnit name components) =
         let componentBaseUnits = (\(Exponential b e) -> second (fmap $ modifyExpPower (* e)) $ toBaseUnitsAndQuantity b) <$> components
             totalQuantity = product $ fst <$> componentBaseUnits
-            totalBaseUnits = foldl' mergeExponentials [] $ snd <$> componentBaseUnits
+            totalBaseUnits = foldl' mergeExpProducts [] $ snd <$> componentBaseUnits
          in (totalQuantity, totalBaseUnits)
+    toBaseUnitsAndQuantity (ScaledUnit name scaler base) = first (scale scaler) $ toBaseUnitsAndQuantity base
+

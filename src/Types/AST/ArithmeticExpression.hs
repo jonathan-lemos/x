@@ -4,9 +4,10 @@ import Data.Number.CReal
 import Data.List
 import Data.Bifunctor
 import Types.Evaluatable.Evaluatable
-import Types.State
-import Types.XValue
+import Types.State.XState
+import Types.Value.Value
 import Utils.Either
+import Types.Value.Scalar
 
 
 stringifyEvaluatable :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -75,7 +76,7 @@ instance Evaluatable Power where
     evaluate (NoPower f) state = evaluate f state
 
 
-data Factor = FactorValue XValue | Parentheses ArithmeticExpression
+data Factor = FactorValue Value | Parentheses ArithmeticExpression
     deriving Eq
 
 instance Show Factor where
@@ -83,6 +84,7 @@ instance Show Factor where
     show (Parentheses ae) = concat ["(", show ae, ")"]
 
 instance Evaluatable Factor where
-    evaluate (FactorValue (XNumber n)) _ = Right n
-    evaluate (FactorValue (XVariable v)) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
+    evaluate (FactorValue (Dimensionless (Number n))) _ = Right n
+    evaluate (FactorValue (Dimensionless (Variable v))) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
     evaluate (Parentheses p) state = evaluate p state
+    evaluate _ _ = undefined

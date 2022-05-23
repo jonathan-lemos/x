@@ -8,6 +8,7 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Error message display~~
 * ~~Variables~~
 * ~~Units~~
+    * Auto adjusting units
     * Unit aliases
 * Better number formatting
     * Rational
