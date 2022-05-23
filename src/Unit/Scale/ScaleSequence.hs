@@ -1,8 +1,8 @@
-module Types.Unit.Scale.ScaleSequence where
+module Unit.Scale.ScaleSequence where
 
 import Data.Foldable
 import Data.Number.CReal
-import Types.Unit.Scale.ScaleStep
+import Unit.Scale.ScaleStep
 
 newtype ScaleSequence = ScaleSequence {steps :: [ScaleStep]}
     deriving (Eq, Ord)

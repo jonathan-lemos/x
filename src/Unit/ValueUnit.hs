@@ -1,7 +1,7 @@
-module Types.Unit.ValueUnit where
+module Unit.ValueUnit where
 
-import Types.Unit.ContextUnit
-import Types.Unit.Exponential
+import Unit.ContextUnit
+import Unit.Exponential
 
 data ValueUnit = ValueContextUnit ContextUnit | AdHocUnit [Exponential ValueUnit]
     deriving Ord

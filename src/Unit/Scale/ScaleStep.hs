@@ -1,4 +1,4 @@
-module Types.Unit.Scale.ScaleStep where
+module Unit.Scale.ScaleStep where
 
 import Data.Number.CReal
 

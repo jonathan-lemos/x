@@ -1,7 +1,7 @@
 module Types.Value.Value where
 
 import Types.Value.Scalar
-import Types.Unit.ValueUnit
+import Unit.ValueUnit
 
 data Value = Dimensionless Scalar | Dimensioned Scalar ValueUnit
     deriving Eq

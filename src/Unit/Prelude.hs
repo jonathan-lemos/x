@@ -1,13 +1,13 @@
-module Types.Unit.Prelude (preludeUnits) where
+module Unit.Prelude (preludeUnits) where
 
-import Types.Unit.ContextUnit
+import Unit.ContextUnit
 import Data.Map
-import Types.Unit.BaseUnit
-import Types.Unit.Metric.Metric
-import Types.Unit.Metric.Prefix
-import Types.Unit.Scale.ScaleStep (ScaleStep(ScaleMultiply, ScaleAdd))
-import Types.Unit.Scale.ScaleSequence
-import Types.Unit.Exponential
+import Unit.BaseUnit
+import Unit.Metric.Metric
+import Unit.Metric.Prefix
+import Unit.Scale.ScaleStep (ScaleStep(ScaleMultiply, ScaleAdd))
+import Unit.Scale.ScaleSequence
+import Unit.Exponential
 
 _lit :: String -> ContextUnit
 _lit = CtxBaseUnit . BaseUnit

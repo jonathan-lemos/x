@@ -7,10 +7,11 @@ import Parser.Parser
 import Data.Bifunctor
 import Data.Number.CReal
 import Parser.Error
-import Types.XValue
+import Types.Value.Value
 import Types.Evaluatable.Evaluatable
-import Types.State
+import State.XState
 import Parser.Parsers.AST.ArithmeticExpressionTestUtils
+import Types.Value.Scalar
 
 isParentheses :: Either ParseError (String, Factor) -> Bool
 isParentheses (Right (_, Parentheses _)) = True
@@ -22,10 +23,10 @@ spec = do
         let f = parse factor
 
         it "evaluates a single number" $ do
-            f "2" `shouldBe` Right ("", FactorValue (XNumber 2))
+            f "2" `shouldBe` Right ("", FactorValue (Dimensionless (Number 2)))
 
         it "evaluates a single number with whitespace" $ do
-            f " 2" `shouldBe` Right ("", FactorValue (XNumber 2))
+            f " 2" `shouldBe` Right ("", FactorValue (Dimensionless (Number 2)))
 
         it "evaluates a parenthesized number" $ do
             f "(2)" `shouldSatisfy` isParentheses
@@ -37,8 +38,8 @@ spec = do
             f "@" `shouldBe` Left (ParseError "Expected a number, variable, or ( expression )" "@")
 
         it "evaluates a variable" $ do
-            f "a" `shouldBe` Right ("", FactorValue (XVariable "a"))
-            f "foobar" `shouldBe` Right ("", FactorValue (XVariable "foobar"))
+            f "a" `shouldBe` Right ("", FactorValue (Dimensionless (Variable "a")))
+            f "foobar" `shouldBe` Right ("", FactorValue (Dimensionless (Variable "foobar")))
 
     describe "evaluates expressions properly" $ do
         let state = mkState [("a", 4), ("foo", 9)]

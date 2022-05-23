@@ -1,6 +1,6 @@
-module Types.Unit.BaseUnit where
+module Unit.BaseUnit where
 import Data.Number.CReal
-import Types.Unit.Exponential
+import Unit.Exponential
 
 class UnitClass u where
     toBaseUnitsAndQuantity :: u -> (CReal, [Exponential BaseUnit])

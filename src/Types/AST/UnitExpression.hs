@@ -2,9 +2,9 @@ module Types.AST.UnitExpression where
 
 import Data.List
 import Data.Number.CReal
-import Types.Unit.ValueUnit (ValueUnit)
-import Types.Unit.Exponential
-import Types.Unit.BaseUnit
+import Unit.ValueUnit (ValueUnit)
+import Unit.Exponential
+import Unit.BaseUnit
 
 data UnitFactor = UnitPower String CReal | JustUnit String
     deriving Eq

@@ -1,6 +1,6 @@
 module Parser.Parsers.AST.ArithmeticExpressionTestUtils where
 import Data.Number.CReal
-import Types.State
+import State.XState
 import Types.Evaluatable.Evaluatable
 import Parser.Parser
 import Parser.Error
