@@ -8,37 +8,42 @@ import Data.Maybe
 import Data.Number.CReal
 import qualified Types.BiMap.BiMap as BM
 import Types.Graph.Graph
-import Types.Unit.ContextUnit
-import Utils.Map
-import Types.Unit.Exponential
 import Types.Unit.BaseUnit
+import Types.Unit.ContextUnit
+import Types.Unit.Exponential
+import Types.Unit.Scale.ScaleSequence
+import Types.Unit.ValueUnit
+import Utils.Map
 
-newtype UnitContext = UnitContext
-    { unitGraph :: Graph CReal ContextUnit
+data UnitContext = UnitContext
+    { baseUnitsToContextUnit :: BM.BiMap [Exponential BaseUnit] ContextUnit
+    , nameToContextUnit :: DM.Map String ContextUnit
     }
 
-modifyGraph :: (Graph CReal ContextUnit -> Graph CReal ContextUnit) -> UnitContext -> UnitContext
-modifyGraph f = UnitContext . f . unitGraph
+modifyBaseUnitsToContextUnit :: (BM.BiMap [Exponential BaseUnit] ContextUnit -> BM.BiMap [Exponential BaseUnit] ContextUnit) -> UnitContext -> UnitContext
+modifyBaseUnitsToContextUnit f ctx = ctx{baseUnitsToContextUnit = f $ baseUnitsToContextUnit ctx}
+
+modifyNameToContextUnit :: (DM.Map String ContextUnit -> DM.Map String ContextUnit) -> UnitContext -> UnitContext
+modifyNameToContextUnit f ctx = ctx{nameToContextUnit = f $ nameToContextUnit ctx}
 
 emptyContext :: UnitContext
-emptyContext = UnitContext emptyGraph
+emptyContext = UnitContext BM.empty DM.empty
+
+newContext :: [ContextUnit] -> UnitContext
+newContext = foldl' (flip addUnit) emptyContext
 
 addUnit :: ContextUnit -> UnitContext -> UnitContext
 addUnit u =
-    case u of
-        (ContextBaseUnit _) -> modifyGraph $ putVertex u
-        (ContextDerivedUnit name quantity components) ->
-            let addAllComponents = foldr (.) id $ addUnit . expBase <$> components
-                addRelationships = modifyGraph $
-                    case components of
-                        [Exponential b 1] ->
-                            putEdge (1 / quantity) u b
-                            . putEdge quantity b u
-                        _ -> id
-            in addAllComponents . addRelationships
+    modifyNameToContextUnit (DM.insert (show u) u)
+        . modifyBaseUnitsToContextUnit (BM.insert (toBaseUnits u) u)
 
-unitMultiply :: (CReal, ContextUnit) -> (CReal, ContextUnit) -> UnitContext -> (CReal, ContextUnit)
-unitMultiply = undefined
+getUnitByName :: String -> UnitContext -> Maybe ContextUnit
+getUnitByName s = DM.lookup s . nameToContextUnit
 
-unitDivide :: (CReal, ContextUnit) -> (CReal, ContextUnit) -> UnitContext -> (CReal, ContextUnit)
-unitDivide = undefined
+castUnit :: ContextUnit -> ContextUnit -> Maybe (CReal -> CReal)
+castUnit a b =
+    let (aQuantity, aBaseUnits) = toBaseUnitsAndQuantity a
+        (bQuantity, bBaseUnits) = toBaseUnitsAndQuantity b
+     in if sort aBaseUnits == sort bBaseUnits
+            then Just $ (/ bQuantity) . (* aQuantity)
+            else Nothing

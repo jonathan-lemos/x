@@ -13,7 +13,7 @@ import Parser.Parsers.Text.Char
 import Parser.Parsers.Text.CharEq
 import Parser.Parsers.Text.Whitespace
 import Types.AST.ArithmeticExpression
-import Types.XValue
+import Types.Value.Value
 import Utils.Monad
 import Parser.Parsers.AST.Token.Identifier
 import Parser.Parsers.Combinator.FirstThatParses
@@ -24,6 +24,7 @@ import Parser.Parsers.Combinator.Possibly
 import Parser.Parsers.Text.CharAny
 import Data.Foldable
 import Parser.Parsers.Combinator.Expression
+import Parser.Parsers.AST.Value.Value
 
 {- | Parses an arithmetic expression, which is some combination of addition, subtraction, multiplication, division, exponentiation, and parentheses.
 
@@ -77,7 +78,6 @@ factor =
         lookaheadParse
             [
                 charEq '(' >> pure parenExpr,
-                possibly (charAny "-+") >> conditional isDigit char >> pure (FactorValue . XNumber <$> creal),
-                conditional isAlpha char >> pure (FactorValue . XVariable <$> identifier),
+                ((possibly (charAny "-+") >> conditional isDigit char) <|> conditional isAlpha char) >> pure (FactorValue <$> value),
                 fail "Expected a number, variable, or ( expression )"
             ]

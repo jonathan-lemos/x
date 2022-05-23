@@ -36,7 +36,7 @@ library
       Parser.Parsers.AST.UnitExpression
       Parser.Parsers.AST.Value.UnitExpression
       Parser.Parsers.AST.Value.UnitFactor
-      Parser.Parsers.AST.Value.XValue
+      Parser.Parsers.AST.Value.Value
       Parser.Parsers.Combinator.Atomic
       Parser.Parsers.Combinator.Check
       Parser.Parsers.Combinator.Choice.Lookahead
@@ -71,21 +71,26 @@ library
       Types.BiMap.BiMap
       Types.Evaluatable.Evaluatable
       Types.Graph.Graph
-      Types.State.Units
-      Types.State.Variables
       Types.State.XState
+      Types.Unit.BaseUnit
       Types.Unit.Context
+      Types.Unit.ContextUnit
+      Types.Unit.Exponential
+      Types.Unit.Metric.Metric
+      Types.Unit.Metric.Prefix
       Types.Unit.Prelude
-      Types.Unit.Unit
-      Types.Unit.UnitValue
-      Types.Unit.Utils
-      Types.XValue
+      Types.Unit.Scale.ScaleSequence
+      Types.Unit.Scale.ScaleStep
+      Types.Unit.ValueUnit
+      Types.Value.Scalar
+      Types.Value.Value
       Utils.Either
       Utils.List
       Utils.Map
       Utils.Monad
       Utils.String
       Utils.Trim
+      Utils.Unit.ValueUnit
   other-modules:
       Paths_x
   hs-source-dirs:

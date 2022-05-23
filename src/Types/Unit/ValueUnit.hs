@@ -8,7 +8,7 @@ data ValueUnit = ValueContextUnit ContextUnit | AdHocUnit [Exponential ValueUnit
 
 toContextUnits :: ValueUnit -> [Exponential ContextUnit]
 toContextUnits (ValueContextUnit u) = [Exponential u 1]
-toContextUnits (AdHocUnit us) = reduceExponentials . concat $ (\(Exponential b e) -> toContextUnits b) <$> us
+toContextUnits (AdHocUnit us) = reduceExpProduct . concat $ (\(Exponential b e) -> toContextUnits b) <$> us
 
 instance Show ValueUnit where
     show (ValueContextUnit vcu) = show vcu
