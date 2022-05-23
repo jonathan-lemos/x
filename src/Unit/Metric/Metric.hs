@@ -1,12 +1,12 @@
-module Types.Unit.Metric.Metric where
+module Unit.Metric.Metric where
 
 import Data.List
 import Data.Maybe
-import Types.Unit.ContextUnit
-import Types.Unit.Exponential
-import Types.Unit.Metric.Prefix
-import Types.Unit.Scale.ScaleSequence
-import Types.Unit.Scale.ScaleStep
+import Unit.ContextUnit
+import Unit.Exponential
+import Unit.Metric.Prefix
+import Unit.Scale.ScaleSequence
+import Unit.Scale.ScaleStep
 
 metric :: (MetricPrefix -> Bool) -> MetricPrefix -> ContextUnit -> (ContextUnit, [ContextUnit])
 metric keepPrefix base cu =

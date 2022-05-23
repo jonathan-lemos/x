@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module Types.Graph.Graph where
+module Structure.Graph where
 
 import Control.Applicative
 import Control.Monad

@@ -4,7 +4,7 @@ import Data.Number.CReal
 import Data.List
 import Data.Bifunctor
 import Types.Evaluatable.Evaluatable
-import Types.State.XState
+import State.XState
 import Types.Value.Value
 import Utils.Either
 import Types.Value.Scalar

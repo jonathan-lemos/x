@@ -1,4 +1,4 @@
-module Types.Unit.Metric.Prefix where
+module Unit.Metric.Prefix where
 
 data MetricPrefix = Nano | Micro | Milli | Centi | Base | Kilo | Mega | Giga | Tera | Peta | Exa
     deriving (Eq, Ord, Enum, Bounded)

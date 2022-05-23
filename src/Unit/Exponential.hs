@@ -1,4 +1,4 @@
-module Types.Unit.Exponential where
+module Unit.Exponential where
 
 import Data.Number.CReal
 import qualified Data.Map as DM

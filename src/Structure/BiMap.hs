@@ -1,4 +1,4 @@
-module Types.BiMap.BiMap where
+module Structure.BiMap where
 
 import qualified Data.Map as DM
 

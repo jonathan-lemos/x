@@ -64,33 +64,32 @@ library
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
       Shell.Shell
+      State.XState
+      Structure.BiMap
+      Structure.Graph
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement
       Types.AST.UnitExpression
-      Types.BiMap.BiMap
       Types.Evaluatable.Evaluatable
-      Types.Graph.Graph
-      Types.State.XState
-      Types.Unit.BaseUnit
-      Types.Unit.Context
-      Types.Unit.ContextUnit
-      Types.Unit.Exponential
-      Types.Unit.Metric.Metric
-      Types.Unit.Metric.Prefix
-      Types.Unit.Prelude
-      Types.Unit.Scale.ScaleSequence
-      Types.Unit.Scale.ScaleStep
-      Types.Unit.ValueUnit
       Types.Value.Scalar
       Types.Value.Value
+      Unit.BaseUnit
+      Unit.Context
+      Unit.ContextUnit
+      Unit.Exponential
+      Unit.Metric.Metric
+      Unit.Metric.Prefix
+      Unit.Prelude
+      Unit.Scale.ScaleSequence
+      Unit.Scale.ScaleStep
+      Unit.ValueUnit
       Utils.Either
       Utils.List
       Utils.Map
       Utils.Monad
       Utils.String
       Utils.Trim
-      Utils.Unit.ValueUnit
   other-modules:
       Paths_x
   hs-source-dirs:

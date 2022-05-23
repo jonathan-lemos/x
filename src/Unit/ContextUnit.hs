@@ -1,12 +1,12 @@
-module Types.Unit.ContextUnit where
+module Unit.ContextUnit where
 
 import Data.Bifunctor
 import qualified Data.Map as DM
 import Data.Number.CReal
-import Types.Unit.BaseUnit
-import Types.Unit.Exponential
+import Unit.BaseUnit
+import Unit.Exponential
 import Data.Foldable
-import Types.Unit.Scale.ScaleSequence
+import Unit.Scale.ScaleSequence
 
 data ContextUnit
     = CtxBaseUnit BaseUnit

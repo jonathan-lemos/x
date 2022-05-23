@@ -1,10 +1,10 @@
-module Types.State.XState where
+module State.XState where
 
 import qualified Data.Map as DM
 import Data.Number.CReal
-import Types.Unit.Context
-import Types.Unit.Prelude
-import Types.Unit.ContextUnit
+import Unit.Context
+import Unit.Prelude
+import Unit.ContextUnit
 
 data XState = XState {
     variables :: DM.Map String CReal,
