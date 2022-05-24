@@ -6,12 +6,8 @@ import Parser.Parser
 import Parser.Parsers.Combinator.Check
 import Parser.Parsers.Text.Char
 import Parser.Parsers.Combinator.Atomic
-import Parser.Parsers.Combinator.Plus
+import Parser.Parsers.Combinator.Conditional
 
 identifier :: Parser String
 identifier =
-    plus $
-        check
-            isAlpha
-            (\c -> "Expected an identifier, which is a sequence of lowercase characters (" <> show c <> " is not)")
-            char
+    some (conditional isAlpha char) <|> fail "Expected an A-z character"

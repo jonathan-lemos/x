@@ -3,7 +3,8 @@ import Test.Hspec
 import Types.AST.Statement
 import Parser.Parsers.AST.Statement (statement)
 import Parser.Parser
-import Parser.Parsers.AST.ArithmeticExpressionTestUtils (hasError)
+import TestUtils.ArithmeticExpression
+import TestUtils.Parser (shouldFailWithMsgAndCi)
 
 spec :: Spec
 spec = do
@@ -25,6 +26,6 @@ spec = do
             stmt "a + 6" `shouldSatisfy` isExpr
 
         it "delivers correct error messages" $ do
-            stmt "_" `shouldSatisfy` hasError "Expected a number, variable, or ( expression )" "_"
-            stmt "foo =" `shouldSatisfy` hasError "Expected a number, variable, or ( expression )" ""
-            stmt "2 +" `shouldSatisfy` hasError "Expected a number, variable, or ( expression )" ""
+            (statement, "_") `shouldFailWithMsgAndCi` ("Expected a number, variable, or ( expression )", "_")
+            (statement, "foo =") `shouldFailWithMsgAndCi` ("Expected a number, variable, or ( expression )", "")
+            (statement, "2 +") `shouldFailWithMsgAndCi` ("Expected a number, variable, or ( expression )", "")

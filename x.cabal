@@ -50,7 +50,6 @@ library
       Parser.Parsers.Combinator.ManyMaybe
       Parser.Parsers.Combinator.MapResult
       Parser.Parsers.Combinator.ParseWhileAggregate
-      Parser.Parsers.Combinator.Plus
       Parser.Parsers.Combinator.Possibly
       Parser.Parsers.Combinator.Precondition
       Parser.Parsers.Numeric.CReal
@@ -122,12 +121,18 @@ test-suite x-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      IO.IOCmdSpec
       Parser.Parsers.AST.ArithmeticExpressionSpec
-      Parser.Parsers.AST.ArithmeticExpressionTestUtils
       Parser.Parsers.AST.AssignmentSpec
       Parser.Parsers.AST.StatementSpec
+      Parser.Parsers.AST.Token.IdentifierSpec
+      Parser.Parsers.AST.Value.UnitExpressionSpec
+      Parser.Parsers.AST.Value.UnitFactorSpec
       Parser.ParserSpec
       Shell.ShellSpec
+      TestUtils.ArithmeticExpression
+      TestUtils.Parser
+      TestUtils.State
       Paths_x
   hs-source-dirs:
       test
