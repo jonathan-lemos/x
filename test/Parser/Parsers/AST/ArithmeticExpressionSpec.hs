@@ -10,7 +10,7 @@ import Parser.Error
 import Types.Value.Value
 import Types.Evaluatable.Evaluatable
 import State.XState
-import Parser.Parsers.AST.ArithmeticExpressionTestUtils
+import TestUtils.ArithmeticExpression
 import Types.Value.Scalar
 
 isParentheses :: Either ParseError (String, Factor) -> Bool

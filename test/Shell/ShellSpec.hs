@@ -10,7 +10,7 @@ import Shell.Shell
 import Test.Hspec
 import Data.List
 import Data.List.Split
-import Parser.Parsers.AST.ArithmeticExpressionTestUtils
+import TestUtils.ArithmeticExpression
 
 ioListToString :: [IOCmd] -> String
 ioListToString = intercalate "" . fmap show

@@ -5,8 +5,9 @@ import Test.Hspec
 import Parser.Parsers.AST.Assignment
 import Parser.Parser
 import Types.AST.Assignment
-import Parser.Parsers.AST.ArithmeticExpressionTestUtils
+import TestUtils.ArithmeticExpression
 import Types.Evaluatable.Evaluatable
+import TestUtils.Parser
 
 spec :: Spec
 spec = do
@@ -34,5 +35,5 @@ spec = do
             a "f = a + 2" `shouldSatisfy` hasValue 6
 
         it "delivers the correct error message for partial parse" $ do
-            a "_" `shouldSatisfy` hasError "Expected an identifier, which is a sequence of lowercase characters ('_' is not)" "_"
-            a "foo = " `shouldSatisfy` hasError "Expected a number, variable, or ( expression )" ""
+            (assignment, "_") `shouldFailWithMsgAndCi` ("Expected an identifier, which is a sequence of lowercase characters ('_' is not)", "_")
+            (assignment, "foo = ") `shouldFailWithMsgAndCi` ("Expected a number, variable, or ( expression )", "")

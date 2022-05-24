@@ -1,19 +1,18 @@
 module Parser.Parsers.AST.Value.UnitFactor where
 
-import Types.AST.UnitExpression
-import Parser.Parser
-import Parser.Parsers.Text.CharEq
-import Parser.Parsers.Numeric.CReal
-import Parser.Parsers.Text.Whitespace
-import Parser.Parsers.AST.Token.Identifier
 import Control.Applicative
+import Parser.Parser
+import Parser.Parsers.AST.Token.Identifier
+import Parser.Parsers.Numeric.CReal
+import Parser.Parsers.Text.CharEq
+import Parser.Parsers.Text.Whitespace
+import Types.AST.UnitExpression
+import Parser.Parsers.Combinator.Choice.LookaheadParse
 
 unitFactor :: Parser UnitFactor
-unitFactor =
-    let suffix = do
-            charEq '^'
-            creal
-    in do
-        whitespace
-        u <- identifier
-        UnitPower u <$> suffix <|> pure (JustUnit u)
+unitFactor = do
+    u <- identifier
+    lookaheadParse
+        [ charEq '^' >> pure (UnitPower u <$> (charEq '^' >> creal))
+        , pure . pure $ JustUnit u
+        ]
