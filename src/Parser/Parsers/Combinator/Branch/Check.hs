@@ -1,4 +1,4 @@
-module Parser.Parsers.Combinator.Check where
+module Parser.Parsers.Combinator.Branch.Check where
 
 import Parser.Error
 import Parser.Parser
@@ -21,7 +21,7 @@ import Parser.Parsers.Combinator.MapResult
  Left (ParseError {reason = "Expected any character", currentInput = ""})
 -}
 check :: (a -> Bool) -> (a -> String) -> Parser a -> Parser a
-check predicate valueToMsg = mapResultWithInput $ \input e ->
+check predicate valueToMsg = mapResultWithInput $ \_input e ->
     e >>= \(newInput, value) ->
         if predicate value
             then Right (newInput, value)

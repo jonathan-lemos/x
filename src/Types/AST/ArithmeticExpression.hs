@@ -5,9 +5,9 @@ import Data.List
 import Data.Bifunctor
 import Types.Evaluatable.Evaluatable
 import State.XState
-import Types.Value.Value
+import Types.AST.Value.Value
 import Utils.Either
-import Types.Value.Scalar
+import Types.AST.Value.Scalar
 
 
 stringifyEvaluatable :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -84,7 +84,6 @@ instance Show Factor where
     show (Parentheses ae) = concat ["(", show ae, ")"]
 
 instance Evaluatable Factor where
-    evaluate (FactorValue (Dimensionless (Number n))) _ = Right n
-    evaluate (FactorValue (Dimensionless (Variable v))) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
+    evaluate (FactorValue (Value (Number n) _unit)) _ = Right n
+    evaluate (FactorValue (Value (Variable v) _unit)) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
     evaluate (Parentheses p) state = evaluate p state
-    evaluate _ _ = undefined

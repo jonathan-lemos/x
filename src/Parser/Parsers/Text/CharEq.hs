@@ -3,7 +3,6 @@ module Parser.Parsers.Text.CharEq where
 import Control.Applicative
 import Parser.Parser
 import Parser.Parsers.Text.CharAny
-import Utils.String
 
 {- | Reads a character equal to the given character, failing on EOF or on a different character
 

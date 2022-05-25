@@ -3,16 +3,16 @@ module Unit.Exponential where
 import Data.Number.CReal
 import qualified Data.Map as DM
 import Data.Foldable
-import Data.Bifunctor
+import Data.List
 
 data Exponential a = Exponential { expBase :: a, expPower :: CReal }
     deriving (Eq, Ord)
 
 modifyExpBase :: (a -> b) -> Exponential a -> Exponential b
-modifyExpBase f exp = exp { expBase = f $ expBase exp }
+modifyExpBase f e = e { expBase = f $ expBase e }
 
 modifyExpPower :: (CReal -> CReal) -> Exponential a -> Exponential a
-modifyExpPower f exp = exp { expPower = f $ expPower exp }
+modifyExpPower f e = e { expPower = f $ expPower e }
 
 _exponentialMap :: (Ord a) => [Exponential a] -> DM.Map a CReal
 _exponentialMap a =
@@ -32,10 +32,16 @@ expComplement = fmap $ modifyExpPower negate
 expProductDifference :: (Ord a) => [Exponential a] -> [Exponential a] -> [Exponential a]
 expProductDifference a b = mergeExpProducts a (expComplement b)
 
+showProduct :: (Show a) => [Exponential a] -> String
+showProduct exps =
+    let filterByPower p = filter (p . expPower) exps
+        positive = show <$> filterByPower (> 0)
+        negative = show . modifyExpPower negate <$> filterByPower (< 0)
+        in intercalate "*" positive <> "/" <> intercalate "*" negative
 
 instance Show a => Show (Exponential a) where
-    show (Exponential base exp) =
-        case exp of
+    show (Exponential b e) =
+        case e of
             0 -> ""
-            1 -> show base
-            _ -> show base <> "^"
+            1 -> show b
+            _ -> show b <> "^"

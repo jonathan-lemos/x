@@ -1,19 +1,13 @@
 module Unit.Context where
 
-import Control.Applicative
 import Data.Foldable
 import Data.List
 import qualified Data.Map as DM
-import Data.Maybe
 import Data.Number.CReal
 import qualified Structure.BiMap as BM
-import Structure.Graph
 import Unit.BaseUnit
 import Unit.ContextUnit
 import Unit.Exponential
-import Unit.Scale.ScaleSequence
-import Unit.ValueUnit
-import Utils.Map
 
 data UnitContext = UnitContext
     { baseUnitsToContextUnit :: BM.BiMap [Exponential BaseUnit] ContextUnit

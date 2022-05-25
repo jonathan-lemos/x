@@ -1,7 +1,8 @@
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Unit.Prelude (preludeUnits) where
 
 import Unit.ContextUnit
-import Data.Map
 import Unit.BaseUnit
 import Unit.Metric.Metric
 import Unit.Metric.Prefix
@@ -81,4 +82,4 @@ yard = ScaledUnit "yd" (ScaleSequence [ScaleMultiply 3]) foot
 pound = ScaledUnit "lb" (ScaleSequence [ScaleMultiply 4.448222]) n
 
 preludeUnits :: [ContextUnit]
-preludeUnits = concat [bytes, grams, meters, seconds, [minute, hour, day, year], amperes, [CtxBaseUnit k, celsius, fahrenheit], moles, candelas, newtons, joules, watts, coulombs, volts, ohms, farads, henries, hertz, [CtxBaseUnit rad, rev, rpm, deg, foot, inch, yard, pound]]
+preludeUnits = concat [bytes, grams, meters, seconds, [minute, hour, day, week, month, year], amperes, [CtxBaseUnit k, celsius, fahrenheit], moles, candelas, newtons, joules, watts, coulombs, volts, ohms, farads, henries, hertz, [CtxBaseUnit rad, rev, rpm, deg, foot, inch, yard, pound]]

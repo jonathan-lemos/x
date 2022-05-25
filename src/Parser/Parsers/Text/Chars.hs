@@ -2,7 +2,7 @@ module Parser.Parsers.Text.Chars where
 
 import Control.Applicative
 import Parser.Parser
-import Parser.Parsers.Combinator.Conditional
+import Parser.Parsers.Combinator.Branch.Conditional
 import Parser.Parsers.Text.Char
 
 {- | Reads zero or more characters that match the given `predicate`.

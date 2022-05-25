@@ -1,28 +1,18 @@
 module Parser.Parsers.AST.ArithmeticExpression where
 
 import Control.Applicative
-import Control.Monad
+import Control.Monad ()
 import Data.Char (isDigit, isAlpha)
-import Data.List
 import Parser.Parser
-import Parser.Parsers.Combinator.ManyMaybe
-import Parser.Parsers.Combinator.Choice.Peek
-import Parser.Parsers.Combinator.Precondition
-import Parser.Parsers.Numeric.CReal
 import Parser.Parsers.Text.Char
 import Parser.Parsers.Text.CharEq
 import Parser.Parsers.Text.Whitespace
 import Types.AST.ArithmeticExpression
-import Types.Value.Value
 import Utils.Monad
-import Parser.Parsers.AST.Token.Identifier
-import Parser.Parsers.Combinator.FirstThatParses
-import Parser.Parsers.Combinator.Atomic
 import Parser.Parsers.Combinator.Choice.LookaheadParse
-import Parser.Parsers.Combinator.Conditional
+import Parser.Parsers.Combinator.Branch.Conditional
 import Parser.Parsers.Combinator.Possibly
 import Parser.Parsers.Text.CharAny
-import Data.Foldable
 import Parser.Parsers.Combinator.Expression
 import Parser.Parsers.AST.Value.Value
 

@@ -7,17 +7,14 @@ import Data.Bifunctor
 import IO.IOCmd
 import Parser.Error
 import Parser.Parser
-import Parser.Parsers.AST.ArithmeticExpression
 import Parser.Parsers.AST.Statement
 import Parser.Parsers.Text.Whitespace
 import Shell.Formatting
 import State.XState
-import System.Console.ANSI
 import System.Console.Terminal.Size
 import Types.AST.Assignment
 import Types.AST.Statement
 import Types.Evaluatable.Evaluatable
-import Utils.String
 
 -- | Parses input, returning Either an error or the result of said input
 parseCommand :: String -> Either ParseError Statement

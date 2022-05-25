@@ -17,7 +17,7 @@ instance Monoid ScaleSequence where
     mempty = ScaleSequence []
 
 scale :: ScaleSequence -> CReal -> CReal
-scale seq n = foldl' (flip applyStep) n (steps seq)
+scale sq n = foldl' (flip applyStep) n (steps sq)
 
 invertScaleSeq :: ScaleSequence -> ScaleSequence
 invertScaleSeq = ScaleSequence . fmap invertStep . reverse . steps

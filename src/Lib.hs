@@ -1,8 +1,5 @@
 module Lib where
 import Shell.Shell
-import System.Console.Terminal.Size
-import Data.Maybe
-import IO.IOCmd
 import State.XState
 
 repl :: IO ()

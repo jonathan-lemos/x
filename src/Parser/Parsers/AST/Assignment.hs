@@ -10,9 +10,9 @@ import Parser.Parsers.AST.ArithmeticExpression
 assignment :: Parser Assignment
 assignment = do
     whitespace
-    id <- identifier
+    ident <- identifier
     whitespace
     charEq '='
     whitespace
-    Assignment id <$> arithmeticExpression
+    Assignment ident <$> arithmeticExpression
 
