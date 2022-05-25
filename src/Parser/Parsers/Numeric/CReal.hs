@@ -2,14 +2,12 @@ module Parser.Parsers.Numeric.CReal where
 
 import Data.Number.CReal
 import Control.Applicative
-import Parser.Parsers.Numeric.Digit
 import Parser.Parser
 import Parser.Parsers.Text.CharEq
 import Parser.Parsers.Text.CharAny
 import Parser.Parsers.Text.Char
 import Data.Char
-import Parser.Parsers.Combinator.Conditional
-import Control.Monad
+import Parser.Parsers.Combinator.Branch.Conditional
 
 {- |
  Parses a real number

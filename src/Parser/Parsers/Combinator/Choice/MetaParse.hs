@@ -1,6 +1,5 @@
 module Parser.Parsers.Combinator.Choice.MetaParse where
 
-import Control.Monad
 import Parser.Parser
 import Parser.Parsers.Combinator.MapResult
 

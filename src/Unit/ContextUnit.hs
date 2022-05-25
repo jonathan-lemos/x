@@ -1,8 +1,6 @@
 module Unit.ContextUnit where
 
 import Data.Bifunctor
-import qualified Data.Map as DM
-import Data.Number.CReal
 import Unit.BaseUnit
 import Unit.Exponential
 import Data.Foldable
@@ -22,18 +20,18 @@ data ContextUnit
 
 instance Show ContextUnit where
     show (CtxBaseUnit base) = show base
-    show (ProductUnit name components) = name
-    show (ScaledUnit name scale base) = name
+    show (ProductUnit name _components) = name
+    show (ScaledUnit name _scale _base) = name
 
 instance Eq ContextUnit where
     a == b = toBaseUnitsAndQuantity a == toBaseUnitsAndQuantity b
 
 instance UnitClass ContextUnit where
     toBaseUnitsAndQuantity (CtxBaseUnit base) = toBaseUnitsAndQuantity base
-    toBaseUnitsAndQuantity (ProductUnit name components) =
+    toBaseUnitsAndQuantity (ProductUnit _name components) =
         let componentBaseUnits = (\(Exponential b e) -> second (fmap $ modifyExpPower (* e)) $ toBaseUnitsAndQuantity b) <$> components
             totalQuantity = product $ fst <$> componentBaseUnits
             totalBaseUnits = foldl' mergeExpProducts [] $ snd <$> componentBaseUnits
          in (totalQuantity, totalBaseUnits)
-    toBaseUnitsAndQuantity (ScaledUnit name scaler base) = first (scale scaler) $ toBaseUnitsAndQuantity base
+    toBaseUnitsAndQuantity (ScaledUnit _name scaler base) = first (scale scaler) $ toBaseUnitsAndQuantity base
 

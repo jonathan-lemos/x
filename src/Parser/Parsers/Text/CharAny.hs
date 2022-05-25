@@ -1,10 +1,8 @@
 module Parser.Parsers.Text.CharAny where
 
 import Control.Applicative
-import Data.List
 import Parser.Parser
-import Parser.Parsers.Combinator.Check
-import Parser.Parsers.Combinator.Conditional
+import Parser.Parsers.Combinator.Branch.Check
 import Parser.Parsers.Text.Char
 import Utils.String (pluralize)
 import Parser.Parsers.Combinator.Atomic

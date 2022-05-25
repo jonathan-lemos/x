@@ -2,9 +2,7 @@ module Types.AST.UnitExpression where
 
 import Data.List
 import Data.Number.CReal
-import Unit.ValueUnit (ValueUnit)
 import Unit.Exponential
-import Unit.BaseUnit
 
 data UnitFactor = UnitPower String CReal | JustUnit String
     deriving Eq
@@ -37,6 +35,6 @@ unitExprToExps =
 
         ueToExps :: UnitExpression -> [Exponential String]
         ueToExps (UnitFraction numerator denominator) = mergeExpProducts (umToExps numerator) (expComplement $ umToExps denominator)
-        ueToExps (UnitProduct product) = umToExps product
+        ueToExps (UnitProduct prod) = umToExps prod
 
         in ueToExps

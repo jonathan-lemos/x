@@ -1,7 +1,7 @@
-module Parser.Parsers.Combinator.Conditional where
+module Parser.Parsers.Combinator.Branch.Conditional where
 
 import Parser.Parser
-import Parser.Parsers.Combinator.Check
+import Parser.Parsers.Combinator.Branch.Check
 
 {- | If the parser succeeds, but the predicate returns `False`, fails with the default error message, otherwise passes the parser through.
 

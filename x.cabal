@@ -38,15 +38,14 @@ library
       Parser.Parsers.AST.Value.UnitFactor
       Parser.Parsers.AST.Value.Value
       Parser.Parsers.Combinator.Atomic
-      Parser.Parsers.Combinator.Check
+      Parser.Parsers.Combinator.Branch.Check
+      Parser.Parsers.Combinator.Branch.Conditional
       Parser.Parsers.Combinator.Choice.Lookahead
       Parser.Parsers.Combinator.Choice.LookaheadN
       Parser.Parsers.Combinator.Choice.LookaheadParse
       Parser.Parsers.Combinator.Choice.MetaParse
       Parser.Parsers.Combinator.Choice.Peek
-      Parser.Parsers.Combinator.Conditional
       Parser.Parsers.Combinator.Expression
-      Parser.Parsers.Combinator.FirstThatParses
       Parser.Parsers.Combinator.ManyMaybe
       Parser.Parsers.Combinator.MapResult
       Parser.Parsers.Combinator.ParseWhileAggregate
@@ -59,6 +58,7 @@ library
       Parser.Parsers.Text.CharAny
       Parser.Parsers.Text.CharEq
       Parser.Parsers.Text.Chars
+      Parser.Parsers.Text.Eof
       Parser.Parsers.Text.Literal
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
@@ -70,9 +70,9 @@ library
       Types.AST.Assignment
       Types.AST.Statement
       Types.AST.UnitExpression
+      Types.AST.Value.Scalar
+      Types.AST.Value.Value
       Types.Evaluatable.Evaluatable
-      Types.Value.Scalar
-      Types.Value.Value
       Unit.BaseUnit
       Unit.Context
       Unit.ContextUnit
@@ -93,6 +93,7 @@ library
       Paths_x
   hs-source-dirs:
       src
+  ghc-options: -Wall -Werror -Wno-unused-do-bind -Wno-name-shadowing
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
@@ -107,7 +108,7 @@ executable x-exe
       Paths_x
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Werror -Wno-unused-do-bind -Wno-name-shadowing
   build-depends:
       ansi-terminal
     , base >=4.7 && <5
@@ -128,6 +129,7 @@ test-suite x-test
       Parser.Parsers.AST.Token.IdentifierSpec
       Parser.Parsers.AST.Value.UnitExpressionSpec
       Parser.Parsers.AST.Value.UnitFactorSpec
+      Parser.Parsers.AST.Value.ValueSpec
       Parser.ParserSpec
       Shell.ShellSpec
       TestUtils.ArithmeticExpression

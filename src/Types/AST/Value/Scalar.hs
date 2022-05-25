@@ -1,4 +1,4 @@
-module Types.Value.Scalar where
+module Types.AST.Value.Scalar where
 
 import Data.Number.CReal
 

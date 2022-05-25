@@ -28,6 +28,11 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -Wall
+    - -Werror
+    - -Wno-unused-do-bind
+    - -Wno-name-shadowing
 
 executables:
   x-exe:
@@ -39,6 +44,8 @@ executables:
     - -with-rtsopts=-N
     - -Wall
     - -Werror
+    - -Wno-unused-do-bind
+    - -Wno-name-shadowing
     dependencies:
     - x
 

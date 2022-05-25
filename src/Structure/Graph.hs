@@ -2,10 +2,7 @@
 
 module Structure.Graph where
 
-import Control.Applicative
 import Control.Monad
-import Data.Bifunctor
-import Data.Foldable
 import qualified Data.Map as DM
 import Data.Maybe
 import qualified Data.Set as DS
