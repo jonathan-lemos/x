@@ -1,80 +1,71 @@
 module Parser.Parsers.AST.ArithmeticExpressionSpec where
 
-import Types.AST.ArithmeticExpression
-import Test.Hspec
-import Parser.Parsers.AST.ArithmeticExpression
-import Parser.Parser
 import Data.Bifunctor
 import Data.Number.CReal
 import Parser.Error
+import Parser.Parser
+import Parser.Parsers.AST.ArithmeticExpression
+import State.XState
+import Test.Hspec
+import TestUtils.ArithmeticExpression
+import TestUtils.Parser
+import Types.AST.ArithmeticExpression
+import Types.AST.UnitExpression
+import Types.AST.Value.Scalar
 import Types.AST.Value.Value
 import Types.Evaluatable.Evaluatable
-import State.XState
-import TestUtils.ArithmeticExpression
-import Types.AST.Value.Scalar
 
-isParentheses :: Either ParseError (String, Factor) -> Bool
-isParentheses (Right (_, Parentheses _)) = True
+isParentheses :: Factor -> Bool
+isParentheses (Parentheses _) = True
 isParentheses _ = False
 
 spec :: Spec
 spec = do
-    describe "factor parses correctly" $ do
-        let f = parse factor
+    passPartialFailFnSpec
+        "factor"
+        factor
+        [ ("2", (== FactorValue (Value (Number 2) Nothing)))
+        , ("2 kg", (== FactorValue (Value (Number 2) (Just . UnitProduct $ UnitMultExpression (JustUnit "kg") []))))
+        , ("(2)", isParentheses)
+        , ("( 2 )", isParentheses)
+        , ("(2 + 2) kg", isParentheses)
+        , ("a", (== FactorValue (Value (Variable "a") Nothing)))
+        , ("foobar", (== FactorValue (Value (Variable "foobar") Nothing)))
+        ]
+        [ ("2 || 5", (== FactorValue (Value (Number 2) Nothing)), " || 5")
+        , ("(2) || 5", isParentheses, " || 5")
+        ]
+        [("@", "Expected a number, variable, or ( expression )", "@")]
 
-        it "evaluates a single number" $ do
-            f "2" `shouldBe` Right ("", FactorValue (Value (Number 2) Nothing))
 
-        it "evaluates a single number with whitespace" $ do
-            f " 2" `shouldBe` Right ("", FactorValue (Value (Number 2) Nothing))
+    let state = mkState [("a", 4), ("foo", 9)]
+    let ae = (`evaluate` state) <$> arithmeticExpression
 
-        it "evaluates a parenthesized number" $ do
-            f "(2)" `shouldSatisfy` isParentheses
+    let evaluatesTo n (Right r) = n == r
+        evaluatesTo _ _ = False
 
-        it "evaluates a parenthesized number w/ whitespace" $ do
-            f " ( 2 )" `shouldSatisfy` isParentheses
+    let evalErrorsWith msg (Left m) = msg == m
+        evalErrorsWith _ _ = False
 
-        it "gives expected error message on unknown char" $ do
-            f "@" `shouldBe` Left (ParseError "Expected a number, variable, or ( expression )" "@")
-
-        it "evaluates a variable" $ do
-            f "a" `shouldBe` Right ("", FactorValue (Value (Variable "a") Nothing))
-            f "foobar" `shouldBe` Right ("", FactorValue (Value (Variable "foobar") Nothing))
+    passPartialFailFnSpec "arithmetic expression evaluation" ae
+        [("2", evaluatesTo 2)
+        ,("3^2", evaluatesTo 9)
+        ,("2^3^2", evaluatesTo 512)
+        ,("2+3",evaluatesTo 5)
+        ,("3-2-1",evaluatesTo 0)
+        ,("100/2/5", evaluatesTo 10)
+        ,("3*2", evaluatesTo 6)
+        ,("2+(5*10)", evaluatesTo 52)
+        ,("(2+5)*10", evaluatesTo 70)
+        ,("(2+2)", evaluatesTo 4)
+        ,("2+3*4^(1/2)", evaluatesTo 8)
+        ,("2 + 3 * 4 ^ ( 1 / 2 )", evaluatesTo 8)]
+        [("2 + 2 || 5 * 7", evaluatesTo 4, " || 5 * 7")
+        ,("(5*8),(7*4)", evaluatesTo 40, ",(7*4)")
+        ,"2 foobar", evaluatesTo ]
+        []
 
     describe "evaluates expressions properly" $ do
-        let state = mkState [("a", 4), ("foo", 9)]
-        let ae = eval state arithmeticExpression
-
-        it "evaluates a single number" $ do
-            ae "2" `shouldBe` Right ("", Right 2)
-
-        it "evaluates a basic power expression" $ do
-            ae "3^2" `shouldBe` Right ("", Right 9)
-
-        it "evaluates a basic multiplication expression" $ do
-            ae "3*2" `shouldBe` Right ("", Right 6)
-
-        it "evaluates a basic addition expression" $ do
-            ae "2+2" `shouldBe` Right ("", Right 4)
-
-        it "evaluates multi power expression" $ do
-            ae "4^3^2" `shouldBe` Right ("", Right 262144)
-
-        it "evaluates multi divide expression" $ do
-            ae "100/2/5" `shouldBe` Right ("", Right 10)
-
-        it "evaluates multi subtract expression" $ do
-            ae "3-2-1" `shouldBe` Right ("", Right 0)
-
-        it "evaluates expression with parentheses" $ do
-            ae "2+(5*10)" `shouldBe` Right ("", Right 52)
-            ae "(2+2)" `shouldBe` Right ("", Right 4)
-
-        it "evaluates complex expression" $ do
-            ae "2+3*4^(1/2)" `shouldBe` Right ("", Right 8)
-
-        it "evaluates expression with whitespace" $ do
-            ae "2 + 3 * 4 ^ ( 1 / 2 )" `shouldBe` Right ("", Right 8)
 
         it "stops evaluating when expression is done" $ do
             ae "2+2 foobar" `shouldBe` Right (" foobar", Right 4)

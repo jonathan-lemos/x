@@ -34,10 +34,18 @@ addUnit u =
 getUnitByName :: String -> UnitContext -> Maybe ContextUnit
 getUnitByName s = DM.lookup s . nameToContextUnit
 
-castUnit :: ContextUnit -> ContextUnit -> Maybe (CReal -> CReal)
+castUnit :: (Show a, UnitLike a, Show b, UnitLike b) => a -> b -> Either String (CReal -> CReal)
 castUnit a b =
-    let (aQuantity, aBaseUnits) = toBaseUnitsAndQuantity a
-        (bQuantity, bBaseUnits) = toBaseUnitsAndQuantity b
+    let (aQuantity, aBaseUnits) = toQuantityAndBaseUnits a
+        (bQuantity, bBaseUnits) = toQuantityAndBaseUnits b
      in if sort aBaseUnits == sort bBaseUnits
-            then Just $ (/ bQuantity) . (* aQuantity)
-            else Nothing
+            then Right $ (/ bQuantity) . (* aQuantity)
+            else Left $ show a <> " cannot be converted to " <> show b
+
+castMaybeUnit :: (Show a, UnitLike a, Show b, UnitLike b) => Maybe a -> Maybe b -> Either String (CReal -> CReal)
+castMaybeUnit Nothing Nothing = Right id
+castMaybeUnit (Just a) (Just b) = castUnit a b
+castMaybeUnit a b =
+    let unitName = maybe "(unitless quantity)" show
+        in Left $ unitName a <> " cannot be converted to " <> unitName b
+

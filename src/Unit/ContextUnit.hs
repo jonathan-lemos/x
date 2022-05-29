@@ -24,14 +24,13 @@ instance Show ContextUnit where
     show (ScaledUnit name _scale _base) = name
 
 instance Eq ContextUnit where
-    a == b = toBaseUnitsAndQuantity a == toBaseUnitsAndQuantity b
+    a == b = toQuantityAndBaseUnits a == toQuantityAndBaseUnits b
 
-instance UnitClass ContextUnit where
-    toBaseUnitsAndQuantity (CtxBaseUnit base) = toBaseUnitsAndQuantity base
-    toBaseUnitsAndQuantity (ProductUnit _name components) =
-        let componentBaseUnits = (\(Exponential b e) -> second (fmap $ modifyExpPower (* e)) $ toBaseUnitsAndQuantity b) <$> components
-            totalQuantity = product $ fst <$> componentBaseUnits
-            totalBaseUnits = foldl' mergeExpProducts [] $ snd <$> componentBaseUnits
+instance UnitLike ContextUnit where
+    toQuantityAndBaseUnits (CtxBaseUnit base) = toQuantityAndBaseUnits base
+    toQuantityAndBaseUnits (ProductUnit _name components) =
+        let componentQuantityAndBaseUnits = toQuantityAndBaseUnits <$> components
+            totalQuantity = product $ fst <$> componentQuantityAndBaseUnits
+            totalBaseUnits = foldl' mergeExpProducts [] $ snd <$> componentQuantityAndBaseUnits
          in (totalQuantity, totalBaseUnits)
-    toBaseUnitsAndQuantity (ScaledUnit _name scaler base) = first (scale scaler) $ toBaseUnitsAndQuantity base
-
+    toQuantityAndBaseUnits (ScaledUnit _name scaler base) = first (scale scaler) $ toQuantityAndBaseUnits base

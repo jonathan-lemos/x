@@ -3,15 +3,16 @@ module Types.AST.ArithmeticExpression where
 import Data.Number.CReal
 import Data.List
 import Data.Bifunctor
-import Types.Evaluatable.Evaluatable
 import State.XState
-import Types.AST.Value.Value
 import Utils.Either
-import Types.AST.Value.Scalar
+import Types.AST.UnitExpression (UnitExpression)
+import Types.AST.Token.Scalar
+import Data.Maybe (fromMaybe)
+import Evaluation.ToValue
 
 
-stringifyEvaluatable :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
-stringifyEvaluatable x xs =
+stringifyLeftAssociativeExpression :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
+stringifyLeftAssociativeExpression x xs =
     let toList (a, b) = [a, b]
         in unwords $ show x : ((toList . bimap show show) =<< xs)
 
@@ -33,10 +34,10 @@ data ArithmeticExpression = ArithmeticExpression Multiplication [(AdditionOperat
     deriving Eq
 
 instance Show ArithmeticExpression where
-    show (ArithmeticExpression x xs) = stringifyEvaluatable x xs
+    show (ArithmeticExpression x xs) = stringifyLeftAssociativeExpression x xs
 
-instance Evaluatable ArithmeticExpression where
-    evaluate (ArithmeticExpression x xs) state =
+instance ToValue ArithmeticExpression where
+    toValue (ArithmeticExpression x xs) state =
         let mapOp Add      = (+)
             mapOp Subtract = (-)
             opList = first mapOp <$> xs
@@ -57,8 +58,8 @@ data Multiplication = Multiplication Power [(MultiplicationOperator, Power)]
 instance Show Multiplication where
     show (Multiplication x xs) = stringifyEvaluatable x xs
 
-instance Evaluatable Multiplication where
-    evaluate (Multiplication x xs) state =
+instance ToValue Multiplication where
+    toValue (Multiplication x xs) state =
         let mapOp Multiply = (*)
             mapOp Divide   = (/)
             opList = first mapOp <$> xs
@@ -71,19 +72,28 @@ instance Show Power where
     show (Power f p) = concat [show f, " ^ ", show p]
     show (NoPower f) = show f
 
-instance Evaluatable Power where
-    evaluate (Power f p) state = (**) <$> evaluate f state <*> evaluate p state
-    evaluate (NoPower f) state = evaluate f state
+instance ToValue Power where
+    toValue (Power f p) state = (**) <$> evaluate f state <*> evaluate p state
+    toValue (NoPower f) state = evaluate f state
 
 
-data Factor = FactorValue Value | Parentheses ArithmeticExpression
+data Factor = Factor FactorQuantity (Maybe UnitExpression)
     deriving Eq
 
 instance Show Factor where
-    show (FactorValue v) = show v
-    show (Parentheses ae) = concat ["(", show ae, ")"]
+    show (Factor quant unit) = show quant <> maybe "" ((" " <>) . show) unit
 
-instance Evaluatable Factor where
-    evaluate (FactorValue (Value (Number n) _unit)) _ = Right n
-    evaluate (FactorValue (Value (Variable v) _unit)) state = eitherFromMaybe ("Use of undeclared variable " <> show v) $ getVar state v
-    evaluate (Parentheses p) state = evaluate p state
+instance ToValue Factor where
+    toValue (Factor quant unit) state =
+        combineErrors (toValue quant) (<$> getUnit unit)
+
+
+data FactorQuantity = FactorScalar Scalar | Parentheses ArithmeticExpression
+    deriving Eq
+
+instance Show FactorQuantity where
+    show (FactorScalar sc) = show sc
+    show (Parentheses ae) = "(" <> show ae <> ")"
+
+instance ToValue FactorQuantity where
+    toValue = undefined
