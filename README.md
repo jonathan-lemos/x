@@ -10,6 +10,9 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Units~~
     * Auto adjusting units
     * Unit aliases
+* Common math functions/vars
+    * sin/cos/tan
+    * pi/e
 * Better number formatting
     * Rational
     * Integer

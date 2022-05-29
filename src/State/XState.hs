@@ -5,17 +5,18 @@ import Data.Number.CReal
 import Unit.Context
 import Unit.Prelude
 import Unit.ContextUnit
+import State.Value
 
 data XState = XState {
-    variables :: DM.Map String CReal,
+    variables :: DM.Map String Value,
     units :: UnitContext
 }
 
-modifyVariables :: (DM.Map String CReal -> DM.Map String CReal) -> XState -> XState
-modifyVariables f s = s { variables = f $ variables s }
+_modifyVariables :: (DM.Map String Value -> DM.Map String Value) -> XState -> XState
+_modifyVariables f s = s { variables = f $ variables s }
 
-modifyUnits :: (UnitContext -> UnitContext) -> XState -> XState
-modifyUnits f s = s { units = f $ units s }
+_modifyUnits :: (UnitContext -> UnitContext) -> XState -> XState
+_modifyUnits f s = s { units = f $ units s }
 
 newState :: XState
 newState = XState {
@@ -23,16 +24,14 @@ newState = XState {
     units = newContext preludeUnits
 }
 
-putUnit :: XState -> ContextUnit -> XState
-putUnit s u = modifyUnits (addUnit u) s
+putUnit :: ContextUnit -> XState -> XState
+putUnit u = _modifyUnits (addUnit u)
 
-getUnit :: XState -> String -> Maybe ContextUnit
-getUnit s u = getUnitByName u (units s)
+putVar :: String -> Value -> XState -> XState
+putVar key value = _modifyVariables $ DM.insert key value
 
-putVar :: XState -> String -> CReal -> XState
-putVar s v n = s {
-    variables = DM.insert v n (variables s)
-}
+getVar :: String -> XState -> Maybe Value
+getVar s = DM.lookup s . variables
 
-getVar :: XState -> String -> Maybe CReal
-getVar s v = DM.lookup v (variables s)
+getUnit :: String -> XState -> Maybe ContextUnit
+getUnit u = getUnitByName u . units

@@ -25,6 +25,7 @@ dependencies:
 - containers
 - numbers
 - terminal-size
+- validation
 
 library:
   source-dirs: src
