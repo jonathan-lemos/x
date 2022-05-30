@@ -1,22 +1,25 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Unit.BaseUnit where
-import Data.Number.CReal
+module Unit.UnitLike where
 import Unit.Exponential
-import Data.Bifunctor
-import Data.Foldable
+import Control.Applicative
+import Data.Number.CReal
 
 class UnitLike u where
-    toQuantityAndBaseUnits :: u -> (CReal, [Exponential String])
+    toScaleAndBaseUnits :: u -> (CReal, [Exponential String])
+    toScaleAndBaseUnits = liftA2 (,) toScale toBaseUnits
 
-    toBaseUnits :: u -> [Exponential BaseUnit]
-    toBaseUnits = snd . toQuantityAndBaseUnits
+    toBaseUnits :: u -> [Exponential String]
+    toBaseUnits = snd . toScaleAndBaseUnits
+
+    toScale :: u -> CReal
+    toScale = fst . toScaleAndBaseUnits
 
 instance UnitLike u => UnitLike (Exponential u) where
-    toQuantityAndBaseUnits (Exponential u p) =
-        bimap (** p) (fmap (modifyExpPower (*p)) . reduceExpProduct) . toQuantityAndBaseUnits $ u
+    toScale (Exponential u p) = toScale u ** p
+
+    toBaseUnits (Exponential u p) = reduceExpProduct $ modifyExpPower (*p) <$> toBaseUnits u
 
 instance (UnitLike u) => UnitLike [u] where
-    toQuantityAndBaseUnits us = foldl'
-        (\(aq, au) (cq, cu) -> (aq * cq, reduceExpProduct $ au <> cu))
-        (1, [])
-        $ toQuantityAndBaseUnits <$> us
+    toBaseUnits = reduceExpProduct . concatMap toBaseUnits
+
+    toScale us = product $ toScale <$> us

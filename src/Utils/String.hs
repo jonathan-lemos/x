@@ -117,3 +117,6 @@ splitIntoLinesByLocation location text =
         targetLine = last beforeOrEqual
         before = take (length beforeOrEqual - 1) beforeOrEqual
      in (before, targetLine, after)
+
+parenthesize :: String -> String
+parenthesize = ("(" <>) . (<> ")")

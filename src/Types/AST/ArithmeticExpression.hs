@@ -1,14 +1,14 @@
 module Types.AST.ArithmeticExpression where
 
-import Data.Number.CReal
-import Data.List
 import Data.Bifunctor
 import State.XState
 import Utils.Either
 import Types.AST.UnitExpression (UnitExpression)
 import Types.AST.Token.Scalar
-import Data.Maybe (fromMaybe)
 import Evaluation.ToValue
+import State.Value
+import Evaluation.Arithmetic
+import Data.Foldable
 
 
 stringifyLeftAssociativeExpression :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -16,10 +16,9 @@ stringifyLeftAssociativeExpression x xs =
     let toList (a, b) = [a, b]
         in unwords $ show x : ((toList . bimap show show) =<< xs)
 
-evaluateEvaluatable :: (Evaluatable a) => a -> XState -> [(CReal -> CReal -> CReal, a)] -> Either String CReal
-evaluateEvaluatable x state =
-    let apply a (f, b) = f <$> a <*> evaluate b state
-        in foldl' apply (evaluate x state)
+evaluateLeftAssociativeExpression :: (ToValue a) => a -> XState -> [(Value -> a -> XState -> Either String Value, a)] -> Either String Value
+evaluateLeftAssociativeExpression x state =
+    foldl' (\acc (f, v) -> acc >>= \av -> f av v state ) (toValue x state)
 
 
 data AdditionOperator = Add | Subtract
@@ -38,10 +37,10 @@ instance Show ArithmeticExpression where
 
 instance ToValue ArithmeticExpression where
     toValue (ArithmeticExpression x xs) state =
-        let mapOp Add      = (+)
-            mapOp Subtract = (-)
+        let mapOp Add      = addValues
+            mapOp Subtract = subValues
             opList = first mapOp <$> xs
-            in evaluateEvaluatable x state opList
+            in evaluateLeftAssociativeExpression x state opList
 
 
 data MultiplicationOperator = Multiply | Divide
@@ -56,16 +55,16 @@ data Multiplication = Multiplication Power [(MultiplicationOperator, Power)]
     deriving Eq
 
 instance Show Multiplication where
-    show (Multiplication x xs) = stringifyEvaluatable x xs
+    show (Multiplication x xs) = stringifyLeftAssociativeExpression x xs
 
 instance ToValue Multiplication where
     toValue (Multiplication x xs) state =
-        let mapOp Multiply = (*)
-            mapOp Divide   = (/)
+        let mapOp Multiply = multValues
+            mapOp Divide   = divValues
             opList = first mapOp <$> xs
-            in evaluateEvaluatable x state opList
+            in evaluateLeftAssociativeExpression x state opList
 
-data Power = Power Factor Power | NoPower Factor
+data Power = Power UnitQuantity Power | NoPower UnitQuantity
     deriving Eq
 
 instance Show Power where
@@ -73,27 +72,27 @@ instance Show Power where
     show (NoPower f) = show f
 
 instance ToValue Power where
-    toValue (Power f p) state = (**) <$> evaluate f state <*> evaluate p state
-    toValue (NoPower f) state = evaluate f state
+    toValue (Power f p) state = combineErrors (toValue f state) (toValue p state) >>= ($ state) . uncurry expValues
+    toValue (NoPower f) state = toValue f state
 
 
-data Factor = Factor FactorQuantity (Maybe UnitExpression)
+data UnitQuantity = UnitQuantity Factor (Maybe UnitExpression)
+    deriving Eq
+
+instance Show UnitQuantity where
+    show (UnitQuantity quant unit) = show quant <> maybe "" ((" " <>) . show) unit
+
+instance ToValue UnitQuantity where
+    toValue (UnitQuantity quant unit) state =
+        combineErrors (toValue quant state) (<$> getUnit unit)
+
+
+data Factor = FactorScalar Scalar | Parentheses ArithmeticExpression
     deriving Eq
 
 instance Show Factor where
-    show (Factor quant unit) = show quant <> maybe "" ((" " <>) . show) unit
-
-instance ToValue Factor where
-    toValue (Factor quant unit) state =
-        combineErrors (toValue quant) (<$> getUnit unit)
-
-
-data FactorQuantity = FactorScalar Scalar | Parentheses ArithmeticExpression
-    deriving Eq
-
-instance Show FactorQuantity where
     show (FactorScalar sc) = show sc
     show (Parentheses ae) = "(" <> show ae <> ")"
 
-instance ToValue FactorQuantity where
+instance ToValue Factor where
     toValue = undefined

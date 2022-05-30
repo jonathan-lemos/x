@@ -14,7 +14,6 @@ import State.XState
 import System.Console.Terminal.Size
 import Types.AST.Assignment
 import Types.AST.Statement
-import Types.Evaluatable.Evaluatable
 
 -- | Parses input, returning Either an error or the result of said input
 parseCommand :: String -> Either ParseError Statement

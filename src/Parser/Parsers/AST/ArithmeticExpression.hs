@@ -14,7 +14,6 @@ import Parser.Parsers.Combinator.Branch.Conditional
 import Parser.Parsers.Combinator.Possibly
 import Parser.Parsers.Text.CharAny
 import Parser.Parsers.Combinator.Expression
-import Parser.Parsers.AST.Value.Value
 
 {- | Parses an arithmetic expression, which is some combination of addition, subtraction, multiplication, division, exponentiation, and parentheses.
 
