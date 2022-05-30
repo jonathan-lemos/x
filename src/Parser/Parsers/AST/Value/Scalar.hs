@@ -9,6 +9,7 @@ import Parser.Parsers.Text.Char
 import Parser.Parsers.Numeric.CReal
 import Parser.Parsers.AST.Token.Identifier
 import Parser.Parsers.Combinator.Possibly
+import Types.AST.Token.Scalar
 
 scalar :: Parser Scalar
 scalar = lookaheadParse

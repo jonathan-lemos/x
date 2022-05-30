@@ -1,10 +1,9 @@
 module State.XState where
 
 import qualified Data.Map as DM
-import Data.Number.CReal
 import Unit.Context
 import Unit.Prelude
-import Unit.ContextUnit
+import Unit.Unit
 import State.Value
 
 data XState = XState {
@@ -24,7 +23,7 @@ newState = XState {
     units = newContext preludeUnits
 }
 
-putUnit :: ContextUnit -> XState -> XState
+putUnit :: Unit -> XState -> XState
 putUnit u = _modifyUnits (addUnit u)
 
 putVar :: String -> Value -> XState -> XState
@@ -33,5 +32,5 @@ putVar key value = _modifyVariables $ DM.insert key value
 getVar :: String -> XState -> Maybe Value
 getVar s = DM.lookup s . variables
 
-getUnit :: String -> XState -> Maybe ContextUnit
+getUnit :: String -> XState -> Maybe Unit
 getUnit u = getUnitByName u . units

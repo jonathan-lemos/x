@@ -74,16 +74,14 @@ library
       Types.AST.Statement
       Types.AST.Token.Scalar
       Types.AST.UnitExpression
-      Unit.BaseUnit
       Unit.Context
-      Unit.ContextUnit
       Unit.Exponential
       Unit.Metric.Metric
       Unit.Metric.Prefix
       Unit.Prelude
-      Unit.Scale.ScaleSequence
-      Unit.Scale.ScaleStep
-      Unit.ValueUnit
+      Unit.Unit
+      Unit.UnitLike
+      Unit.UnitScaleOperation
       Utils.Either
       Utils.List
       Utils.Map

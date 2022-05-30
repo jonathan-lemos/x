@@ -1,4 +1,5 @@
 module Utils.Trim where
+import Data.Char
 
 {- | Drops elements from the longer list (left if they're equal) until the sum of their lengths is <= `minWidth`
 
@@ -50,3 +51,6 @@ trimAroundCenter center maxWidth line =
     let (lt, gte) = splitAt center line
         (leftChopped, left, rightChopped, right) = balance maxWidth lt (reverse gte)
      in (leftChopped, left <> reverse right, rightChopped)
+
+trim :: String -> String
+trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
