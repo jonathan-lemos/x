@@ -69,11 +69,13 @@ library
       State.XState
       Structure.BiMap
       Structure.Graph
+      Structure.Try
       Types.AST.ArithmeticExpression
       Types.AST.Assignment
       Types.AST.Statement
       Types.AST.Token.Scalar
       Types.AST.UnitExpression
+      Unit.Arithmetic
       Unit.Context
       Unit.Exponential
       Unit.Metric.Metric

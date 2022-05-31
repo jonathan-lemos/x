@@ -14,6 +14,7 @@ import State.XState
 import System.Console.Terminal.Size
 import Types.AST.Assignment
 import Types.AST.Statement
+import Evaluation.ToValue
 
 -- | Parses input, returning Either an error or the result of said input
 parseCommand :: String -> Either ParseError Statement
@@ -34,7 +35,7 @@ executeStatement :: XState -> Statement -> Either String (XState, String)
 executeStatement state (StmtAssignment (Assignment a expr)) =
     liftA2 (,) (\x -> putVar a x state) (((a <> " <- ") <>) . show) <$> toValue expr state
 executeStatement state (StmtExpr expr) =
-    liftA2 (,) (Right state) (show <$> evaluate expr state)
+    liftA2 (,) (Right state) (show <$> toValue expr state)
 
 -- | Given the terminal width and a line, produces the new state (or the same state on error), and IOCmds
 execute :: XState -> Int -> String -> (XState, [IOCmd])
