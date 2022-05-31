@@ -93,7 +93,10 @@ instance ToValue UnitQuantity where
                     (Numeric qReal (Just qUnit), Nothing) -> Right $ Numeric qReal (Just qUnit)
                     (Numeric qReal Nothing, Just unit) -> Right $ Numeric qReal (Just unit)
                     (Numeric qReal Nothing, Nothing) -> Right $ Numeric qReal Nothing
-                    (Numeric _qReal (Just qUnit), Just unit) -> Left $ "Cannot add unit " <> parenthesize (show unit) <> " to a variable that already has a unit " <> parenthesize (show qUnit)
+                    (Numeric qReal (Just qUnit), Just unit) ->
+                        if qUnit == unit
+                            then Right $ Numeric qReal (Just qUnit)
+                            else Left $ "Cannot add unit " <> parenthesize (show unit) <> " to a variable that already has a unit " <> parenthesize (show qUnit)
 
 data Factor = FactorScalar Scalar | Parentheses ArithmeticExpression
     deriving Eq

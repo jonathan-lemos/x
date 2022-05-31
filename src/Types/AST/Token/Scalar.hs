@@ -5,7 +5,6 @@ import Evaluation.ToValue
 import State.Value
 import State.XState
 import Utils.Either
-import Unit.Unit
 
 data Scalar = Number CReal | Variable String
     deriving Eq

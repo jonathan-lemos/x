@@ -1,12 +1,8 @@
 module Unit.Context where
 
 import Data.Foldable
-import Data.List
 import qualified Data.Map as DM
-import Data.Number.CReal
 import Unit.Unit
-import Unit.Exponential
-import Unit.UnitLike
 
 newtype UnitContext = UnitContext
     { nameToContextUnit :: DM.Map String Unit
