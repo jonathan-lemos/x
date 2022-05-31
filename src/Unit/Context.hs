@@ -27,11 +27,3 @@ addUnit u =
 
 getUnitByName :: String -> UnitContext -> Maybe Unit
 getUnitByName s = DM.lookup s . nameToContextUnit
-
-castUnit :: (Show a, UnitLike a, Show b, UnitLike b) => a -> b -> Either String (CReal -> CReal)
-castUnit a b =
-    let (aQuantity, aBaseUnits) = toQuantityAndBaseUnits a
-        (bQuantity, bBaseUnits) = toQuantityAndBaseUnits b
-     in if sort aBaseUnits == sort bBaseUnits
-            then Right $ (/ bQuantity) . (* aQuantity)
-            else Left $ show a <> " cannot be converted to " <> show b

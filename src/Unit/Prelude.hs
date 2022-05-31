@@ -6,6 +6,7 @@ import Unit.Unit
 import Unit.Metric.Metric
 import Unit.Metric.Prefix
 import Unit.UnitScaleOperation
+import Unit.Arithmetic
 
 mab = metric (const True) Base
 

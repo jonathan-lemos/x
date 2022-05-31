@@ -3,12 +3,13 @@ module Types.AST.ArithmeticExpression where
 import Data.Bifunctor
 import State.XState
 import Utils.Either
-import Types.AST.UnitExpression (UnitExpression)
+import Types.AST.UnitExpression
 import Types.AST.Token.Scalar
 import Evaluation.ToValue
 import State.Value
 import Evaluation.Arithmetic
 import Data.Foldable
+import Utils.String
 
 
 stringifyLeftAssociativeExpression :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -83,16 +84,23 @@ instance Show UnitQuantity where
     show (UnitQuantity quant unit) = show quant <> maybe "" ((" " <>) . show) unit
 
 instance ToValue UnitQuantity where
-    toValue (UnitQuantity quant unit) state =
-        combineErrors (toValue quant state) (<$> getUnit unit)
-
+    toValue (UnitQuantity quant unitExpr) state =
+        let unit = sequenceA $ (`ueToUnit` state) <$> unitExpr
+            quantValue = toValue quant state
+        in combineErrors quantValue unit >>=
+            \(q, u) ->
+                case (q, u) of
+                    (Numeric qReal (Just qUnit), Nothing) -> Right $ Numeric qReal (Just qUnit)
+                    (Numeric qReal Nothing, Just unit) -> Right $ Numeric qReal (Just unit)
+                    (Numeric qReal Nothing, Nothing) -> Right $ Numeric qReal Nothing
+                    (Numeric _qReal (Just qUnit), Just unit) -> Left $ "Cannot add unit " <> parenthesize (show unit) <> " to a variable that already has a unit " <> parenthesize (show qUnit)
 
 data Factor = FactorScalar Scalar | Parentheses ArithmeticExpression
     deriving Eq
 
 instance Show Factor where
     show (FactorScalar sc) = show sc
-    show (Parentheses ae) = "(" <> show ae <> ")"
+    show (Parentheses ae) = parenthesize $ show ae
 
 instance ToValue Factor where
     toValue = undefined

@@ -5,6 +5,7 @@ import Unit.UnitLike
 import Unit.UnitScaleOperation
 import Utils.String
 import Unit.Exponential
+import Data.List
 
 data Unit
     = BaseUnit String
@@ -43,29 +44,26 @@ instance UnitLike Unit where
 _showInfixOp :: (Show a, Show b) => a -> String -> b -> String
 _showInfixOp a op b = parenthesize $ show a <> op <> show b
 
-unitless :: Unit
-unitless = ProductUnit "" []
+unitMaybeify :: (Show a, UnitLike a, Show b, UnitLike b) => c -> (a -> b -> Either String c) -> Maybe a -> Maybe b -> Either String c
+unitMaybeify _def f (Just a) (Just b) = f a b
+unitMaybeify def _f Nothing Nothing = Right def
+unitMaybeify _def _f (Just a) Nothing = Left $ show a <> " cannot be converted to unitless quantity"
+unitMaybeify _def _f Nothing (Just b) = Left $ "unitless quantity cannot be converted to " <> show b
 
-unitMult :: Unit -> Unit -> Unit
-unitMult a b = ProductUnit (_showInfixOp a "*" b) [a, b]
+castUnit :: (Show a, UnitLike a, Show b, UnitLike b) => a -> b -> Either String (CReal -> CReal)
+castUnit a b =
+    let (aScale, aBaseUnits) = toScaleAndBaseUnits a
+        (bScale, bBaseUnits) = toScaleAndBaseUnits b
+     in if sort aBaseUnits == sort bBaseUnits
+            then Right $ (/ bScale) . (* aScale)
+            else Left $ show a <> " cannot be converted to " <> show b
 
-unitDiv :: Unit -> Unit -> Unit
-unitDiv a b = ProductUnit (_showInfixOp a "/" b) [a, unitExpScalar b (-1)]
+castMaybeUnit :: (Show a, UnitLike a, Show b, UnitLike b) => Maybe a -> Maybe b -> Either String (CReal -> CReal)
+castMaybeUnit = unitMaybeify id castUnit
 
-unitReciprocal :: Unit -> Unit
-unitReciprocal u = ScaledUnit (_showInfixOp (1 :: Integer) "/" u) (Exponentiate (-1)) u
+scaleUnit :: (UnitLike a, UnitLike b) => a -> b -> CReal -> CReal
+scaleUnit a b x = x * toScale a / toScale b
 
-unitAddScalar :: Unit -> CReal -> Unit
-unitAddScalar u s = ScaledUnit (_showInfixOp u "+" s) (Add s) u
-
-unitSubScalar :: Unit -> CReal -> Unit
-unitSubScalar u s = ScaledUnit (_showInfixOp u "-" s) (Add (-s)) u
-
-unitMultScalar :: Unit -> CReal -> Unit
-unitMultScalar u s = ScaledUnit (_showInfixOp u "*" s) (Multiply s) u
-
-unitDivScalar :: Unit -> CReal -> Unit
-unitDivScalar u s = ScaledUnit (_showInfixOp u "/" s) (Multiply (1 / s)) u
-
-unitExpScalar :: Unit -> CReal -> Unit
-unitExpScalar b e = ScaledUnit (_showInfixOp b "^" e) (Exponentiate (-1)) b
+scaleMaybeUnit :: (UnitLike a, UnitLike b) => Maybe a -> Maybe b -> CReal -> CReal
+scaleMaybeUnit (Just a) (Just b) = scaleUnit a b
+scaleMaybeUnit _ _ = id
