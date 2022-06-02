@@ -106,4 +106,5 @@ instance Show Factor where
     show (Parentheses ae) = parenthesize $ show ae
 
 instance ToValue Factor where
-    toValue = undefined
+    toValue (FactorScalar sc) = toValue sc
+    toValue (Parentheses ae) = toValue ae

@@ -15,4 +15,4 @@ instance Show Scalar where
 
 instance ToValue Scalar where
     toValue (Number n) _state = Right (Numeric n Nothing)
-    toValue (Variable s) state = eitherFromMaybe ("Unknown variable " <> show s <> "used") (getVar s state)
+    toValue (Variable s) state = eitherFromMaybe ("Use of undeclared variable " <> show s) (getVar s state)

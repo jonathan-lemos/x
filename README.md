@@ -8,8 +8,11 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Error message display~~
 * ~~Variables~~
 * ~~Units~~
-    * Auto adjusting units
-    * Unit aliases
+    * Unit expressions
+    * Defining units
+    * Viewing unit definitions
+    * Unit aliases (e.g. "second" == "s")
+    * Auto adjusting units?
 * Common math functions/vars
     * sin/cos/tan
     * pi/e

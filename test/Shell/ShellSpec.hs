@@ -11,13 +11,16 @@ import Test.Hspec
 import Data.List
 import Data.List.Split
 import TestUtils.ArithmeticExpression
+import TestUtils.State
+import State.Value
+import Unit.Unit
 
 ioListToString :: [IOCmd] -> String
 ioListToString = intercalate "" . fmap show
 
 spec :: Spec
 spec = do
-    let sState = mkState [("a", 4), ("foo", 9)]
+    let sState = mkState [("a", Numeric 4 Nothing), ("foo", Numeric 9 (Just $ BaseUnit "kg"))]
 
     describe "parseCommand tests" $ do
         it "parses basic expressions" $ do

@@ -21,7 +21,7 @@ data Unit
     deriving (Ord)
 
 instance Show Unit where
-    show (BaseUnit base) = show base
+    show (BaseUnit base) = base
     show (ProductUnit name _components) = name
     show (ScaledUnit name _scale _base) = name
 

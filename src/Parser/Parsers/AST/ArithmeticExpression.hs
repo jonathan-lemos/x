@@ -61,7 +61,7 @@ unitQuantity :: Parser UnitQuantity
 unitQuantity = do
     fact <- factor
     lookaheadParse
-        [ whitespace >> identifier >> (void (charAny "*/") <|> void whitespace <|> eof) >> pure (UnitQuantity fact . Just <$> unitExpr)
+        [ whitespace >> identifier >> (void (charAny "*/") <|> void whitespace <|> eof) >> pure (UnitQuantity fact . Just <$> (whitespace >> unitExpr))
         , pure (pure $ UnitQuantity fact Nothing)
         ]
 
