@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Evaluation.Arithmetic where
 
 import Control.Applicative
@@ -18,18 +19,18 @@ _evalValues f a b state =
     combineErrors (toValue a state) (toValue b state)
         >>= \(Numeric xa ua, Numeric xb ub) -> f xa ua xb ub
 
-_evalAdditive :: (ToValue a, ToValue b) => (CReal -> CReal -> CReal) -> a -> b -> XState -> Either String Value
-_evalAdditive f a b state =
+_evalAdditive :: (ToValue a, ToValue b) => (CReal -> CReal -> CReal) -> String -> a -> b -> XState -> Either String Value
+_evalAdditive f verb a b state =
     let addF xa ua xb ub =
-            castMaybeUnit ua ub
+            (castMaybeUnit ua ub <> Left ("Cannot " <> verb <> " " <> show ua <> " and " <> show ub))
                 >>= \scaleB -> Right $ Numeric (f xa (scaleB xb)) ub
      in _evalValues addF a b state
 
 addValues :: (ToValue a, ToValue b) => a -> b -> XState -> Either String Value
-addValues = _evalAdditive (+)
+addValues = _evalAdditive (+) "add"
 
 subValues :: (ToValue a, ToValue b) => a -> b -> XState -> Either String Value
-subValues = _evalAdditive (-)
+subValues = _evalAdditive (-) "subtract"
 
 _unitMaybeifyable :: (Unit -> Unit -> Unit) -> (Unit -> Unit -> Either String (Maybe Unit))
 _unitMaybeifyable f a b = Right . Just $ f a b

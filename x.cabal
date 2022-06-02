@@ -125,6 +125,7 @@ test-suite x-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Evaluation.ArithmeticSpec
       IO.IOCmdSpec
       Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.AST.AssignmentSpec

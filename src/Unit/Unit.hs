@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module Unit.Unit where
 
 import Data.Number.CReal
@@ -24,6 +25,10 @@ instance Show Unit where
     show (BaseUnit base) = base
     show (ProductUnit name _components) = name
     show (ScaledUnit name _scale _base) = name
+
+instance {-# OVERLAPPING #-} Show (Maybe Unit) where
+    show (Just u) = show u
+    show Nothing = "unitless quantity"
 
 instance Eq Unit where
     a == b = toScaleAndBaseUnits a == toScaleAndBaseUnits b
