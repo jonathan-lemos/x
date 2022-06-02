@@ -5,7 +5,7 @@ import Unit.Unit
 import Unit.UnitScaleOperation
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     describe "castUnit tests" $ do
         let b = BaseUnit "b"
         let kg = BaseUnit "kg"

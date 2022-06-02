@@ -12,7 +12,7 @@ import Parser.Parsers.Text.Literal (literal)
 import Parser.Error
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     describe "parser functor" $ do
         it "functors correctly" $ do
             let f = parse $ (+1) <$> digit

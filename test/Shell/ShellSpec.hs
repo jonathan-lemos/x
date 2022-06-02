@@ -19,7 +19,7 @@ ioListToString :: [IOCmd] -> String
 ioListToString = intercalate "" . fmap show
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     let sState = mkState [("a", Numeric 4 Nothing), ("foo", Numeric 9 (Just $ BaseUnit "kg"))]
 
     describe "parseCommand tests" $ do

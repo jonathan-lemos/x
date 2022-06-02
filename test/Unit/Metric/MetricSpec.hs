@@ -10,7 +10,7 @@ import Unit.Unit
 import Unit.UnitLike
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     let metricNames p b u = fmap show . snd $ metric p b u
 
     let scale units name = toScale . fromJust . find ((== name) . show) $ units

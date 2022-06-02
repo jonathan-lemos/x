@@ -22,7 +22,7 @@ isParentheses (Parentheses _) = True
 isParentheses _ = False
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     passPartialFailFnSpec
         "factor"
         factor
