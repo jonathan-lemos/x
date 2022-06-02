@@ -11,7 +11,7 @@ import Unit.Unit
 import Evaluation.ToValue
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     let state = mkState [("a", Numeric 4 Nothing), ("b", Numeric 9 (Just $ BaseUnit "kg"))]
 
     let gus = (`getUnit` state)
@@ -34,6 +34,7 @@ spec = do
     shouldBeSpec
         "addValues"
         [ (a `add` b, Right $ Numeric 5 Nothing, "adding scalars")
+        , (b `add` a, Right $ Numeric 5 Nothing, "adding scalars is commutative")
         , (d `add` d, Right $ Numeric 14 anonymousNewton, "adding anonymous newton")
         , (c `add` d, Right $ Numeric 12 (gus "N"), "adding newton to anonymous newton")
         , (d `add` c, Right $ Numeric 12 anonymousNewton, "adding anonymous newton to newton")
@@ -49,4 +50,13 @@ spec = do
         , (d `sub` c, Right $ Numeric 2 anonymousNewton, "subtracting newton from anonymous newton")
         , (a `sub` c, Left "Cannot subtract unitless quantity and N", "subtracting unitless and N")
         , (c `sub` a, Left "Cannot subtract N and unitless quantity", "subtracting N and unitless")
+        ]
+
+    shouldBeSpec
+        "multValues"
+        [ (a `mul` b, Right $ Numeric 6 Nothing, "multiplying scalar")
+        , (b `mul` a, Right $ Numeric 6 Nothing, "multiplying scalar is commutative")
+        , (a `mul` c, Right $ Numeric 10 (gus "N"), "multiplying scalar and newton")
+        , (c `mul` a, Right $ Numeric 10 (gus "N"), "multiplying scalar and newton is commutative")
+        , (c `mul` c, Right $ Numeric 25 (gus "N" `unitMaybeMult` gus "N"), "squaring newton")
         ]

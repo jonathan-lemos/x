@@ -7,7 +7,7 @@ import TestUtils.ArithmeticExpression
 import TestUtils.Parser (shouldFailWithMsgAndCi)
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     describe "assignment tests" $ do
         let isAssignment (Right ("", StmtAssignment _)) = True
             isAssignment _ = False

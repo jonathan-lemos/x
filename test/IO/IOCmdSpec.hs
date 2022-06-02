@@ -4,7 +4,7 @@ import Test.Hspec
 import IO.IOCmd
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     describe "IOCmd tests" $ do
         it "appends newline for line" $ do
             line "foo" `shouldBe` IOCmd [] "foo\n"

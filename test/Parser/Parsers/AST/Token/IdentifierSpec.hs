@@ -7,7 +7,7 @@ import Parser.Parsers.AST.Token.Identifier
 import Control.Applicative
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     let asPassList = fmap $ liftA2 (,) id id
     let asFailList = fmap $ liftA2 (, "Expected an A-z character", ) id id
 

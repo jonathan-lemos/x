@@ -6,7 +6,7 @@ import TestUtils.Parser
 import Types.AST.UnitExpression
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     passPartialFailSpec
         "unitMultExpr"
         unitMultExpr

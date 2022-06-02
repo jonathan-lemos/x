@@ -13,7 +13,7 @@ import Types.AST.Assignment
 import Unit.Unit
 
 spec :: Spec
-spec = do
+spec = parallel $ do
     let isValidAssignment s (Assignment x _) = s == x
 
     let state = mkState [("a", Numeric 4 Nothing), ("b", Numeric 9 (Just $ BaseUnit "kg"))]
