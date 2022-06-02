@@ -18,6 +18,6 @@ metric keepPrefix base cu =
                         (ScaledUnit (show n <> baseName) (Multiply $ 10 ** (metricPrefixToExponent n - metricPrefixToExponent p)) u, n)
                     )
                     (cu, base)
-        prev = unitsToList $ drop 1 [base .. minBound]
-        post = unitsToList $ drop 1 [base .. maxBound]
+        prev = unitsToList [minBound .. pred base]
+        post = unitsToList [succ base .. maxBound]
      in (cu, prev <> [cu] <> post)

@@ -132,12 +132,14 @@ test-suite x-test
       Parser.Parsers.AST.Token.IdentifierSpec
       Parser.Parsers.AST.Value.UnitExpressionSpec
       Parser.Parsers.AST.Value.UnitFactorSpec
-      Parser.Parsers.AST.Value.ValueSpec
       Parser.ParserSpec
       Shell.ShellSpec
       TestUtils.ArithmeticExpression
       TestUtils.Parser
+      TestUtils.Should
       TestUtils.State
+      Unit.Metric.MetricSpec
+      Unit.UnitSpec
       Paths_x
   hs-source-dirs:
       test
