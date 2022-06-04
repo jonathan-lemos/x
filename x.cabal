@@ -135,6 +135,7 @@ test-suite x-test
       Parser.Parsers.AST.Value.UnitFactorSpec
       Parser.ParserSpec
       Shell.ShellSpec
+      TestUtils.Arbitrary
       TestUtils.ArithmeticExpression
       TestUtils.Parser
       TestUtils.Should
@@ -146,7 +147,8 @@ test-suite x-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ansi-terminal
+      QuickCheck
+    , ansi-terminal
     , base >=4.7 && <5
     , containers
     , hspec
