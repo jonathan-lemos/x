@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE IncoherentInstances #-}
 module Unit.Exponential where
 
 import Data.Number.CReal
@@ -39,9 +41,17 @@ showProduct exps =
         negative = show . modifyExpPower negate <$> filterByPower (< 0)
         in intercalate "*" positive <> "/" <> intercalate "*" negative
 
+
+instance {-# OVERLAPPING #-} Show (Exponential String) where
+    show (Exponential b e) =
+        case e of
+            0 -> ""
+            1 -> b
+            n -> b <> "^" <> show n
+
 instance Show a => Show (Exponential a) where
     show (Exponential b e) =
         case e of
             0 -> ""
             1 -> show b
-            _ -> show b <> "^"
+            n -> show b <> "^" <> show n

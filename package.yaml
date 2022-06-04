@@ -61,4 +61,5 @@ tests:
     dependencies:
     - x
     - hspec
+    - QuickCheck
     - split

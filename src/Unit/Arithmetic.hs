@@ -18,7 +18,7 @@ unitDiv :: Unit -> Unit -> Unit
 unitDiv a b = ProductUnit (_showInfixOp a "/" b) [a, unitExpScalar b (-1)]
 
 unitMaybeDiv :: Maybe Unit -> Maybe Unit -> Maybe Unit
-unitMaybeDiv (Just a) (Just b) = Just $ unitMult a b
+unitMaybeDiv (Just a) (Just b) = Just $ unitDiv a b
 unitMaybeDiv (Just a) Nothing = Just a
 unitMaybeDiv Nothing (Just b) = Just $ unitReciprocal b
 unitMaybeDiv Nothing Nothing = Nothing
@@ -57,7 +57,7 @@ unitMaybeDivScalar :: Maybe Unit -> CReal -> Maybe Unit
 unitMaybeDivScalar = maybeScalar unitDivScalar
 
 unitExpScalar :: Unit -> CReal -> Unit
-unitExpScalar b e = ScaledUnit (_showInfixOp b "^" e) (Exponentiate (-1)) b
+unitExpScalar b e = ScaledUnit (_showInfixOp b "^" e) (Exponentiate e) b
 
 unitMaybeExpScalar :: Maybe Unit -> CReal -> Maybe Unit
 unitMaybeExpScalar = maybeScalar unitExpScalar

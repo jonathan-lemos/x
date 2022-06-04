@@ -9,6 +9,7 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Variables~~
 * ~~Units~~
     * Unit expressions
+    * Unit simplification
     * Defining units
     * Viewing unit definitions
     * Unit aliases (e.g. "second" == "s")
