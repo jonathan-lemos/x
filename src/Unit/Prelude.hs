@@ -36,7 +36,7 @@ k = BaseUnit "K"
 
 celsius = ScaledUnit "C" (Add 273.15) k
 
-fahrenheit = ScaledUnit "F" (Add 32) (celsius `unitMultScalar` (9/5))
+fahrenheit = ScaledUnit "F" (Add (-32)) (celsius `unitDivScalar` (9/5))
 
 (mol, moles) = mab $ BaseUnit "mol"
 

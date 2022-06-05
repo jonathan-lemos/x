@@ -13,6 +13,11 @@ instance Show UnitScaleOperation where
     show (Multiply n) = "* " <> show n
     show (Exponentiate n) = "^ " <> show n
 
+invertUso :: UnitScaleOperation -> UnitScaleOperation
+invertUso (Add n) = Add (-n)
+invertUso (Multiply n) = Multiply (1 / n)
+invertUso (Exponentiate n) = Exponentiate (-n)
+
 applyUso :: UnitScaleOperation -> CReal -> CReal
 applyUso (Add n) = (+n)
 applyUso (Multiply n) = (*n)
