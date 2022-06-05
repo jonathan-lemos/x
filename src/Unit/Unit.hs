@@ -6,7 +6,6 @@ import Unit.UnitLike
 import Unit.UnitScaleOperation
 import Utils.String
 import Unit.Exponential
-import Data.List
 
 data Unit
     = BaseUnit String
@@ -55,15 +54,23 @@ unitMaybeify def _f Nothing Nothing = Right def
 unitMaybeify _def _f (Just a) Nothing = Left $ show a <> " cannot be converted to unitless quantity"
 unitMaybeify _def _f Nothing (Just b) = Left $ "unitless quantity cannot be converted to " <> show b
 
-castUnit :: (Show a, UnitLike a, Show b, UnitLike b) => a -> b -> Either String (CReal -> CReal)
-castUnit a b =
-    let (aScale, aBaseUnits) = toScaleAndBaseUnits a
-        (bScale, bBaseUnits) = toScaleAndBaseUnits b
-     in if sort aBaseUnits == sort bBaseUnits
-            then Right $ (/ bScale) . (* aScale)
-            else Left $ show a <> " cannot be converted to " <> show b
+downscale :: Unit -> CReal -> CReal
+downscale (BaseUnit _) = id
+downscale (ScaledUnit _name uso base) = downscale base . applyUso uso
+downscale (ProductUnit _name ps) = (*) . (1 /) . product $ toScale <$> ps
 
-castMaybeUnit :: (Show a, UnitLike a, Show b, UnitLike b) => Maybe a -> Maybe b -> Either String (CReal -> CReal)
+upscale :: Unit -> CReal -> CReal
+upscale (BaseUnit _) = id
+upscale (ScaledUnit _name uso base) = applyUso (invertUso uso) . upscale base
+upscale (ProductUnit _name ps) = (*) . product $ toScale <$> ps
+
+castUnit :: Unit -> Unit -> Either String (CReal -> CReal)
+castUnit a b =
+    if toBaseUnits a == toBaseUnits b
+        then Right $ upscale b . downscale a
+        else Left $ show a <> " cannot be converted to " <> show b
+
+castMaybeUnit :: Maybe Unit -> Maybe Unit -> Either String (CReal -> CReal)
 castMaybeUnit = unitMaybeify id castUnit
 
 scaleUnit :: (UnitLike a, UnitLike b) => a -> b -> CReal -> CReal

@@ -39,6 +39,6 @@ spec = parallel $ do
         [ tc "b" "kb" (/ 1000)
         , tc "kb" "b" (* 1000)
         , (cu anonymousNewton (lookup "N"), id, "anonymous newton -> newton")
-        , tc "K" "C" (+ 273.15)
-        , tc "K" "F" $ (* (9/5)) . (+ 32) . (+ 273.15)
+        , tc "K" "C" (+ negate 273.15)
+        , tc "K" "F" $ (+ 32) . (* (9/5)) . (+ negate 273.15)
         ]
