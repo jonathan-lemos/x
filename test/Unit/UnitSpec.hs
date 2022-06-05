@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Unit.UnitSpec where
@@ -11,8 +12,8 @@ import TestUtils.Should
 import Unit.Arithmetic
 import Unit.Prelude
 import Unit.Unit
-import Unit.UnitScaleOperation
 import Unit.UnitLike
+import Unit.UnitScaleOperation
 
 spec :: Spec
 spec = parallel $ do
@@ -36,9 +37,12 @@ spec = parallel $ do
 
     shouldBeQcSpec
         "castUnit tests"
-        [ tc "b" "kb" (/ 1000)
+        [ (cu (lookup "km" `unitExpScalar` 2) (lookup "m" `unitExpScalar` 2), (* 1000000), "km^2 -> m^2")
+        , tc "b" "kb" (/ 1000)
         , tc "kb" "b" (* 1000)
         , (cu anonymousNewton (lookup "N"), id, "anonymous newton -> newton")
         , tc "K" "C" (+ negate 273.15)
-        , tc "K" "F" $ (+ 32) . (* (9/5)) . (+ negate 273.15)
+        , tc "K" "F" $ (+ 32) . (* (9 / 5)) . (+ negate 273.15)
+        , (cu (lookup "N" `unitMult` lookup "m") (lookup "N" `unitMult` lookup "cm"), (* 100), "N*m -> N*cm")
+        , (cu (lookup "N" `unitMult` lookup "cm") (lookup "N" `unitMult` lookup "m"), (/ 100), "N*cm -> N*m")
         ]
