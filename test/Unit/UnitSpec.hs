@@ -42,6 +42,7 @@ spec = parallel $ do
         , tc "kb" "b" (* 1000)
         , (cu anonymousNewton (lookup "N"), id, "anonymous newton -> newton")
         , tc "K" "C" (+ negate 273.15)
+        , tc "C" "F" $ (+ 32) . (* (9 / 5))
         , tc "K" "F" $ (+ 32) . (* (9 / 5)) . (+ negate 273.15)
         , (cu (lookup "N" `unitMult` lookup "m") (lookup "N" `unitMult` lookup "cm"), (* 100), "N*m -> N*cm")
         , (cu (lookup "N" `unitMult` lookup "cm") (lookup "N" `unitMult` lookup "m"), (/ 100), "N*cm -> N*m")
