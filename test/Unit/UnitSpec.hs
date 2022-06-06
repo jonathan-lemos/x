@@ -37,8 +37,7 @@ spec = parallel $ do
 
     shouldBeQcSpec
         "castUnit tests"
-        [ (cu (lookup "km" `unitExpScalar` 2) (lookup "m" `unitExpScalar` 2), (* 1000000), "km^2 -> m^2")
-        , tc "b" "kb" (/ 1000)
+        [ tc "b" "kb" (/ 1000)
         , tc "kb" "b" (* 1000)
         , (cu anonymousNewton (lookup "N"), id, "anonymous newton -> newton")
         , tc "K" "C" (+ negate 273.15)
@@ -46,4 +45,9 @@ spec = parallel $ do
         , tc "K" "F" $ (+ 32) . (* (9 / 5)) . (+ negate 273.15)
         , (cu (lookup "N" `unitMult` lookup "m") (lookup "N" `unitMult` lookup "cm"), (* 100), "N*m -> N*cm")
         , (cu (lookup "N" `unitMult` lookup "cm") (lookup "N" `unitMult` lookup "m"), (/ 100), "N*cm -> N*m")
+        , (cu (lookup "N" `unitDiv` lookup "m") (lookup "N" `unitDiv` lookup "cm"), (/ 100), "N/m -> N/cm")
+        , (cu (lookup "N" `unitDiv` lookup "cm") (lookup "N" `unitDiv` lookup "m"), (* 100), "N/cm -> N/m")
+        , (cu (lookup "N" `unitMult` lookup "C") (lookup "N" `unitMult` lookup "K"), id, "N*C -> N*K")
+        , (cu (lookup "N" `unitMult` lookup "C") (lookup "N" `unitMult` lookup "K"), id, "N*K -> N*C")
+        , (cu (lookup "km" `unitExpScalar` 2) (lookup "m" `unitExpScalar` 2), (* 1000000), "km^2 -> m^2")
         ]
