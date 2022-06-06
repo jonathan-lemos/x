@@ -6,6 +6,7 @@ import Unit.UnitLike
 import Unit.UnitScaleOperation
 import Utils.String
 import Unit.Exponential
+import Utils.CReal
 
 data Unit
     = BaseUnit String
@@ -56,13 +57,21 @@ unitMaybeify _def _f Nothing (Just b) = Left $ "unitless quantity cannot be conv
 
 downscale :: Unit -> CReal -> CReal
 downscale (BaseUnit _) = id
-downscale (ScaledUnit _name uso base) = downscale base . applyUso uso
-downscale (ProductUnit _name ps) = (*) . (1 /) . product $ toScale <$> ps
+downscale (ScaledUnit _name uso base) =
+    let apUso (Add n)          = (+ n) -- 0 C -> 273.15 K
+        apUso (Multiply n)     = (* n) -- 1 kg -> 1000 g
+        apUso (Exponentiate n) = (`absExp` (1 `safeDiv` n)) -- 1 km^2 -> 1000000 m^2
+    in downscale base . apUso uso
+downscale (ProductUnit _name ps) = (*) . product $ toScale <$> ps
 
 upscale :: Unit -> CReal -> CReal
 upscale (BaseUnit _) = id
-upscale (ScaledUnit _name uso base) = applyUso (invertUso uso) . upscale base
-upscale (ProductUnit _name ps) = (*) . product $ toScale <$> ps
+upscale (ScaledUnit _name uso base) =
+    let apUso (Add n)          = (+ negate n)  -- 0 K -> -273.15 C
+        apUso (Multiply n)     = (`safeDiv` n) -- 1000 g -> 1 kg
+        apUso (Exponentiate n) = (`absExp` n)  -- 1000000 m^2 -> 1 km^2
+    in apUso uso . upscale base
+upscale (ProductUnit _name ps) = (*) . (1 /) . product $ toScale <$> ps
 
 castUnit :: Unit -> Unit -> Either String (CReal -> CReal)
 castUnit a b =

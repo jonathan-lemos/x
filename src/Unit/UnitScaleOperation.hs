@@ -1,6 +1,7 @@
 module Unit.UnitScaleOperation where
 
 import Data.Number.CReal
+import Utils.CReal
 
 data UnitScaleOperation = Add CReal | Multiply CReal | Exponentiate CReal
     deriving (Eq, Ord)
@@ -15,13 +16,13 @@ instance Show UnitScaleOperation where
 
 invertUso :: UnitScaleOperation -> UnitScaleOperation
 invertUso (Add n) = Add (-n)
-invertUso (Multiply n) = Multiply (1 / n)
-invertUso (Exponentiate n) = Exponentiate (-n)
+invertUso (Multiply n) = Multiply (1 `safeDiv` n)
+invertUso (Exponentiate n) = Exponentiate (1 `safeDiv` n)
 
 applyUso :: UnitScaleOperation -> CReal -> CReal
 applyUso (Add n) = (+n)
 applyUso (Multiply n) = (*n)
-applyUso (Exponentiate n) = (**n)
+applyUso (Exponentiate n) = (`absExp` n)
 
 applyUsos :: Foldable f => f UnitScaleOperation -> CReal -> CReal
 applyUsos = foldr ((.) . applyUso) id
