@@ -35,7 +35,6 @@ library
       Parser.Parsers.AST.Assignment
       Parser.Parsers.AST.Statement
       Parser.Parsers.AST.Token.Identifier
-      Parser.Parsers.AST.UnitExpression
       Parser.Parsers.AST.Value.Scalar
       Parser.Parsers.AST.Value.UnitExpression
       Parser.Parsers.AST.Value.UnitFactor
@@ -132,6 +131,7 @@ test-suite x-test
       Parser.Parsers.AST.AssignmentSpec
       Parser.Parsers.AST.StatementSpec
       Parser.Parsers.AST.Token.IdentifierSpec
+      Parser.Parsers.AST.Value.ScalarSpec
       Parser.Parsers.AST.Value.UnitExpressionSpec
       Parser.Parsers.AST.Value.UnitFactorSpec
       Parser.ParserSpec
