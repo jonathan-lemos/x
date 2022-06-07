@@ -16,6 +16,8 @@ import Types.AST.Token.Scalar
 import Types.AST.UnitExpression
 import State.Value
 import Unit.Unit
+import Unit.Arithmetic (unitMult)
+import Data.Maybe
 
 isParentheses :: Factor -> Bool
 isParentheses (Parentheses _) = True
@@ -39,6 +41,8 @@ spec = parallel $ do
         [("@", "Expected a number, variable, or ( expression )", "@")]
 
     let state = mkState [("a", Numeric 4 Nothing), ("foo", Numeric 9 (Just $ BaseUnit "kg"))]
+    let gu s = fromJust $ getUnit s state
+
     let ae = (`toValue` state) <$> arithmeticExpression
 
     let evaluatesTo n (Right r) = n == r
@@ -67,9 +71,13 @@ spec = parallel $ do
         , ("2+3*4^(1/2)", evaluatesToScalar 8)
         , ("2 + 3 * 4 ^ ( 1 / 2 )", evaluatesToScalar 8)
         , ("a", evaluatesToScalar 4)
-        , ("foo", evaluatesToUnitQuantity 9 (BaseUnit "kg"))
+        , ("foo", evaluatesToUnitQuantity 9 (gu "kg"))
         , ("foobar", evalErrorsWith "Use of undeclared variable \"foobar\"")
-        , ("2 kg", evaluatesToUnitQuantity 2 (BaseUnit "kg"))
+        , ("2 kg", evaluatesToUnitQuantity 2 (gu "kg"))
+        , ("2 kg*m", evaluatesToUnitQuantity 2 (gu "kg" `unitMult` gu "m"))
+        , ("2kg*3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
+        , ("2kg * 3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
+        , ("2 kg * 3 m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
         ]
         [ ("2 + 2 || 5 * 7", evaluatesToScalar 4, " || 5 * 7")
         , ("(5*8),(7*4)", evaluatesToScalar 40, ",(7*4)")

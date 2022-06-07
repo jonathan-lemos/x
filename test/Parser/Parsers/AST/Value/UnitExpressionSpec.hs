@@ -18,6 +18,7 @@ spec = parallel $ do
         [ ("kg*m^2 foo", UnitMultExpression (JustUnit "kg") [UnitPower "m" 2], " foo")
         , ("kg*m^2 ", UnitMultExpression (JustUnit "kg") [UnitPower "m" 2], " ")
         , ("kg*m^2_", UnitMultExpression (JustUnit "kg") [UnitPower "m" 2], "_")
+        , ("kg*3m", UnitMultExpression (JustUnit "kg") [], "*3m")
         ]
         [ ("_foobar", "Expected an A-z character", "_foobar")
         , (" kg", "Expected an A-z character", " kg")

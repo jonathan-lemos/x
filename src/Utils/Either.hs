@@ -1,21 +1,18 @@
 module Utils.Either where
-import Data.Validation
+
+import Data.Either
 import Data.Foldable
 import Data.List
-import Data.Bifunctor
 
 eitherFromMaybe :: a -> Maybe b -> Either a b
 eitherFromMaybe left Nothing = Left left
 eitherFromMaybe _ (Just right) = Right right
 
-eitherToValidation :: Either a b -> Validation a b
-eitherToValidation (Left l) = Failure l
-eitherToValidation (Right r) = Success r
-
 concatErrors :: (Functor f, Foldable f) => f (Either String a) -> Either String [a]
 concatErrors foldable =
-    let validations = fmap (bimap (:[]) (:[]) . eitherToValidation) foldable
-        in toEither . first (intercalate "\n") $ mconcat (toList validations)
+    case partitionEithers (toList foldable) of
+        ([], rs) -> Right rs
+        (es, _) -> Left $ intercalate "\n" es
 
 combineErrors :: Either String a -> Either String b -> Either String (a, b)
 combineErrors a b =
