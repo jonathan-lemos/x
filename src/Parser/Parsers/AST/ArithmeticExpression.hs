@@ -1,9 +1,10 @@
 module Parser.Parsers.AST.ArithmeticExpression where
 
 import Control.Applicative
-import Control.Monad (void)
 import Data.Char (isAlpha, isDigit)
 import Parser.Parser
+import Parser.Parsers.AST.Value.Scalar
+import Parser.Parsers.AST.Value.UnitExpression
 import Parser.Parsers.Combinator.Branch.Conditional
 import Parser.Parsers.Combinator.Choice.LookaheadParse
 import Parser.Parsers.Combinator.Expression
@@ -14,10 +15,6 @@ import Parser.Parsers.Text.CharEq
 import Parser.Parsers.Text.Whitespace
 import Types.AST.ArithmeticExpression
 import Utils.Monad
-import Parser.Parsers.AST.Token.Identifier
-import Parser.Parsers.Text.Eof
-import Parser.Parsers.AST.Value.UnitExpression
-import Parser.Parsers.AST.Value.Scalar
 
 {- | Parses an arithmetic expression, which is some combination of addition, subtraction, multiplication, division, exponentiation, and parentheses.
 
@@ -41,7 +38,7 @@ arithmeticExpression =
                 mapOp '-' = Just Subtract
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression ArithmeticExpression operator multiplication
+     in leftAssociativeExpression ArithmeticExpression (whitespace >> operator) (whitespace >> multiplication)
 
 multiplication :: Parser Multiplication
 multiplication =
@@ -50,20 +47,20 @@ multiplication =
                 mapOp '/' = Just Divide
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression Multiplication operator power
+     in leftAssociativeExpression Multiplication (whitespace >> operator) (whitespace >> power)
 
 power :: Parser Power
 power =
     let mkPower left _op = Power left
-     in rightAssociativeExpression NoPower mkPower (charEq '^') unitQuantity
+     in rightAssociativeExpression NoPower mkPower (whitespace >> charEq '^') (whitespace >> unitQuantity)
 
 unitQuantity :: Parser UnitQuantity
-unitQuantity = do
-    fact <- factor
-    lookaheadParse
-        [ whitespace >> identifier >> (void (charAny "*/") <|> void whitespace <|> eof) >> pure (UnitQuantity fact . Just <$> (whitespace >> unitExpr))
-        , pure (pure $ UnitQuantity fact Nothing)
-        ]
+unitQuantity =
+    do
+        fact <- factor
+        UnitQuantity fact . Just <$> (whitespace >> unitExpr)
+            <|> pure (UnitQuantity fact Nothing)
+            <|> fail "Expected [number] [unit]?"
 
 factor :: Parser Factor
 factor =

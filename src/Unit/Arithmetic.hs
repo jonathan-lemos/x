@@ -63,4 +63,4 @@ unitMaybeExpScalar :: Maybe Unit -> CReal -> Maybe Unit
 unitMaybeExpScalar = maybeScalar unitExpScalar
 
 unitProduct :: (Foldable f) => f Unit -> Unit
-unitProduct = liftA2 ProductUnit (intercalate "*" . fmap show) id. toList
+unitProduct = liftA2 ProductUnit (intercalate "*" . fmap show) id . toList

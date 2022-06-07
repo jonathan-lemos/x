@@ -101,7 +101,6 @@ library
     , containers
     , numbers
     , terminal-size
-    , validation
   default-language: Haskell2010
 
 executable x-exe
@@ -117,7 +116,6 @@ executable x-exe
     , containers
     , numbers
     , terminal-size
-    , validation
     , x
   default-language: Haskell2010
 
@@ -138,9 +136,11 @@ test-suite x-test
       Shell.ShellSpec
       TestUtils.Arbitrary
       TestUtils.ArithmeticExpression
+      TestUtils.Either
       TestUtils.Parser
       TestUtils.Should
       TestUtils.State
+      Types.AST.UnitExpressionSpec
       Unit.Metric.MetricSpec
       Unit.UnitSpec
       Paths_x
@@ -156,6 +156,5 @@ test-suite x-test
     , numbers
     , split
     , terminal-size
-    , validation
     , x
   default-language: Haskell2010
