@@ -27,7 +27,7 @@ library
   exposed-modules:
       Evaluation.Arithmetic
       Evaluation.ToValue
-      IO.IOCmd
+      IO.PrintCmd
       Lib
       Parser.Error
       Parser.Parser
@@ -124,7 +124,7 @@ test-suite x-test
   main-is: Spec.hs
   other-modules:
       Evaluation.ArithmeticSpec
-      IO.IOCmdSpec
+      IO.PrintCmdSpec
       Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.AST.AssignmentSpec
       Parser.Parsers.AST.StatementSpec
