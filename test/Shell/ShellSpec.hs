@@ -3,7 +3,7 @@ module Shell.ShellSpec where
 import Control.Monad
 import Data.Bifunctor
 import Data.Either
-import IO.IOCmd
+import IO.PrintCmd
 import Parser.Error
 import Parser.Parsers.AST.ArithmeticExpressionSpec
 import Shell.Shell
@@ -15,7 +15,7 @@ import TestUtils.State
 import State.Value
 import Unit.Unit
 
-ioListToString :: [IOCmd] -> String
+ioListToString :: [PrintCmd] -> String
 ioListToString = intercalate "" . fmap show
 
 spec :: Spec

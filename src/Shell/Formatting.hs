@@ -2,14 +2,14 @@ module Shell.Formatting (makeErrorMessageCmds, makeParseErrorCmds, makeValueCmds
 
 -- holy shit this module is bad
 
-import IO.IOCmd
+import IO.PrintCmd
 import System.Console.ANSI
 import Utils.String
 import Utils.Trim
 import Parser.Error
 
--- | Makes IOCmds for the lines surrounding the erroring line
-_makeSurroundingErrorContextCmds :: Int -> [String] -> [IOCmd]
+-- | Makes PrintCmds for the lines surrounding the erroring line
+_makeSurroundingErrorContextCmds :: Int -> [String] -> [PrintCmd]
 _makeSurroundingErrorContextCmds width sLines =
   coloredLine [SetColor Foreground Dull White] . trimLine width <$> sLines
 
@@ -41,16 +41,16 @@ _makeErroringLines width errorIdx sLine =
       caratLine = replicate (errorIdx - deletedFromLeft) ' ' <> "^"
    in (formattedErrorLine, caratLine)
 
--- | Makes IOCmds for the erroring line itself
-_makeErroringLineCmds :: Int -> Int -> String -> [IOCmd]
+-- | Makes PrintCmds for the erroring line itself
+_makeErroringLineCmds :: Int -> Int -> String -> [PrintCmd]
 _makeErroringLineCmds width errorIdx sLine =
   let (formattedErrorLine, caratLine) = _makeErroringLines width errorIdx sLine
    in [ coloredLine [SetColor Foreground Vivid Red] formattedErrorLine
       , coloredLine [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity] caratLine
       ]
 
--- | Makes IOCmds for the footer that shows the error location
-_makeErrorLocationCmds :: Int -> String -> String -> [IOCmd]
+-- | Makes PrintCmds for the footer that shows the error location
+_makeErrorLocationCmds :: Int -> String -> String -> [PrintCmd]
 _makeErrorLocationCmds width original sCurrentInput =
   let lengthNoNewlines = length . filter (/= '\n')
       ciPos = lengthNoNewlines original - lengthNoNewlines sCurrentInput
@@ -66,18 +66,18 @@ _makeErrorLocationCmds width original sCurrentInput =
    in upperCommands <> errorLineCommands <> lowerCommands
 
 
--- | Makes IOCmds for a successfully calculated value
-makeValueCmds :: String -> [IOCmd]
+-- | Makes PrintCmds for a successfully calculated value
+makeValueCmds :: String -> [PrintCmd]
 makeValueCmds v = [coloredLine [SetColor Foreground Vivid Blue] v]
 
--- | Makes IOCmds for the `error: xxxxx` line
-makeErrorMessageCmds :: String -> [IOCmd]
+-- | Makes PrintCmds for the `error: xxxxx` line
+makeErrorMessageCmds :: String -> [PrintCmd]
 makeErrorMessageCmds errmsg =
   [ coloredText [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity] "error: "
   , coloredLine [SetColor Foreground Vivid Red] errmsg
   ]
 
 -- | Given the terminal width, input, and parse error, makes commands for printing it
-makeParseErrorCmds :: Int -> String -> ParseError -> [IOCmd]
+makeParseErrorCmds :: Int -> String -> ParseError -> [PrintCmd]
 makeParseErrorCmds width original (ParseError r ci) =
     makeErrorMessageCmds r <> [newline] <> _makeErrorLocationCmds width original ci

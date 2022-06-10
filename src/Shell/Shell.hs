@@ -4,7 +4,7 @@ module Shell.Shell where
 
 import Control.Applicative
 import Data.Bifunctor
-import IO.IOCmd
+import IO.PrintCmd
 import Parser.Error
 import Parser.Parser
 import Parser.Parsers.AST.Statement
@@ -37,8 +37,8 @@ executeStatement state (StmtAssignment (Assignment a expr)) =
 executeStatement state (StmtExpr expr) =
     liftA2 (,) (Right state) (show <$> toValue expr state)
 
--- | Given the terminal width and a line, produces the new state (or the same state on error), and IOCmds
-execute :: XState -> Int -> String -> (XState, [IOCmd])
+-- | Given the terminal width and a line, produces the new state (or the same state on error), and PrintCmds
+execute :: XState -> Int -> String -> (XState, [PrintCmd])
 execute state width line =
     either
         (state,)
