@@ -75,7 +75,7 @@ spec = parallel $ do
         , ("foobar", evalErrorsWith "Use of undeclared variable \"foobar\"")
         , ("2 kg", evaluatesToUnitQuantity 2 (gu "kg"))
         , ("2 kg*m", evaluatesToUnitQuantity 2 (gu "kg" `unitMult` gu "m"))
-        , ("2kg*3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
+        -- , ("2kg*3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
         , ("2kg * 3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
         , ("2 kg * 3 m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))
         ]
