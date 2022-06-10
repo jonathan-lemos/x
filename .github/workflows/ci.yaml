@@ -45,9 +45,6 @@ jobs:
     - name: Update Cabal mirrors
       run: cabal update
 
-    - name: Install Doctest
-      run: cabal install doctest || true
-
     - uses: haskell/actions/hlint-setup@v2
       name: Setup hLint
       with:
@@ -61,9 +58,6 @@ jobs:
       with:
         path: src/
         fail-on: warning
-
-    - name: Run doctest tests
-      run: cabal repl --with-ghc=doctest
 
     - name: Run hSpec tests
       run: stack test

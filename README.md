@@ -10,6 +10,9 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
 * ~~Units~~
     * Unit expressions
         * Parentheses in unit expressions?
+        * (m * m) -> m^2
+        * (m * ft) -> m^2
+    * Unit casting
     * Better anonymous unit strings
     * Unit simplification
     * Defining units
