@@ -1,17 +1,18 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 module Shell.Shell where
 
 import Control.Applicative
 import Data.Bifunctor
-import IO.PrintCmd
+import IO.Terminal
 import Parser.Error
 import Parser.Parser
 import Parser.Parsers.AST.Statement
 import Parser.Parsers.Text.Whitespace
 import Shell.Formatting
 import State.XState
-import System.Console.Terminal.Size
 import Types.AST.Assignment
 import Types.AST.Statement
 import Evaluation.ToValue
@@ -47,17 +48,23 @@ execute state width line =
             >>= bimap makeErrorMessageCmds (second makeValueCmds) . executeStatement state
         )
 
--- | Prints the shell prompt
-prompt :: IO ()
-prompt = putStr "x> "
+readCommand :: Terminal t => t (Maybe String)
+readCommand = do
+    printCmd $ text "x> "
+    inputLine
 
-rep :: XState -> IO XState
-rep state = do
-    prompt
-    line <- getLine
-    termWidth <- maybe (1024 :: Int) width <$> size
+executeCommand :: Terminal a => XState -> Maybe String -> Maybe TerminalDimensions -> a XState
+executeCommand state (Just cmd) dims = executeJust state cmd dims
+executeCommand state Nothing dims = executeNothing state dims
 
-    let (newState, ioCmds) = execute state termWidth line
+executeJust :: Terminal a => XState -> String -> Maybe TerminalDimensions -> a XState
+executeJust state cmd dimensions = do
+    let w = maybe 1000 width dimensions
+
+    let (newState, ioCmds) = execute state w cmd
     sequence_ $ printCmd <$> ioCmds
 
     return newState
+
+executeNothing :: Terminal a => XState -> Maybe TerminalDimensions -> a XState
+executeNothing state _dimensions = return state

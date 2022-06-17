@@ -1,6 +1,24 @@
-module IO.PrintCmd where
-
+module IO.Terminal where
 import System.Console.ANSI
+import qualified System.Console.Terminal.Size as ST
+
+data TerminalDimensions = TerminalDimensions {
+    height :: Int,
+    width :: Int
+}
+
+class Monad m => Terminal m where
+    inputLine :: m (Maybe String)
+    dimensions :: m (Maybe TerminalDimensions)
+    printCmd :: PrintCmd -> m ()
+
+instance Terminal IO where
+    inputLine = Just <$> getLine
+    dimensions = (fmap . fmap) (\w -> TerminalDimensions (ST.height w) (ST.width w)) ST.size
+    printCmd (PrintCmd sgr txt) = do
+        setSGR sgr
+        putStr txt
+        setSGR [Reset]
 
 {- | Represents a print to be done.
  Feed these to `printCmd` to actually execute them.
@@ -30,10 +48,3 @@ line = coloredLine []
 -- | A command that prints a newline
 newline :: PrintCmd
 newline = line ""
-
--- | Prints a command
-printCmd :: PrintCmd -> IO ()
-printCmd (PrintCmd sgr txt) = do
-    setSGR sgr
-    putStr txt
-    setSGR [Reset]

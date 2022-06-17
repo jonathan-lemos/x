@@ -1,10 +1,7 @@
 module Lib where
 import Shell.Shell
 import State.XState
+import Shell.Repl.Repl
 
-repl :: IO ()
-repl =
-    let loop state = do
-            state' <- rep state
-            loop state'
-    in loop newState
+mainLoop :: IO ()
+mainLoop = repl newState readCommand executeCommand

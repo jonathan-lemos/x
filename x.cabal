@@ -27,7 +27,7 @@ library
   exposed-modules:
       Evaluation.Arithmetic
       Evaluation.ToValue
-      IO.PrintCmd
+      IO.Terminal
       Lib
       Parser.Error
       Parser.Parser
@@ -63,6 +63,7 @@ library
       Parser.Parsers.Text.Literal
       Parser.Parsers.Text.Whitespace
       Shell.Formatting
+      Shell.Repl.Repl
       Shell.Shell
       State.Value
       State.XState
@@ -137,6 +138,7 @@ test-suite x-test
       TestUtils.Arbitrary
       TestUtils.ArithmeticExpression
       TestUtils.Either
+      TestUtils.MockIO
       TestUtils.Parser
       TestUtils.Should
       TestUtils.State
