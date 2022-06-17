@@ -19,6 +19,12 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
     * Viewing unit definitions
     * Unit aliases (e.g. "second" == "s")
     * Auto adjusting units?
+* Refactoring
+    * Test refactoring
+        * Removing doctests
+    * Left-to-right infix operators
+    * Either -> Try
+    * Comments
 * Common math functions/vars
     * sin/cos/tan
     * pi/e
@@ -35,5 +41,6 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
     * (up arrow to see previous commands)
     * tab completion
     * Flesh out error messages
+* Monte carlo simulation DSL
 * Matrices
 * Algebra/calculus solver?

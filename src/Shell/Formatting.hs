@@ -2,7 +2,7 @@ module Shell.Formatting (makeErrorMessageCmds, makeParseErrorCmds, makeValueCmds
 
 -- holy shit this module is bad
 
-import IO.PrintCmd
+import IO.Terminal
 import System.Console.ANSI
 import Utils.String
 import Utils.Trim

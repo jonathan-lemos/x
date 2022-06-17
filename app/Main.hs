@@ -6,5 +6,5 @@ import GHC.IO.Handle.FD
 
 main :: IO ()
 main = do
-    hSetBuffering stdout NoBuffering 
-    repl
+    hSetBuffering stdout NoBuffering
+    mainLoop
