@@ -3,7 +3,7 @@ module Shell.ShellSpec where
 import Control.Monad
 import Data.Bifunctor
 import Data.Either
-import IO.PrintCmd
+import IO.Terminal
 import Parser.Error
 import Parser.Parsers.AST.ArithmeticExpressionSpec
 import Shell.Shell

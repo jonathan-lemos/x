@@ -48,16 +48,16 @@ execute state width line =
             >>= bimap makeErrorMessageCmds (second makeValueCmds) . executeStatement state
         )
 
-readCommand :: Terminal t => t (Maybe String)
+readCommand :: Terminal (Maybe String)
 readCommand = do
     printCmd $ text "x> "
     inputLine
 
-executeCommand :: Terminal a => XState -> Maybe String -> Maybe TerminalDimensions -> a XState
+executeCommand :: XState -> Maybe String -> Maybe TerminalDimensions -> Terminal XState
 executeCommand state (Just cmd) dims = executeJust state cmd dims
 executeCommand state Nothing dims = executeNothing state dims
 
-executeJust :: Terminal a => XState -> String -> Maybe TerminalDimensions -> a XState
+executeJust :: XState -> String -> Maybe TerminalDimensions -> Terminal XState
 executeJust state cmd dimensions = do
     let w = maybe 1000 width dimensions
 
@@ -66,5 +66,5 @@ executeJust state cmd dimensions = do
 
     return newState
 
-executeNothing :: Terminal a => XState -> Maybe TerminalDimensions -> a XState
+executeNothing :: XState -> Maybe TerminalDimensions -> Terminal XState
 executeNothing state _dimensions = return state

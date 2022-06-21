@@ -1,7 +1,7 @@
-module IO.PrintCmdSpec where
+module IO.TerminalSpec where
 
 import Test.Hspec
-import IO.PrintCmd
+import IO.Terminal
 
 spec :: Spec
 spec = parallel $ do
