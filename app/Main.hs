@@ -8,4 +8,4 @@ import GHC.IO.Handle.FD
 main :: IO ()
 main = do
     hSetBuffering stdout NoBuffering
-    run $ mainLoop
+    run mainLoop

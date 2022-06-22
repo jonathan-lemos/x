@@ -128,6 +128,7 @@ test-suite x-test
   other-modules:
       Evaluation.ArithmeticSpec
       IO.TerminalSpec
+      LibSpec
       Parser.Parsers.AST.ArithmeticExpressionSpec
       Parser.Parsers.AST.AssignmentSpec
       Parser.Parsers.AST.StatementSpec
@@ -140,6 +141,7 @@ test-suite x-test
       TestUtils.Arbitrary
       TestUtils.ArithmeticExpression
       TestUtils.Either
+      TestUtils.List
       TestUtils.MockTerminal
       TestUtils.Parser
       TestUtils.Should
