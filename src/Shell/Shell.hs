@@ -16,6 +16,7 @@ import State.XState
 import Types.AST.Assignment
 import Types.AST.Statement
 import Evaluation.ToValue
+import Control.Monad.Free
 
 -- | Parses input, returning Either an error or the result of said input
 parseCommand :: String -> Either ParseError Statement
@@ -55,7 +56,7 @@ readCommand = do
 
 executeCommand :: XState -> Maybe String -> Maybe TerminalDimensions -> Terminal XState
 executeCommand state (Just cmd) dims = executeJust state cmd dims
-executeCommand state Nothing dims = executeNothing state dims
+executeCommand _state Nothing _dims = Free Exit
 
 executeJust :: XState -> String -> Maybe TerminalDimensions -> Terminal XState
 executeJust state cmd dimensions = do
@@ -65,6 +66,3 @@ executeJust state cmd dimensions = do
     sequence_ $ printCmd <$> ioCmds
 
     return newState
-
-executeNothing :: XState -> Maybe TerminalDimensions -> Terminal XState
-executeNothing state _dimensions = return state
