@@ -1,0 +1,165 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           X
+version:        0.0.4.0
+description:    Please see the README on GitHub at <https://github.com/jonathan-lemos/x#readme>
+homepage:       https://github.com/jonathan-lemos/x#readme
+bug-reports:    https://github.com/jonathan-lemos/x/issues
+author:         Jonathan Lemos
+maintainer:     jonathanlemos@protonmail.com
+copyright:      2022 Jonathan Lemos
+license:        Apache-2.0
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/jonathan-lemos/x
+
+library
+  exposed-modules:
+      Lib
+      X.Control.Parser
+      X.Control.Parser.AST.ArithmeticExpression
+      X.Control.Parser.AST.Assignment
+      X.Control.Parser.AST.Statement
+      X.Control.Parser.AST.Token.Identifier
+      X.Control.Parser.AST.Value.Scalar
+      X.Control.Parser.AST.Value.UnitExpression
+      X.Control.Parser.AST.Value.UnitFactor
+      X.Control.Parser.Combinator.Atomic
+      X.Control.Parser.Combinator.Branch.Check
+      X.Control.Parser.Combinator.Branch.Conditional
+      X.Control.Parser.Combinator.Choice.Lookahead
+      X.Control.Parser.Combinator.Choice.LookaheadN
+      X.Control.Parser.Combinator.Choice.LookaheadParse
+      X.Control.Parser.Combinator.Choice.MetaParse
+      X.Control.Parser.Combinator.Choice.Peek
+      X.Control.Parser.Combinator.Expression
+      X.Control.Parser.Combinator.ManyMaybe
+      X.Control.Parser.Combinator.MapResult
+      X.Control.Parser.Combinator.ParseWhileAggregate
+      X.Control.Parser.Combinator.Possibly
+      X.Control.Parser.Combinator.Precondition
+      X.Control.Parser.Numeric.CReal
+      X.Control.Parser.Numeric.Digit
+      X.Control.Parser.Numeric.Number
+      X.Control.Parser.Text.Char
+      X.Control.Parser.Text.CharAny
+      X.Control.Parser.Text.CharEq
+      X.Control.Parser.Text.Chars
+      X.Control.Parser.Text.Eof
+      X.Control.Parser.Text.Literal
+      X.Control.Parser.Text.Whitespace
+      X.Control.Terminal
+      X.Data.AST.ArithmeticExpression
+      X.Data.AST.Assignment
+      X.Data.AST.Statement
+      X.Data.AST.Token.Scalar
+      X.Data.AST.UnitExpression
+      X.Data.ParseError
+      X.Data.State.Value
+      X.Data.State.XState
+      X.Data.Try
+      X.Data.Unit.Arithmetic
+      X.Data.Unit.Context
+      X.Data.Unit.Exponential
+      X.Data.Unit.Metric.Metric
+      X.Data.Unit.Metric.Prefix
+      X.Data.Unit.Prelude
+      X.Data.Unit.Unit
+      X.Data.Unit.UnitLike
+      X.Data.Unit.UnitScaleOperation
+      X.Evaluation.Arithmetic
+      X.Evaluation.ToValue
+      X.Shell.Formatting
+      X.Shell.Main
+      X.Shell.Repl
+      X.Utils.CReal
+      X.Utils.Either
+      X.Utils.List
+      X.Utils.Map
+      X.Utils.Monad
+      X.Utils.String
+      X.Utils.Trim
+  other-modules:
+      Paths_X
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Werror -Wno-unused-do-bind -Wno-name-shadowing
+  build-depends:
+      ansi-terminal
+    , base >=4.7 && <5
+    , containers
+    , free
+    , numbers
+    , terminal-size
+  default-language: Haskell2010
+
+executable X-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_X
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Werror -Wno-unused-do-bind -Wno-name-shadowing
+  build-depends:
+      X
+    , ansi-terminal
+    , base >=4.7 && <5
+    , containers
+    , free
+    , numbers
+    , terminal-size
+  default-language: Haskell2010
+
+test-suite X-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      LibSpec
+      X.Control.Parser.AST.ArithmeticExpressionSpec
+      X.Control.Parser.AST.AssignmentSpec
+      X.Control.Parser.AST.StatementSpec
+      X.Control.Parser.AST.Token.IdentifierSpec
+      X.Control.Parser.AST.Value.ScalarSpec
+      X.Control.Parser.AST.Value.UnitExpressionSpec
+      X.Control.Parser.AST.Value.UnitFactorSpec
+      X.Control.ParserSpec
+      X.Control.TerminalSpec
+      X.Data.AST.UnitExpressionSpec
+      X.Data.Unit.Metric.MetricSpec
+      X.Data.Unit.UnitSpec
+      X.Evaluation.ArithmeticSpec
+      X.Shell.MainSpec
+      X.TestUtils.Arbitrary
+      X.TestUtils.ArithmeticExpression
+      X.TestUtils.Either
+      X.TestUtils.List
+      X.TestUtils.MockTerminal
+      X.TestUtils.Parser
+      X.TestUtils.Should
+      X.TestUtils.State
+      Paths_X
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      QuickCheck
+    , X
+    , ansi-terminal
+    , base >=4.7 && <5
+    , containers
+    , free
+    , hspec
+    , numbers
+    , split
+    , terminal-size
+  default-language: Haskell2010

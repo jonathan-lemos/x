@@ -1,8 +1,9 @@
 module Lib where
-import Shell.Shell
-import State.XState
-import Shell.Repl.Repl
-import IO.Terminal
+
+import X.Shell.Main
+import X.Data.State.XState
+import X.Shell.Repl
+import X.Control.Terminal
 
 mainLoop :: Terminal ()
 mainLoop = repl newState readCommand executeCommand
