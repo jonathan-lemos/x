@@ -1,11 +1,11 @@
 module LibSpec where
 
-import IO.Terminal
+import X.Control.Terminal
 import Lib
 import Test.Hspec
-import TestUtils.MockTerminal
-import TestUtils.Should (shouldBeSpec)
-import TestUtils.List
+import X.TestUtils.MockTerminal
+import X.TestUtils.Should (shouldBeSpec)
+import X.TestUtils.List
 
 spec :: Spec
 spec = do

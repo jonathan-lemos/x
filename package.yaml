@@ -1,4 +1,4 @@
-name:                x
+name:                X
 version:             0.0.4.0
 github:              "jonathan-lemos/x"
 license:             "Apache-2.0"
@@ -36,7 +36,7 @@ library:
     - -Wno-name-shadowing
 
 executables:
-  x-exe:
+  X-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -48,10 +48,10 @@ executables:
     - -Wno-unused-do-bind
     - -Wno-name-shadowing
     dependencies:
-    - x
+    - X
 
 tests:
-  x-test:
+  X-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -59,7 +59,7 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - x
+    - X
     - hspec
     - QuickCheck
     - split

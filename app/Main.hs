@@ -1,7 +1,7 @@
 module Main where
 
 import Lib
-import IO.Terminal
+import X.Control.Terminal
 import GHC.IO.Handle
 import GHC.IO.Handle.FD
 

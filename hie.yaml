@@ -1,10 +1,10 @@
 cradle:
   cabal:
     - path: "src"
-      component: "lib:x"
+      component: "lib:X"
 
     - path: "app/Main.hs"
-      component: "x:exe:x-exe"
+      component: "X:exe:X-exe"
 
     - path: "test"
-      component: "x:test:x-test"
+      component: "X:test:X-test"
