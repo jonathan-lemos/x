@@ -8,8 +8,9 @@ import X.Data.State.Value
 import X.Data.State.XState
 import X.Data.AST.Token.Scalar
 import X.Data.AST.UnitExpression
-import X.Utils.Either
 import X.Utils.String
+import X.Control.Try
+import Control.Applicative
 
 -- | Turns a list of expressions (a:c) joined by operators (b) into a string
 stringifyLeftAssociativeExpression :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
@@ -20,7 +21,7 @@ stringifyLeftAssociativeExpression x xs =
 -- | Evaluates expressions (a) joined by operators
 --
 -- An operator function takes a `Value`, `Expression`, and `State`, and returns either an error message or a new `Value`.
-evaluateLeftAssociativeExpression :: (ToValue a) => a -> XState -> [(Value -> a -> XState -> Either String Value, a)] -> Either String Value
+evaluateLeftAssociativeExpression :: (ToValue a) => a -> XState -> [(Value -> a -> XState -> Try Value, a)] -> Try Value
 evaluateLeftAssociativeExpression x state =
     foldl' (\acc (f, v) -> acc >>= \av -> f av v state) (toValue x state)
 
@@ -75,7 +76,7 @@ instance Show Power where
     show (NoPower f) = show f
 
 instance ToValue Power where
-    toValue (Power f p) state = combineErrors (toValue f state) (toValue p state) >>= ($ state) . uncurry expValues
+    toValue (Power f p) state = liftA2 (,) (toValue f state) (toValue p state) >>= ($ state) . uncurry expValues
     toValue (NoPower f) state = toValue f state
 
 -- | A quantity or parentheses expression that may or may not have a unit.
@@ -89,16 +90,16 @@ instance ToValue UnitQuantity where
     toValue (UnitQuantity quant unitExpr) state =
         let unit = sequenceA $ (`ueToUnit` state) <$> unitExpr
             quantValue = toValue quant state
-         in combineErrors quantValue unit
+         in liftA2 (,) quantValue unit
                 >>= \(q, u) ->
                     case (q, u) of
-                        (Numeric qReal (Just qUnit), Nothing) -> Right $ Numeric qReal (Just qUnit)
-                        (Numeric qReal Nothing, Just unit) -> Right $ Numeric qReal (Just unit)
-                        (Numeric qReal Nothing, Nothing) -> Right $ Numeric qReal Nothing
+                        (Numeric qReal (Just qUnit), Nothing) -> Success $ Numeric qReal (Just qUnit)
+                        (Numeric qReal Nothing, Just unit) -> Success $ Numeric qReal (Just unit)
+                        (Numeric qReal Nothing, Nothing) -> Success $ Numeric qReal Nothing
                         (Numeric qReal (Just qUnit), Just unit) ->
                             if qUnit == unit
-                                then Right $ Numeric qReal (Just qUnit)
-                                else Left $ "Cannot add unit " <> parenthesize (show unit) <> " to a variable that already has a unit " <> parenthesize (show qUnit)
+                                then Success $ Numeric qReal (Just qUnit)
+                                else fail $ "Cannot add unit " <> parenthesize (show unit) <> " to a variable that already has a unit " <> parenthesize (show qUnit)
 
 -- | A scalar or parentheses expression.
 data Factor = FactorScalar Scalar | Parentheses ArithmeticExpression

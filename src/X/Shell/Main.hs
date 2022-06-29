@@ -1,55 +1,62 @@
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE TupleSections #-}
 
 module X.Shell.Main where
 
 import Control.Applicative
-import Data.Bifunctor
-import X.Control.Terminal
-import X.Data.ParseError
+import Control.Monad.Free
+import Data.List
 import X.Control.Parser
 import X.Control.Parser.AST.Statement
-import X.Control.Parser.Text.Whitespace
-import X.Shell.Formatting
-import X.Data.State.XState
+import X.Control.Parser.Combinator.Complete
+import X.Control.Parser.Combinator.WithTrailingWhitespace
+import X.Control.Terminal
+import X.Control.Try
 import X.Data.AST.Assignment
 import X.Data.AST.Statement
+import X.Data.ParseError
+import X.Data.State.XState
 import X.Evaluation.ToValue
-import Control.Monad.Free
+import X.Shell.Formatting
+import X.Utils.Function
+import X.Utils.Functor
 
 -- | Parses input, returning Either an error or the result of said input
 parseCommand :: String -> Either ParseError Statement
 parseCommand input =
-    let parser = do
-            pt <- statement
-            whitespace
-            return pt
+    parse (statement >$ withTrailingWhitespace >$ complete) input >$> snd
 
-        parseTree = parse parser input
-     in parseTree >>= \(r, v) ->
-            if null r
-                then Right v
-                else Left $ ParseError "Unexpected end of parse" r
+-- | Evaluates a parsed Statement, returning either an error message or the new state and string output
+evaluateStatement :: XState -> Statement -> Try (XState, String)
+evaluateStatement state (StmtExpr expr) =
+    toValue expr state
+        >$> show
+        >$> (state,)
+evaluateStatement state (StmtAssignment (Assignment a expr)) =
+    let toPrintedStatement x = a <> " <- " <> show x
+        newState x = putVar a x state
+     in toValue expr state
+            >$> liftA2 (,) newState toPrintedStatement
 
--- | Executes a parsed Statement, returning either an error message or the new state and string output
-executeStatement :: XState -> Statement -> Either String (XState, String)
-executeStatement state (StmtAssignment (Assignment a expr)) =
-    liftA2 (,) (\x -> putVar a x state) (((a <> " <- ") <>) . show) <$> toValue expr state
-executeStatement state (StmtExpr expr) =
-    liftA2 (,) (Right state) (show <$> toValue expr state)
+-- | Executes a parsed Statement, returning the new state and what should be printed to the screen
+executeStatement :: XState -> Statement -> (XState, [PrintCmd])
+executeStatement state stmt =
+    case evaluateStatement state stmt of
+        Success (newState, line) -> (newState, makeValueCmds line)
+        Failures fs ->
+            fs >$> makeErrorMessageCmds
+                >$ intercalate [newline]
+                >$ (state,)
 
--- | Given the terminal width and a line, produces the new state (or the same state on error), and PrintCmds
+-- | Given the current state, terminal width, and input string, returns the new state and what should be printed to the screen
 execute :: XState -> Int -> String -> (XState, [PrintCmd])
 execute state width line =
-    either
-        (state,)
-        id
-        ( first (makeParseErrorCmds width line) (parseCommand line)
-            >>= bimap makeErrorMessageCmds (second makeValueCmds) . executeStatement state
-        )
+    case parseCommand line of
+        Left parseError -> (state, makeParseErrorCmds width line parseError)
+        Right stmt -> executeStatement state stmt
 
--- | Reads a line from the terminal, if one exists
+-- | Reads a line from the terminal.
 readCommand :: Terminal (Maybe String)
 readCommand = do
     printCmd $ text "x> "
@@ -66,6 +73,6 @@ executeJust state cmd dimensions = do
     let w = maybe 1000 width dimensions
 
     let (newState, ioCmds) = execute state w cmd
-    sequence_ $ printCmd <$> ioCmds
+    ioCmds >$> printCmd >$ sequence_
 
     return newState

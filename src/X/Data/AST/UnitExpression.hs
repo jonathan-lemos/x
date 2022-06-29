@@ -1,20 +1,21 @@
 module X.Data.AST.UnitExpression where
 
+import Control.Applicative
 import Data.List
 import Data.Number.CReal
-import X.Data.Unit.Unit
+import X.Control.Try
 import X.Data.State.XState
-import X.Utils.Either
-import Control.Applicative
 import X.Data.Unit.Arithmetic
+import X.Data.Unit.Unit
+import X.Utils.Try
 
 -- | A base unit term. Either `unit^power` or just `unit`.
 data UnitFactor = UnitPower String CReal | JustUnit String
-    deriving Eq
+    deriving (Eq)
 
-ufToUnit :: UnitFactor -> XState -> Either String Unit
+ufToUnit :: UnitFactor -> XState -> Try Unit
 ufToUnit (JustUnit s) state =
-    eitherFromMaybe ("No such unit " <> show s) $ getUnit s state
+    maybeToTry ("No such unit " <> show s) $ getUnit s state
 ufToUnit (UnitPower b e) state =
     (`unitExpScalar` e) <$> ufToUnit (JustUnit b) state
 
@@ -24,23 +25,23 @@ instance Show UnitFactor where
 
 -- | A chain of unit multiplications.
 data UnitMultExpression = UnitMultExpression UnitFactor [UnitFactor]
-    deriving Eq
+    deriving (Eq)
 
 instance Show UnitMultExpression where
-    show (UnitMultExpression x xs) = intercalate "*" $ show <$> x:xs
+    show (UnitMultExpression x xs) = intercalate "*" $ show <$> x : xs
 
-umToUnit :: UnitMultExpression -> XState -> Either String Unit
+umToUnit :: UnitMultExpression -> XState -> Try Unit
 umToUnit (UnitMultExpression x xs) state =
-    unitProduct <$> concatErrors ((`ufToUnit` state) <$> (x:xs))
+    fmap unitProduct . mconcat $ fmap (: []) . (`ufToUnit` state) <$> (x : xs)
 
 -- | A chain of unit multiplications or a fraction.
 data UnitExpression = UnitFraction UnitMultExpression UnitMultExpression | UnitProduct UnitMultExpression
-    deriving Eq
+    deriving (Eq)
 
 instance Show UnitExpression where
     show (UnitFraction ua ub) = show ua <> "/" <> show ub
     show (UnitProduct e) = show e
 
-ueToUnit :: UnitExpression -> XState -> Either String Unit
+ueToUnit :: UnitExpression -> XState -> Try Unit
 ueToUnit (UnitProduct e) state = umToUnit e state
 ueToUnit (UnitFraction ua ub) state = liftA2 unitDiv (umToUnit ua state) (umToUnit ub state)

@@ -18,6 +18,7 @@ import X.Data.State.Value
 import X.Data.Unit.Unit
 import X.Data.Unit.Arithmetic (unitMult)
 import Data.Maybe
+import X.Control.Try
 
 isParentheses :: Factor -> Bool
 isParentheses (Parentheses _) = True
@@ -45,14 +46,14 @@ spec = parallel $ do
 
     let ae = (`toValue` state) <$> arithmeticExpression
 
-    let evaluatesTo n (Right r) = n == r
+    let evaluatesTo n (Success r) = n == r
         evaluatesTo _ _ = False
 
     let evaluatesToScalar n = evaluatesTo (Numeric n Nothing)
 
     let evaluatesToUnitQuantity n u = evaluatesTo (Numeric n (Just u))
 
-    let evalErrorsWith msg (Left m) = msg == m
+    let evalErrorsWith msg (Failures m) = msg == m
         evalErrorsWith _ _ = False
 
     passPartialFailFnSpec
@@ -72,7 +73,7 @@ spec = parallel $ do
         , ("2 + 3 * 4 ^ ( 1 / 2 )", evaluatesToScalar 8)
         , ("a", evaluatesToScalar 4)
         , ("foo", evaluatesToUnitQuantity 9 (gu "kg"))
-        , ("foobar", evalErrorsWith "Use of undeclared variable \"foobar\"")
+        , ("foobar", evalErrorsWith ["Use of undeclared variable \"foobar\""])
         , ("2 kg", evaluatesToUnitQuantity 2 (gu "kg"))
         , ("2 kg*m", evaluatesToUnitQuantity 2 (gu "kg" `unitMult` gu "m"))
         -- , ("2kg*3m", evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m"))

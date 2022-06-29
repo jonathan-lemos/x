@@ -11,6 +11,7 @@ import X.TestUtils.Parser
 import X.TestUtils.State
 import X.Data.AST.Assignment
 import X.Data.Unit.Unit
+import X.Control.Try
 
 spec :: Spec
 spec = parallel $ do
@@ -18,7 +19,7 @@ spec = parallel $ do
 
     let state = mkState [("a", Numeric 4 Nothing), ("b", Numeric 9 (Just $ BaseUnit "kg"))]
 
-    let hasValue v (Assignment _ parsed) = toValue parsed state == Right v
+    let hasValue v (Assignment _ parsed) = toValue parsed state == Success v
 
     let hasScalar = hasValue . (`Numeric` Nothing)
 
