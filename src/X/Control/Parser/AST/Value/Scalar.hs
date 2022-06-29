@@ -11,6 +11,7 @@ import X.Control.Parser.AST.Token.Identifier
 import X.Control.Parser.Combinator.Possibly
 import X.Data.AST.Token.Scalar
 
+-- | Matches a scalar, which is an identifier or number (without unit)
 scalar :: Parser Scalar
 scalar = lookaheadParse
             [ possibly (charAny "+-") >> conditional isDigit char >> pure (Number <$> creal)

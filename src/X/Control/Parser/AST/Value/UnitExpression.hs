@@ -7,11 +7,13 @@ import X.Control.Parser.Text.CharEq
 import X.Control.Parser.AST.Value.UnitFactor
 import Control.Applicative
 
+-- | Matches a chain of unit * unit * ...
 unitMultExpr :: Parser UnitMultExpression
 unitMultExpr =
     let ume x xs = UnitMultExpression x (fmap snd xs)
         in leftAssociativeExpression ume (charEq '*') unitFactor
 
+-- | Matches unitMult / unitMult or unitMult
 unitExpr :: Parser UnitExpression
 unitExpr = do
     ume1 <- unitMultExpr

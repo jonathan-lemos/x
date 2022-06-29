@@ -4,7 +4,8 @@ import Data.Number.CReal
 import X.Evaluation.ToValue
 import X.Data.State.Value
 import X.Data.State.XState
-import X.Utils.Either
+import X.Control.Try
+import X.Utils.Try
 
 -- | A unitless quantity, a number or a variable
 data Scalar = Number CReal | Variable String
@@ -15,5 +16,5 @@ instance Show Scalar where
     show (Variable x) = show x
 
 instance ToValue Scalar where
-    toValue (Number n) _state = Right (Numeric n Nothing)
-    toValue (Variable s) state = eitherFromMaybe ("Use of undeclared variable " <> show s) (getVar s state)
+    toValue (Number n) _state = Success (Numeric n Nothing)
+    toValue (Variable s) state = maybeToTry ("Use of undeclared variable " <> show s) (getVar s state)

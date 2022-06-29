@@ -6,7 +6,7 @@ import X.Control.Parser
 import X.Control.Parser.Text.Char
 import X.Control.Parser.Combinator.Branch.Conditional
 
--- | Matches an identifier, which uniquely identifies
+-- | Matches an identifier, which is a string of A-z characters
 identifier :: Parser String
 identifier =
     some (conditional isAlpha char) <|> fail "Expected an A-z character"

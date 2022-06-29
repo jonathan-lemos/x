@@ -42,12 +42,14 @@ library
       X.Control.Parser.Combinator.Choice.LookaheadParse
       X.Control.Parser.Combinator.Choice.MetaParse
       X.Control.Parser.Combinator.Choice.Peek
+      X.Control.Parser.Combinator.Complete
       X.Control.Parser.Combinator.Expression
       X.Control.Parser.Combinator.ManyMaybe
       X.Control.Parser.Combinator.MapResult
       X.Control.Parser.Combinator.ParseWhileAggregate
       X.Control.Parser.Combinator.Possibly
       X.Control.Parser.Combinator.Precondition
+      X.Control.Parser.Combinator.WithTrailingWhitespace
       X.Control.Parser.Numeric.CReal
       X.Control.Parser.Numeric.Digit
       X.Control.Parser.Numeric.Number
@@ -59,6 +61,7 @@ library
       X.Control.Parser.Text.Literal
       X.Control.Parser.Text.Whitespace
       X.Control.Terminal
+      X.Control.Try
       X.Data.AST.ArithmeticExpression
       X.Data.AST.Assignment
       X.Data.AST.Statement
@@ -67,7 +70,6 @@ library
       X.Data.ParseError
       X.Data.State.Value
       X.Data.State.XState
-      X.Data.Try
       X.Data.Unit.Arithmetic
       X.Data.Unit.Context
       X.Data.Unit.Exponential
@@ -83,12 +85,14 @@ library
       X.Shell.Main
       X.Shell.Repl
       X.Utils.CReal
-      X.Utils.Either
+      X.Utils.Function
+      X.Utils.Functor
       X.Utils.List
       X.Utils.Map
       X.Utils.Monad
       X.Utils.String
       X.Utils.Trim
+      X.Utils.Try
   other-modules:
       Paths_X
   hs-source-dirs:
@@ -132,6 +136,7 @@ test-suite X-test
       X.Control.Parser.AST.Value.ScalarSpec
       X.Control.Parser.AST.Value.UnitExpressionSpec
       X.Control.Parser.AST.Value.UnitFactorSpec
+      X.Control.Parser.Combinator.Branch.Check
       X.Control.ParserSpec
       X.Control.TerminalSpec
       X.Data.AST.UnitExpressionSpec

@@ -7,6 +7,7 @@ import X.Control.Parser.Text.CharEq
 import X.Data.AST.UnitExpression
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 
+-- | Matches a single term in a unit expression, which can be id or id^power
 unitFactor :: Parser UnitFactor
 unitFactor = do
     u <- identifier
