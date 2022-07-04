@@ -128,6 +128,8 @@ test-suite X-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Harness.ParserCase
+      Harness.TestCase
       LibSpec
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec
@@ -136,7 +138,7 @@ test-suite X-test
       X.Control.Parser.AST.Value.ScalarSpec
       X.Control.Parser.AST.Value.UnitExpressionSpec
       X.Control.Parser.AST.Value.UnitFactorSpec
-      X.Control.Parser.Combinator.Branch.Check
+      X.Control.Parser.Combinator.Branch.CheckSpec
       X.Control.ParserSpec
       X.Control.TerminalSpec
       X.Data.AST.UnitExpressionSpec

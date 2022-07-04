@@ -1,9 +1,13 @@
 module X.TestUtils.Parser where
 
 import Control.Monad
-import X.Data.ParseError
-import X.Control.Parser
+import Data.Bifunctor
 import Test.Hspec
+import X.Control.Parser
+import X.Data.ParseError
+import X.TestUtils.Either
+import X.Utils.Function
+import X.Utils.Functor
 
 shouldCompletelyParse :: (Eq a, Show a) => (Parser a, String) -> a -> Expectation
 shouldCompletelyParse (p, s) r = parse p s `shouldBe` Right ("", r)
@@ -14,36 +18,42 @@ shouldPartiallyParse (p, s) (r, v) = parse p s `shouldBe` Right (r, v)
 shouldFailWithMsgAndCi :: (Eq a, Show a) => (Parser a, String) -> (String, String) -> Expectation
 shouldFailWithMsgAndCi (p, s) (msg, ci) = parse p s `shouldBe` Left (ParseError{reason = msg, currentInput = ci})
 
-passPartialFailSpec :: (Eq a, Show a) => String -> Parser a -> [(String, a)] -> [(String, a, String)] -> [(String, String, String)] -> SpecWith ()
-passPartialFailSpec name parser pass partial fail =
-    describe (name <> " pass/partial/fail") $ do
-        forM_ pass $ \(input, expected) ->
-            it ("resolves " <> show input <> " as " <> show expected) $ do
-                (parser, input) `shouldCompletelyParse` expected
+parserSpec :: (Eq a, Show a) => Parser a -> String -> [(String, Either ParseError (String, a) -> Bool, String)] -> SpecWith ()
+parserSpec parser title testCases =
+    describe title $ do
+        forM_ testCases $ \(input, predicate, tcTitle) ->
+            it tcTitle $ do
+                parse parser input `shouldSatisfy` predicate
 
-        forM_ partial $ \(input, expected, remainder) ->
-            it ("resolves " <> show input <> " as " <> show expected <> " with remainder " <> show remainder) $ do
-                (parser, input) `shouldPartiallyParse` (remainder, expected)
+successfulParseFnSpec :: (Eq a, Show a) => Parser a -> String -> [(String, a -> Bool, String -> Bool, String)] -> SpecWith ()
+successfulParseFnSpec title parser cases =
+    parserSpec title parser $
+        cases >$> \(input, predicate, remainderShould, tcName) ->
+            (input, rightIs $ \(remainder, value) -> predicate value && remainderShould remainder, tcName)
 
-        forM_ fail $ \(input, reason, currentInput) ->
-            it ("fails to parse " <> show input <> " for reason " <> show reason) $ do
-                (parser, input) `shouldFailWithMsgAndCi` (reason, currentInput)
+totalParseFnSpec :: (Eq a, Show a) => Parser a -> String -> [(String, a -> Bool)] -> SpecWith ()
+totalParseFnSpec title parser cases =
+    successfulParseFnSpec title parser $
+        cases >$> \(input, predicate) -> (input, predicate, (== ""), "resolves " <> input)
 
-passPartialFailFnSpec :: (Eq a, Show a) => String -> Parser a -> [(String, a -> Bool)] -> [(String, a -> Bool, String)] -> [(String, String, String)] -> SpecWith ()
-passPartialFailFnSpec name parser pass partial fail =
-    describe (name <> " pass/partial/fail") $ do
-        forM_ pass $ \(input, expected) ->
-            let expected' (Right ("", v)) = expected v
-                expected' _ = False
-             in it ("resolves " <> show input) $ do
-                    parse parser input `shouldSatisfy` expected'
+partialParseFnSpec :: (Eq a, Show a) => Parser a -> String -> [(String, a -> Bool, String)] -> SpecWith ()
+partialParseFnSpec parser title cases =
+    successfulParseFnSpec parser title $
+        cases >$> \(input, predicate, remainder) -> (input, predicate, (== remainder), "resolves " <> input <> " with remainder " <> remainder)
 
-        forM_ partial $ \(input, expected, remainder) ->
-            let expected' (Right (s, v)) = expected v && s == remainder
-                expected' _ = False
-             in it ("resolves " <> show input <> " with remainder " <> show remainder) $ do
-                    parse parser input `shouldSatisfy` expected'
+failParseFnSpec :: (Eq a, Show a) => Parser a -> String -> [(String, ParseError -> Bool)] -> SpecWith ()
+failParseFnSpec title parser cases =
+    parserSpec title parser $
+        cases >$> \(input, predicate) -> (input, leftIs predicate, "fails on " <> input)
 
-        forM_ fail $ \(input, reason, currentInput) ->
-            it ("fails to parse " <> show input <> " for reason " <> show reason) $ do
-                (parser, input) `shouldFailWithMsgAndCi` (reason, currentInput)
+totalParseSpec :: (Eq a, Show a) => Parser a -> String -> [(String, a)] -> SpecWith ()
+totalParseSpec parser title cases =
+    totalParseFnSpec parser title $ cases >$> second (==)
+
+partialParseSpec :: (Eq a, Show a) => Parser a -> String -> [(String, a, String)] -> SpecWith ()
+partialParseSpec parser title cases =
+    partialParseFnSpec parser title $ cases >$> \(input, value, remainder) -> (input, (==) value, remainder)
+
+failParseSpec :: (Eq a, Show a) => Parser a -> String -> [(String, ParseError)] -> SpecWith ()
+failParseSpec parser title cases =
+    partialParseFnSpec parser title $ cases >$> \(input, value, remainder) -> (input, (==) value, remainder)

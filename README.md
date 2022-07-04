@@ -19,6 +19,7 @@ A CLI calculator. It will be great some day, but right now it's just a basic ari
     * Viewing unit definitions
     * Unit aliases (e.g. "second" == "s")
     * Auto adjusting units?
+* Atoms
 * Refactoring
     * Test refactoring
         * Removing doctests
