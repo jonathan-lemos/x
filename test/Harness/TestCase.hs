@@ -5,7 +5,7 @@ module Harness.TestCase where
 import Test.Hspec
 import X.Utils.Function
 import X.Utils.Functor
-import Harness.WithMessage
+import Harness.With
 import Harness.TestDSLMonad
 import Data.Data (tyConModule)
 
@@ -13,8 +13,8 @@ newtype TestCase = TestCase { getTc :: (String, Expectation) }
 
 type TestCaseMonad a = TestDSLMonad TestCase a
 
-instance WithMessage TestCase where
-    TestCase (_, exp) `withMessage` msg = TestCase (msg, exp)
+instance WithTitle TestCase where
+    TestCase (_, exp) `withTitle` msg = TestCase (msg, exp)
 
 desc :: String -> TestCaseMonad () -> SpecWith ()
 desc title tcm = do

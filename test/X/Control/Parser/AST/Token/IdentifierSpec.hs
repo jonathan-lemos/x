@@ -10,11 +10,11 @@ import X.Data.ParseError
 spec :: Spec
 spec = parallel $ do
     parserDesc identifier "identifier" $ do
-        "abc" `shouldTotallyParseTo` "abc"
-        "d" `shouldTotallyParseTo` "d"
+        "abc" `shouldParseTo` "abc"
+        "d" `shouldParseTo` "d"
 
-        "abc def" `shouldPartiallyParseTo` "abc" `withRemainder` " def"
+        "abc def" `shouldParseTo` "abc" `withRemainder` " def"
 
-        "_" `shouldFailWith` ParseError "Expected an A-z character" "_"
-        "_abc" `shouldFailWith` ParseError "Expected an A-z character" "_abc"
-        " abc" `shouldFailWith` ParseError "Expected an A-z character" " abc"
+        "_" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_"
+        "_abc" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_abc"
+        " abc" `shouldFailWithReason` "Expected an A-z character" `andRemainder` " abc"

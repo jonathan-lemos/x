@@ -1,6 +1,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module X.Control.Try where
 
+-- TODO: failures -> failure. join strings with "\n" instead of collecting
+
 -- Represents a value that may be present, or one or more error messages.
 data Try a = Success a | Failures [String]
     deriving (Show, Eq, Ord)
