@@ -2,23 +2,22 @@ module X.Control.Parser.AST.Value.ScalarSpec where
 
 import X.Control.Parser.AST.Value.Scalar
 import Test.Hspec
-import X.TestUtils.Parser
 import X.Data.AST.Token.Scalar
+import Harness.ParserCase
+import X.Data.ParseError
 
 spec :: Spec
 spec = do
-    passPartialFailSpec
-        "scalar"
-        scalar
-        [ ("2e4", Number 2e4)
-        , ("-2.4", Number (-2.4))
-        , ("2", Number 2)
-        , ("foo", Variable "foo")
-        , ("g", Variable "g")
-        ]
-        [ ("2e4 + 5", Number 2e4, " + 5")
-        , ("foo * 7", Variable "foo", " * 7")]
-        [ ("_", "Expected a number or a variable name", "_")
-        , ("", "Expected a number or a variable name", "")
-        , (" foo", "Expected a number or a variable name", " foo")
-        ]
+   parserDesc scalar "scalar" $ do
+        "2e4" `shouldTotallyParseTo` Number 2e4
+        "-2.4" `shouldTotallyParseTo` Number (-2.4)
+        "2" `shouldTotallyParseTo` Number 2
+        "foo" `shouldTotallyParseTo` Variable "foo"
+        "g" `shouldTotallyParseTo` Variable "g"
+
+        "2e4 + 5" `shouldPartiallyParseTo` Number 2e4 `withRemainder` " + 5"
+        "foo * 7" `shouldPartiallyParseTo` Variable "foo" `withRemainder` " * 7"
+
+        "_" `shouldFailWith` ParseError "Expected a number or a variable name" "_"
+        "" `shouldFailWith` ParseError "Expected a number or a variable name" ""
+        " foo" `shouldFailWith` ParseError "Expected a number or a variable name" " foo"
