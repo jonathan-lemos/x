@@ -16,16 +16,30 @@ import X.Data.AST.Token.Scalar
 import X.Data.AST.UnitExpression
 import X.Data.State.Value
 import X.Data.Unit.Unit
-import X.Data.Unit.Arithmetic (unitMult)
+import X.Data.Unit.Arithmetic
 import Data.Maybe
 import X.Control.Try
+import Harness.TestCase
+import Harness.ParserCase
 
-isParentheses :: Factor -> Bool
-isParentheses (Parentheses _) = True
-isParentheses _ = False
+
+beParentheses :: Factor -> Bool
+beParentheses (Parentheses _) = True
+beParentheses _ = False
 
 spec :: Spec
 spec = parallel $ do
+
+    parserDesc factor "factor" $ do
+        "2" `shouldTotallyParseTo` FactorScalar (Number 2)
+        "(2)" `shouldTotallyParseAndSatisfy` beParentheses
+        "( 2 )" `shouldTotallyParseAndSatisfy` beParentheses
+        "(2 + 2)" `shouldTotallyParseAndSatisfy` beParentheses
+        "a" `shouldTotallyParseAndSatisfy` FactorScalar (Variable "a")
+        "foobar" `shouldBe` FactorScalar (Variable "foobar")
+
+        "2 || 5" `shouldBe`
+
     passPartialFailFnSpec
         "factor"
         factor

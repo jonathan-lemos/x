@@ -130,6 +130,8 @@ test-suite X-test
   other-modules:
       Harness.ParserCase
       Harness.TestCase
+      Harness.TestDSLMonad
+      Harness.WithMessage
       LibSpec
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec
