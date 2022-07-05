@@ -9,14 +9,14 @@ import X.Data.ParseError
 spec :: Spec
 spec = do
    parserDesc scalar "scalar" $ do
-        "2e4" `shouldTotallyParseTo` Number 2e4
-        "-2.4" `shouldTotallyParseTo` Number (-2.4)
-        "2" `shouldTotallyParseTo` Number 2
-        "foo" `shouldTotallyParseTo` Variable "foo"
-        "g" `shouldTotallyParseTo` Variable "g"
+        "2e4" `shouldParseTo` Number 2e4
+        "-2.4" `shouldParseTo` Number (-2.4)
+        "2" `shouldParseTo` Number 2
+        "foo" `shouldParseTo` Variable "foo"
+        "g" `shouldParseTo` Variable "g"
 
-        "2e4 + 5" `shouldPartiallyParseTo` Number 2e4 `withRemainder` " + 5"
-        "foo * 7" `shouldPartiallyParseTo` Variable "foo" `withRemainder` " * 7"
+        "2e4 + 5" `shouldParseTo` Number 2e4 `withRemainder` " + 5"
+        "foo * 7" `shouldParseTo` Variable "foo" `withRemainder` " * 7"
 
         "_" `shouldFailWith` ParseError "Expected a number or a variable name" "_"
         "" `shouldFailWith` ParseError "Expected a number or a variable name" ""

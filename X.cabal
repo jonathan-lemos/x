@@ -131,7 +131,7 @@ test-suite X-test
       Harness.ParserCase
       Harness.TestCase
       Harness.TestDSLMonad
-      Harness.WithMessage
+      Harness.With
       LibSpec
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec

@@ -3,48 +3,68 @@ module Harness.ParserCase where
 import Data.Bifunctor
 import Harness.TestCase
 import Harness.TestDSLMonad
-import Harness.WithMessage
+import Harness.With
 import Test.Hspec
 import X.Control.Parser
 import X.Data.ParseError
 import X.Utils.Function
 import X.Utils.Functor
 
-newtype ParserCase a = ParserCase {parserCaseFn :: Parser a -> (String, Expectation)}
+data ParserExpectation a = ParsedShouldEqual a | ParsedShouldSatisfy (a -> Bool) | ParseShouldFail String
 
-liftPc :: (Parser a -> (String, Expectation)) -> ParserCaseMonad a ()
-liftPc = ParserCase |> liftTdm
+data ParserCase a = ParserCase
+    { pcInput :: String
+    , pcExpectation :: ParserExpectation a
+    , pcRemainder :: String
+    , pcTitle :: String
+    }
+
+pcToTitleAndExpectation :: (Show a, Eq a) => ParserCase a -> Parser a -> (String, Expectation)
+pcToTitleAndExpectation (ParserCase input expectation remainder title) parser =
+    let parserResult = parse parser input
+        exp =
+            case expectation of
+                ParsedShouldEqual expected -> parserResult `shouldBe` Right (remainder, expected)
+                ParsedShouldSatisfy predicate ->
+                    let newPredicate (Right (r, v)) = r == remainder && predicate v
+                        newPredicate _ = False
+                     in parserResult `shouldSatisfy` newPredicate
+                ParseShouldFail reason -> parserResult `shouldBe` Left (ParseError reason remainder)
+     in (title, exp)
 
 type ParserCaseMonad a b = TestDSLMonad (ParserCase a) b
 
-instance WithMessage (ParserCase a) where
-    (ParserCase f) `withMessage` msg = ParserCase $ f |> first (const msg)
+instance WithTitle (ParserCase a) where
+    pc `withTitle` title = pc{pcTitle = title}
 
-parserDesc :: Parser a -> String -> ParserCaseMonad a b -> SpecWith ()
+instance WithRemainder (ParserCase a) where
+    pc `withRemainder` remainder = pc{pcRemainder = remainder}
+
+parserDesc :: (Show a, Eq a) => Parser a -> String -> ParserCaseMonad a b -> SpecWith ()
 parserDesc parser title ps =
     describe title $ do
         tdmItems ps
-            >$> parserCaseFn
+            >$> pcToTitleAndExpectation
             >$> ($ parser)
             >$> uncurry it >$ sequence_
 
-shouldTotallyParseAndSatisfy :: (Show a, Eq a) => String -> (a -> Bool) -> ParserCaseMonad a ()
-shouldTotallyParseAndSatisfy input predicate =
-    let parserPredicate (Right ("", v)) = predicate v
-        parserPredicate _ = False
-     in liftPc $ \parser -> (input <> " should parse and satisfy predicate", parse parser input `shouldSatisfy` parserPredicate)
+{- | The parser given in `parserDesc` should parse the **entire** input into the given value.
+Use `withRemainder` if the parser should only parse some of the input.
+-}
+shouldParseTo :: (Show a, Eq a) => String -> a -> ParserCaseMonad a ()
+shouldParseTo input expected =
+    liftTdm $ ParserCase input (ParsedShouldEqual expected) (input <> " should parse to " <> show expected) ""
 
-shouldTotallyParseTo :: (Show a, Eq a) => String -> a -> ParserCaseMonad a ()
-shouldTotallyParseTo input expected =
-    liftPc $ \parser -> (input <> " should parse to " <> show expected, parse parser input `shouldBe` Right ("", expected))
+{- | The parser given in `parserDesc` should parse the **entire** input into a value that satisfies the given predicate.
+Use `withRemainder` if the parser should only parse some of the input.
+-}
+shouldParseAndSatisfy :: String -> (a -> Bool) -> ParserCaseMonad a ()
+shouldParseAndSatisfy input predicate =
+    liftTdm $ ParserCase input (ParsedShouldSatisfy predicate) (input <> " should parse and satisfy predicate") ""
 
-shouldPartiallyParseTo :: (Show a, Eq a) => String -> a -> String -> ParserCaseMonad a ()
-shouldPartiallyParseTo input expected remainder =
-    liftPc $ \parser -> (input <> " should parse to " <> show expected, parse parser input `shouldBe` Right ("", expected))
+shouldFailWithReason :: (Show a, Eq a) => String -> String -> String -> ParserCaseMonad a ()
+shouldFailWithReason input reason remainder =
+    liftTdm $ ParserCase input (ParseShouldFail reason) (input <> " should fail to parse with reason " <> show reason) ""
 
-withRemainder :: (String -> a) -> String -> a
-withRemainder = ($)
-
-shouldFailWith :: (Show a, Eq a) => String -> ParseError -> ParserCaseMonad a ()
-shouldFailWith input parseError =
-    liftPc $ \parser -> (input <> " should fail to parse with reason " <> show (reason parseError) <> " and input " <> show (currentInput parseError), parse parser input `shouldEq` Left parseError)
+andRemainder :: (String -> ParserCaseMonad a ()) -> String -> ParserCaseMonad a ()
+andRemainder = ($)
