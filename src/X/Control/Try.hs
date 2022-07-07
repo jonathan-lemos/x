@@ -3,24 +3,29 @@ module X.Control.Try where
 
 -- TODO: failures -> failure. join strings with "\n" instead of collecting
 
+combineErrorMessages :: String -> String -> String
+combineErrorMessages "" s = s
+combineErrorMessages s "" = s
+combineErrorMessages a b = a <> "\n" <> b
+
 -- Represents a value that may be present, or one or more error messages.
-data Try a = Success a | Failures [String]
+data Try a = Success a | Failure String
     deriving (Show, Eq, Ord)
 
-failmap :: ([String] -> [String]) -> Try a -> Try a
+failmap :: (String -> String) -> Try a -> Try a
 failmap _ (Success a) = Success a
-failmap f (Failures fs) = Failures $ f fs
+failmap f (Failure reason) = Failure $ f reason
 
 instance Functor Try where
     fmap f (Success a) = Success $ f a
-    fmap _ (Failures fs) = Failures fs
+    fmap _ (Failure f) = Failure f
 
 instance Applicative Try where
     pure = Success
     (Success f) <*> (Success a) = Success $ f a
-    (Success _) <*> (Failures fs) = Failures fs
-    (Failures fs) <*> (Success _) = Failures fs
-    (Failures fs1) <*> (Failures fs2) = Failures $ fs1 <> fs2
+    (Success _) <*> (Failure reason) = Failure reason
+    (Failure reason) <*> (Success _) = Failure reason
+    (Failure reason1) <*> (Failure reason2) = Failure $ combineErrorMessages reason1 reason2
 
 instance Monad Try where
     -- technically this is not a valid monad instance because ap != <*>
@@ -28,16 +33,16 @@ instance Monad Try where
     --
     -- but i want it to collect the errors w/ liftA2 but not with do-syntax, so this works out fine
     (Success a) >>= f = f a
-    (Failures fs) >>= _ = Failures fs
+    (Failure reason) >>= _ = Failure reason
 
 instance MonadFail Try where
-    fail = Failures . (:[])
+    fail = Failure
 
 instance Semigroup (Try a) where
     (Success a) <> (Success _) = Success a
-    (Success a) <> (Failures _) = Success a
-    (Failures _) <> (Success b) = Success b
-    (Failures a) <> (Failures b) = Failures $ a <> b
+    (Success a) <> (Failure _) = Success a
+    (Failure _) <> (Success b) = Success b
+    (Failure a) <> (Failure b) = Failure $ combineErrorMessages a b
 
 instance Monoid a => Monoid (Try a) where
     mempty = Success mempty

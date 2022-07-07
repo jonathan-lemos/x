@@ -13,40 +13,40 @@ import X.Data.Unit.Prelude
 import X.Data.Unit.Unit
 import X.Data.Unit.UnitLike
 import X.Data.Unit.UnitScaleOperation
+import X.Utils.Function
+import X.TestUtils.Unwrap
+import Harness.With
+import Harness.TestCase
+import Harness.QcCase
+import X.TestUtils.Unit
+import X.TestUtils.Try
+import Data.Number.CReal
 
 spec :: Spec
 spec = parallel $ do
-    let units = preludeUnits
-    let lookup s = fromJust $ find ((== s) . show) units
+    let castTo :: (TestUnitConvertible a, TestUnitConvertible b) => a -> b -> CReal -> CReal
+        castTo = castUnitOrDie
 
-    let right (Right x) = x
-        right (Left e) = error e
+    let anonymousNewton = ("kg" `testUnitMult` "m") `testUnitDiv` ("s" `testUnitExpScalar` 2)
 
-    let cu a b = right $ castUnit a b
+    desc "toScaleAndBaseUnitTests" $ do
+        toScaleAndBaseUnits anonymousNewton `shouldEq` toScaleAndBaseUnits (toUnit "N") `withTitle` "anonymous newton == newton"
 
-    let clu a b = cu (lookup a) (lookup b)
-
-    let tc a b f = (clu a b, f, show a <> " -> " <> show b)
-
-    let anonymousNewton = (lookup "kg" `unitMult` lookup "m") `unitDiv` (lookup "s" `unitExpScalar` 2)
-
-    shouldBeSpec
-        "toScaleAndBaseUnitTests"
-        [(toScaleAndBaseUnits anonymousNewton, toScaleAndBaseUnits $ lookup "N", "anonymous newton == newton")]
-
-    shouldBeQcSpec
-        "castUnit tests"
-        [ tc "b" "kb" (/ 1000)
-        , tc "kb" "b" (* 1000)
-        , (cu anonymousNewton (lookup "N"), id, "anonymous newton -> newton")
-        , tc "K" "C" (+ negate 273.15)
-        , tc "C" "F" $ (+ 32) . (* (9 / 5))
-        , tc "K" "F" $ (+ 32) . (* (9 / 5)) . (+ negate 273.15)
-        , (cu (lookup "N" `unitMult` lookup "m") (lookup "N" `unitMult` lookup "cm"), (* 100), "N*m -> N*cm")
-        , (cu (lookup "N" `unitMult` lookup "cm") (lookup "N" `unitMult` lookup "m"), (/ 100), "N*cm -> N*m")
-        , (cu (lookup "N" `unitDiv` lookup "m") (lookup "N" `unitDiv` lookup "cm"), (/ 100), "N/m -> N/cm")
-        , (cu (lookup "N" `unitDiv` lookup "cm") (lookup "N" `unitDiv` lookup "m"), (* 100), "N/cm -> N/m")
-        , (cu (lookup "N" `unitMult` lookup "C") (lookup "N" `unitMult` lookup "K"), id, "N*C -> N*K")
-        , (cu (lookup "N" `unitMult` lookup "C") (lookup "N" `unitMult` lookup "K"), id, "N*K -> N*C")
-        , (cu (lookup "km" `unitExpScalar` 2) (lookup "m" `unitExpScalar` 2), (* 1000000), "km^2 -> m^2")
-        ]
+    qcDesc "castUnit quickchecks" $ do
+        "b" `castTo` "kb" `shouldQcEq` (/ 1000)
+        "kb" `castTo` "b" `shouldQcEq` (* 1000)
+        anonymousNewton `castTo` "N" `shouldQcEq` id
+        "N" `castTo` anonymousNewton `shouldQcEq` id
+        "K" `castTo` "C" `shouldQcEq` \x -> x - 273.15
+        "C" `castTo` "F" `shouldQcEq` \x -> x * (9 / 5) + 32
+        "K" `castTo` "F" `shouldQcEq` \x -> (x - 273.15) * (9 / 5) + 32
+        ("N" `testUnitMult` "m") `castTo` ("N" `testUnitMult` "cm") `shouldQcEq` (* 100)
+        ("N" `testUnitMult` "cm") `castTo` ("N" `testUnitMult` "m") `shouldQcEq` (/ 100)
+        ("N" `testUnitDiv` "m") `castTo` ("N" `testUnitDiv` "cm") `shouldQcEq` (/ 100)
+        ("N" `testUnitDiv` "cm") `castTo` ("N" `testUnitDiv` "m") `shouldQcEq` (* 100)
+        ("N" `testUnitMult` "C") `castTo` ("N" `testUnitMult` "K") `shouldQcEq` id
+        ("N" `testUnitMult` "K") `castTo` ("N" `testUnitMult` "C") `shouldQcEq` id
+        ("N" `testUnitDiv` "C") `castTo` ("N" `testUnitDiv` "K") `shouldQcEq` id
+        ("N" `testUnitDiv` "K") `castTo` ("N" `testUnitDiv` "C") `shouldQcEq` id
+        ("km" `testUnitExpScalar` 2) `castTo` ("m" `testUnitExpScalar` 2) `shouldQcEq` (* 1000000)
+        ("m" `testUnitExpScalar` 2) `castTo` ("km" `testUnitExpScalar` 2) `shouldQcEq` (/ 1000000)

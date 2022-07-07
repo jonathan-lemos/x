@@ -4,32 +4,19 @@ import Test.Hspec
 import X.TestUtils.Parser
 import X.Utils.Function
 import X.Control.Parser.Combinator.Branch.Check
+import X.Control.Parser.AST.Token.Identifier
+import Harness.With
+import Harness.ParserCase
 
 spec :: Spec
 spec = do
-    let sampleParser = check (length |> (< 5)) (<> " failed") parser
+    let sampleParser = check (length |> (< 5)) (<> " failed") identifier
 
-    let dup a = (a, a)
+    parserDesc sampleParser "check identifier with length < 5" $ do
+        "abc" `shouldParseTo` "abc"
 
-    let totalCases =
-            dup
-                <$> [ "foo"
-                    , "bar"
-                    , "baz"
-                    ]
+        "abc def" `shouldParseTo` "abc" `withRemainder` " def"
 
-    let dupWith (a, b) = (a, a, b)
-
-    let partialCases =
-            dupWith
-                <$> [ ("foo bar", " bar")
-                    , ("baz_", "_")
-                    ]
-
-    let failCases =
-                [ ("abcde", "abcde failed", "abcde")
-                , ("_", "Expected an A-z character", "_")
-                , ("", "Expected an A-z character", "")
-                ]
-
-    passPartialFailSpec "check" sampleParser totalCases partialCases failCases
+        "_" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_"
+        "abcde" `shouldFailWithReason` "abcde failed" `andRemainder` ""
+        "abcde ghi" `shouldFailWithReason` "abcde failed" `andRemainder` " ghi"
