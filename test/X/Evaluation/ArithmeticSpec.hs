@@ -9,6 +9,10 @@ import X.TestUtils.Should
 import X.TestUtils.State
 import X.Data.Unit.Arithmetic
 import X.Data.Unit.Unit
+import Harness.TestCase
+import Harness.With
+import X.TestUtils.Unit
+import X.Control.Try
 
 spec :: Spec
 spec = parallel $ do
@@ -16,7 +20,7 @@ spec = parallel $ do
 
     let gus = (`getUnit` state)
 
-    let withState :: (Value -> Value -> XState -> Either String Value) -> Value -> Value -> Either String Value
+    let withState :: (Value -> Value -> XState -> Try Value) -> Value -> Value -> Try Value
         withState f a b = f a b state
 
     let add = withState addValues
@@ -32,55 +36,45 @@ spec = parallel $ do
     let c = Numeric 5 (gus "N")
     let d = Numeric 7 anonymousNewton
 
-    shouldBeSpec
-        "addValues"
-        [ (a `add` b, Right $ Numeric 5 Nothing, "adding scalars")
-        , (b `add` a, Right $ Numeric 5 Nothing, "adding scalars is commutative")
-        , (d `add` d, Right $ Numeric 14 anonymousNewton, "adding anonymous newton")
-        , (c `add` d, Right $ Numeric 12 (gus "N"), "adding newton to anonymous newton")
-        , (d `add` c, Right $ Numeric 12 anonymousNewton, "adding anonymous newton to newton")
-        , (a `add` c, Left "Cannot add unitless quantity and N", "adding unitless and N")
-        , (c `add` a, Left "Cannot add N and unitless quantity", "adding N and unitless")
-        ]
+    desc "addValues" $ do
+        a `add` b `shouldEq` Success (Numeric 5 Nothing) `withTitle` "adding scalars"
+        b `add` a `shouldEq` Success (Numeric 5 Nothing) `withTitle` "adding scalars is commutative"
+        d `add` d `shouldEq` Success (Numeric 14 anonymousNewton) `withTitle` "adding anonymous newton"
+        c `add` d `shouldEq` Success (Numeric 12 (Just $ toUnit "N")) `withTitle` "adding newton to anonymous newton"
+        d `add` c `shouldEq` Success (Numeric 12 anonymousNewton) `withTitle` "adding anonymous newton to newton"
+        a `add` c `shouldEq` Failure "Cannot add unitless quantity and N" `withTitle` "adding unitless and N"
+        c `add` a `shouldEq` Failure "Cannot add N and unitless quantity" `withTitle` "adding N and unitless"
 
-    shouldBeSpec
-        "subValues"
-        [ (b `sub` a, Right $ Numeric 1 Nothing, "subtracting scalars")
-        , (d `sub` d, Right $ Numeric 0 anonymousNewton, "subtracting anonymous newtons")
-        , (c `sub` d, Right $ Numeric (-2) (gus "N"), "subtracting anonymous newton from newton")
-        , (d `sub` c, Right $ Numeric 2 anonymousNewton, "subtracting newton from anonymous newton")
-        , (a `sub` c, Left "Cannot subtract unitless quantity and N", "subtracting unitless and N")
-        , (c `sub` a, Left "Cannot subtract N and unitless quantity", "subtracting N and unitless")
-        ]
+    desc "subValues" $ do
+        b `sub` a `shouldEq` Success (Numeric 1 Nothing) `withTitle` "subtracting scalars"
+        d `sub` d `shouldEq` Success (Numeric 0 anonymousNewton) `withTitle` "subtracting anonymous newtons"
+        c `sub` d `shouldEq` Success (Numeric (-2) (Just $ toUnit "N")) `withTitle` "subtracting anonymous newton from newton"
+        d `sub` c `shouldEq` Success (Numeric 2 anonymousNewton) `withTitle` "subtracting newton from anonymous newton"
+        a `sub` c `shouldEq` Failure "Cannot subtract unitless quantity and N" `withTitle` "subtracting unitless and N"
+        c `sub` a `shouldEq` Failure "Cannot subtract N and unitless quantity" `withTitle` "subtracting N and unitless"
 
-    shouldBeSpec
-        "multValues"
-        [ (a `mul` b, Right $ Numeric 6 Nothing, "multiplying scalar")
-        , (b `mul` a, Right $ Numeric 6 Nothing, "multiplying scalar is commutative")
-        , (a `mul` c, Right $ Numeric 10 (gus "N"), "multiplying scalar and newton")
-        , (c `mul` a, Right $ Numeric 10 (gus "N"), "multiplying scalar and newton is commutative")
-        , (c `mul` c, Right $ Numeric 25 (gus "N" `unitMaybeMult` gus "N"), "squaring newton -- todo: should be N^2")
-        , (c `mul` d, Right $ Numeric 35 (gus "N" `unitMaybeMult` anonymousNewton), "multiplying newton and anonymous newton -- todo: should be N^2")
-        , (d `mul` c, Right $ Numeric 35 (anonymousNewton `unitMaybeMult` gus "N"), "multiplying anonymous newton and newton -- todo: should be kg*m/s^2")
-        ]
+    desc "multValues" $ do
+        a `mul` b `shouldEq` Success (Numeric 6 Nothing) `withTitle` "multiplying scalar"
+        b `mul` a `shouldEq` Success (Numeric 6 Nothing) `withTitle` "multiplying scalar is commutative"
+        a `mul` c `shouldEq` Success (Numeric 10 (gus "N")) `withTitle` "multiplying scalar and newton"
+        c `mul` a `shouldEq` Success (Numeric 10 (gus "N")) `withTitle` "multiplying scalar and newton is commutative"
+        c `mul` c `shouldEq` Success (Numeric 25 (gus "N" `unitMaybeMult` gus "N")) `withTitle` "squaring newton -- todo: should be N^2"
+        c `mul` d `shouldEq` Success (Numeric 35 (gus "N" `unitMaybeMult` anonymousNewton)) `withTitle` "multiplying newton and anonymous newton -- todo: should be N^2"
+        d `mul` c `shouldEq` Success (Numeric 35 (anonymousNewton `unitMaybeMult` gus "N")) `withTitle` "multiplying anonymous newton and newton -- todo: should be kg*m/s^2"
 
-    shouldBeSpec
-        "divValues"
-        [ (a `div` b, Right $ Numeric (2 / 3) Nothing, "dividing 2/3")
-        , (b `div` a, Right $ Numeric (3 / 2) Nothing, "dividing 3/2")
-        , (a `div` c, Right $ Numeric (2 / 5) (unitMaybeReciprocal $ gus "N"), "2 / 5N")
-        , (c `div` a, Right $ Numeric (5 / 2) (gus "N"), "5N / 2")
-        , (c `div` c, Right $ Numeric 1 (gus "N" `unitMaybeDiv` gus "N"), "5N / 5N -- todo: should be unitless")
-        , (c `div` d, Right $ Numeric (5 / 7) (gus "N" `unitMaybeDiv` anonymousNewton), "5N / 7kg*m/s^2 -- todo: should be unitless")
-        , (d `div` c, Right $ Numeric (7 / 5) (anonymousNewton `unitMaybeDiv` gus "N"), "7kg*m/s^2 / 5N -- todo: should be kg*m/s^2")
-        ]
+    desc "divValues" $ do
+        a `div` b `shouldEq` Success (Numeric (2 / 3) Nothing) `withTitle` "dividing 2/3"
+        b `div` a `shouldEq` Success (Numeric (3 / 2) Nothing) `withTitle` "dividing 3/2"
+        a `div` c `shouldEq` Success (Numeric (2 / 5) (unitMaybeReciprocal $ gus "N")) `withTitle` "2 / 5N"
+        c `div` a `shouldEq` Success (Numeric (5 / 2) (gus "N")) `withTitle` "5N / 2"
+        c `div` c `shouldEq` Success (Numeric 1 (gus "N" `unitMaybeDiv` gus "N")) `withTitle` "5N / 5N -- todo: should be unitless"
+        c `div` d `shouldEq` Success (Numeric (5 / 7) (gus "N" `unitMaybeDiv` anonymousNewton)) `withTitle` "5N / 7kg*m/s^2 -- todo: should be unitless"
+        d `div` c `shouldEq` Success (Numeric (7 / 5) (anonymousNewton `unitMaybeDiv` gus "N")) `withTitle` "7kg*m/s^2 / 5N -- todo: should be kg*m/s^2"
 
-    shouldBeSpec
-        "expValues"
-        [ (a `exp` b, Right $ Numeric 8 Nothing, "2^3")
-        , (b `exp` a, Right $ Numeric 9 Nothing, "3^2")
-        , (c `exp` a, Right $ Numeric 25 (gus "N" `unitMaybeExpScalar` 2), "5N^2")
-        , (d `exp` b, Right $ Numeric 343 (anonymousNewton `unitMaybeExpScalar` 3), "(7kg*m/s^2)^3")
-        , (a `exp` c, Left "Cannot exponentiate by a unit quantity (N). Must exponentiate by a unitless quantity.", "2^(5N)")
-        , (b `exp` d, Left "Cannot exponentiate by a unit quantity (((kg*m)/(s^2.0))). Must exponentiate by a unitless quantity.", "3^(7N) -- todo unparenthesize error message")
-        ]
+    desc "expValues" $ do
+        a `exp` b `shouldEq` Success (Numeric 8 Nothing) `withTitle` "2^3"
+        b `exp` a `shouldEq` Success (Numeric 9 Nothing) `withTitle` "3^2"
+        c `exp` a `shouldEq` Success (Numeric 25 (gus "N" `unitMaybeExpScalar` 2)) `withTitle` "5N^2"
+        d `exp` b `shouldEq` Success (Numeric 343 (anonymousNewton `unitMaybeExpScalar` 3)) `withTitle` "(7kg*m/s^2)^3"
+        a `exp` c `shouldEq` Failure "Cannot exponentiate by a unit quantity (N). Must exponentiate by a unitless quantity." `withTitle` "2^(5N)"
+        b `exp` d `shouldEq` Failure "Cannot exponentiate by a unit quantity (((kg*m)/(s^2.0))). Must exponentiate by a unitless quantity." `withTitle` "3^(7N) -- todo unparenthesize error message"

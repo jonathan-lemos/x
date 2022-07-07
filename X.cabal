@@ -129,6 +129,7 @@ test-suite X-test
   main-is: Spec.hs
   other-modules:
       Harness.ParserCase
+      Harness.QcCase
       Harness.TestCase
       Harness.TestDSLMonad
       Harness.With
@@ -156,6 +157,9 @@ test-suite X-test
       X.TestUtils.Parser
       X.TestUtils.Should
       X.TestUtils.State
+      X.TestUtils.Try
+      X.TestUtils.Unit
+      X.TestUtils.Unwrap
       Paths_X
   hs-source-dirs:
       test

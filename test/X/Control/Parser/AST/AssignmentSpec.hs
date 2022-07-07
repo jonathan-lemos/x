@@ -12,6 +12,8 @@ import X.TestUtils.State
 import X.Data.AST.Assignment
 import X.Data.Unit.Unit
 import X.Control.Try
+import Harness.ParserCase
+import Harness.With
 
 spec :: Spec
 spec = parallel $ do
@@ -25,18 +27,16 @@ spec = parallel $ do
 
     let hasUnitQuantity u q = hasValue (Numeric u (Just q))
 
-    passPartialFailFnSpec
-        "assignment"
-        assignment
-        [ ("f = 2", isValidAssignment "f")
-        , ("f = a + 2", isValidAssignment "f")
-        , ("f = 2", hasScalar 2)
-        , ("f = a + 2", hasScalar 6)
-        ]
-        [("f = 2;foo", isValidAssignment "f", ";foo")
-        , ("f = a + 2 ;foo", isValidAssignment "f", " ;foo")
-        , ("f = 2 ;foo", hasScalar 2, " ;foo")
-        , ("f = a + 2 ;foo", hasScalar 6, " ;foo")]
-        [ ("_", "Expected an A-z character", "_")
-        , ("foo = ", "Expected a number, variable, or ( expression )", "")
-        ]
+    parserDesc assignment "assignment" $ do
+        "f = 2" `shouldParseAndSatisfy` isValidAssignment "f"
+        "f = a + 2" `shouldParseAndSatisfy` isValidAssignment "f"
+        "f = 2" `shouldParseAndSatisfy` hasScalar 2
+        "f = a + 2" `shouldParseAndSatisfy` hasScalar 6
+
+        "f = 2;foo" `shouldParseAndSatisfy` isValidAssignment "f" `withRemainder` ";foo"
+        "f = a + 2 ;foo" `shouldParseAndSatisfy` isValidAssignment "f" `withRemainder` " ;foo"
+        "f = 2 ;foo" `shouldParseAndSatisfy` hasScalar 2 `withRemainder` " ;foo"
+        "f = a + 2 ;foo" `shouldParseAndSatisfy` hasScalar 6 `withRemainder` " ;foo"
+
+        "_" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_"
+        "foo = " `shouldFailWithReason` "Expected a number `withRemainder` variable, or ( expression " `andRemainder` ""

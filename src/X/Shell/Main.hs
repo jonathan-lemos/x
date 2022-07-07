@@ -6,7 +6,6 @@ module X.Shell.Main where
 
 import Control.Applicative
 import Control.Monad.Free
-import Data.List
 import X.Control.Parser
 import X.Control.Parser.AST.Statement
 import X.Control.Parser.Combinator.Complete
@@ -44,9 +43,8 @@ executeStatement :: XState -> Statement -> (XState, [PrintCmd])
 executeStatement state stmt =
     case evaluateStatement state stmt of
         Success (newState, line) -> (newState, makeValueCmds line)
-        Failures fs ->
-            fs >$> makeErrorMessageCmds
-                >$ intercalate [newline]
+        Failure f ->
+            f >$ makeErrorMessageCmds
                 >$ (state,)
 
 -- | Given the current state, terminal width, and input string, returns the new state and what should be printed to the screen

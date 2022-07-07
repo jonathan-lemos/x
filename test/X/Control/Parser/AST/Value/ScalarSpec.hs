@@ -5,6 +5,7 @@ import Test.Hspec
 import X.Data.AST.Token.Scalar
 import Harness.ParserCase
 import X.Data.ParseError
+import Harness.With
 
 spec :: Spec
 spec = do
@@ -18,6 +19,6 @@ spec = do
         "2e4 + 5" `shouldParseTo` Number 2e4 `withRemainder` " + 5"
         "foo * 7" `shouldParseTo` Variable "foo" `withRemainder` " * 7"
 
-        "_" `shouldFailWith` ParseError "Expected a number or a variable name" "_"
-        "" `shouldFailWith` ParseError "Expected a number or a variable name" ""
-        " foo" `shouldFailWith` ParseError "Expected a number or a variable name" " foo"
+        "_" `shouldFailWithReason` "Expected a number or a variable name" `andRemainder` "_"
+        "" `shouldFailWithReason` "Expected a number or a variable name" `andRemainder` ""
+        " foo" `shouldFailWithReason` "Expected a number or a variable name" `andRemainder` " foo"

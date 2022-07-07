@@ -6,6 +6,7 @@ import X.Control.Parser.AST.Token.Identifier
 import Control.Applicative
 import Harness.ParserCase
 import X.Data.ParseError
+import Harness.With
 
 spec :: Spec
 spec = parallel $ do

@@ -40,6 +40,7 @@ instance WithTitle (ParserCase a) where
 instance WithRemainder (ParserCase a) where
     pc `withRemainder` remainder = pc{pcRemainder = remainder}
 
+-- | Defines a sequence of tests that all use the given parser. The String argument defines the name of the block of tests.
 parserDesc :: (Show a, Eq a) => Parser a -> String -> ParserCaseMonad a b -> SpecWith ()
 parserDesc parser title ps =
     describe title $ do
@@ -62,9 +63,13 @@ shouldParseAndSatisfy :: String -> (a -> Bool) -> ParserCaseMonad a ()
 shouldParseAndSatisfy input predicate =
     liftTdm $ ParserCase input (ParsedShouldSatisfy predicate) (input <> " should parse and satisfy predicate") ""
 
+{- | The parser given in `parserDesc` should fail to parse the input with the given reason.
+Must be followed by `andRemainder` to specify the location of the error within the input.
+-}
 shouldFailWithReason :: (Show a, Eq a) => String -> String -> String -> ParserCaseMonad a ()
 shouldFailWithReason input reason remainder =
     liftTdm $ ParserCase input (ParseShouldFail reason) (input <> " should fail to parse with reason " <> show reason) ""
 
+-- | Specifies the error location of `shouldFailWithReason`
 andRemainder :: (String -> ParserCaseMonad a ()) -> String -> ParserCaseMonad a ()
 andRemainder = ($)

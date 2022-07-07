@@ -8,6 +8,7 @@ import X.Utils.Functor
 import Harness.With
 import Harness.TestDSLMonad
 import Data.Data (tyConModule)
+import Test.QuickCheck
 
 newtype TestCase = TestCase { getTc :: (String, Expectation) }
 
