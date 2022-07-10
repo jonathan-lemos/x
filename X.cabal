@@ -154,7 +154,6 @@ test-suite X-test
       X.TestUtils.Either
       X.TestUtils.List
       X.TestUtils.MockTerminal
-      X.TestUtils.Parser
       X.TestUtils.Should
       X.TestUtils.State
       X.TestUtils.Try

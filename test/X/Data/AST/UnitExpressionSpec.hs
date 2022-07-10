@@ -8,33 +8,33 @@ import X.Data.State.XState
 import X.Data.Unit.Arithmetic
 import X.TestUtils.Either
 import X.TestUtils.Should
+import X.Utils.Function
+import X.TestUtils.Unit
+import Harness.TestCase
+import X.Control.Try
+import Harness.With
+import X.TestUtils.Unwrap
 
 spec :: Spec
 spec = do
-    let state = newState
-    let gu s = fromJust $ getUnit s state
+    let justUnitCase s = ufToUnit (JustUnit s) newState `shouldEq` (toUnit s >$ Success) `withTitle` s
+    let unitPowerCase base exponent = ufToUnit (UnitPower base exponent) newState `shouldEq` (toUnit base `unitExpScalar` exponent >$ Success) `withTitle` (base <> "^" <> show exponent)
 
-    let juCase s = (ufToUnit (JustUnit s) state, Right . gu $ s, s)
-    let upCase b e = (ufToUnit (UnitPower b e) state, Right $ gu b `unitExpScalar` e, b <> "^" <> show e)
-
-    shouldBeSpec
-        "ufToUnit"
-        [ juCase "kg"
-        , juCase "m"
-        , upCase "m" 2
-        , upCase "m" (-2)
-        ]
+    desc "ufToUnit" $ do
+        justUnitCase "kg"
+        justUnitCase "m"
+        unitPowerCase "m" 2
+        unitPowerCase "m" (-2)
 
     let ume xs = UnitMultExpression (head xs) (tail xs)
-    let umeCase us = (right $ umToUnit (ume us) state, unitProduct (right . (`ufToUnit` state) <$> us), intercalate ", " $ show <$> us)
+    let umeCase us = unwrap (umToUnit (ume us) newState) `shouldEq` unitProduct (unwrap . (`ufToUnit` newState) <$> us) `withTitle` intercalate ", " (show <$> us)
 
-    shouldBeSpec
-        "umToUnit"
-        [ umeCase [JustUnit "kg"]
-        , umeCase [JustUnit "kg", JustUnit "m"]
-        , umeCase [JustUnit "kg", UnitPower "m" 2]
-        , umeCase [JustUnit "kg", UnitPower "m" 2, UnitPower "s" (-2)]
-        ]
+    desc "umToUnit" $ do
+        umeCase [JustUnit "kg"]
+        umeCase [JustUnit "kg", JustUnit "m"]
+        umeCase [JustUnit "kg", UnitPower "m" 2]
+        umeCase [JustUnit "kg", UnitPower "m" 2, UnitPower "s" (-2)]
+
 
     let ueFractionCase n d = (right $ ueToUnit (UnitFraction n d) state, right (umToUnit n state) `unitDiv` right (umToUnit d state), show n <> "/" <> show d)
     let ueProductCase n = (right $ ueToUnit (UnitProduct n) state, right $ umToUnit n state, show n)

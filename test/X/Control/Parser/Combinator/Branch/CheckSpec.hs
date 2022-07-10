@@ -1,7 +1,6 @@
 module X.Control.Parser.Combinator.Branch.CheckSpec where
 
 import Test.Hspec
-import X.TestUtils.Parser
 import X.Utils.Function
 import X.Control.Parser.Combinator.Branch.Check
 import X.Control.Parser.AST.Token.Identifier

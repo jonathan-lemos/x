@@ -9,7 +9,6 @@ import X.Control.Parser.AST.ArithmeticExpression
 import X.Data.State.XState
 import Test.Hspec
 import X.TestUtils.ArithmeticExpression
-import X.TestUtils.Parser
 import X.TestUtils.State
 import X.Data.AST.ArithmeticExpression
 import X.Data.AST.Token.Scalar
@@ -56,7 +55,7 @@ spec = parallel $ do
 
     let evaluatesToUnitQuantity n u = evaluatesTo (Numeric n (Just u))
 
-    let evalErrorsWith msg (Failures m) = msg == m
+    let evalErrorsWith msg (Failure m) = msg == m
         evalErrorsWith _ _ = False
 
     parserDesc ae "arithmetic expression evaluation" $ do
@@ -74,7 +73,7 @@ spec = parallel $ do
         "2 + 3 * 4 ^ ( 1 / 2 )" `shouldParseAndSatisfy` evaluatesToScalar 8
         "a" `shouldParseAndSatisfy` evaluatesToScalar 4
         "foo" `shouldParseAndSatisfy` evaluatesToUnitQuantity 9 (gu "kg")
-        "foobar" `shouldParseAndSatisfy` evalErrorsWith ["Use of undeclared variable \"foobar\""]
+        "foobar" `shouldParseAndSatisfy` evalErrorsWith "Use of undeclared variable \"foobar\""
         "2 kg" `shouldParseAndSatisfy` evaluatesToUnitQuantity 2 (gu "kg")
         "2 kg*m" `shouldParseAndSatisfy` evaluatesToUnitQuantity 2 (gu "kg" `unitMult` gu "m")
         -- "2kg*3m" `shouldParseAndSatisfy` evaluatesToUnitQuantity 6 (gu "kg" `unitMult` gu "m")
