@@ -7,7 +7,6 @@ import X.Control.Parser
 import X.Control.Parser.AST.Assignment
 import X.Data.State.Value
 import X.TestUtils.ArithmeticExpression
-import X.TestUtils.Parser
 import X.TestUtils.State
 import X.Data.AST.Assignment
 import X.Data.Unit.Unit
