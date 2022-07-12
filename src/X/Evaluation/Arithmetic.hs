@@ -25,7 +25,7 @@ _evalValues f a b state =
 _evalAdditive :: (ToValue a, ToValue b) => (CReal -> CReal -> CReal) -> String -> a -> b -> XState -> Try Value
 _evalAdditive f verb a b state =
     let addF xa ua xb ub =
-            (castMaybeUnit ub ua <> fail ("Cannot " <> verb <> " " <> show ua <> " and " <> show ub))
+            (castMaybeUnit ub ua <|> fail ("Cannot " <> verb <> " " <> show ua <> " and " <> show ub))
                 >>= \scaleB -> Success $ Numeric (f xa (scaleB xb)) ua
      in _evalValues addF a b state
 

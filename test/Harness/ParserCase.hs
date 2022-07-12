@@ -54,21 +54,21 @@ Use `withRemainder` if the parser should only parse some of the input.
 -}
 shouldParseTo :: (Show a, Eq a) => String -> a -> ParserCaseMonad a ()
 shouldParseTo input expected =
-    liftTdm $ ParserCase input (ParsedShouldEqual expected) (input <> " should parse to " <> show expected) ""
+    liftTdm $ ParserCase input (ParsedShouldEqual expected) "" (input <> " should parse to " <> show expected)
 
 {- | The parser given in `parserDesc` should parse the **entire** input into a value that satisfies the given predicate.
 Use `withRemainder` if the parser should only parse some of the input.
 -}
 shouldParseAndSatisfy :: String -> (a -> Bool) -> ParserCaseMonad a ()
 shouldParseAndSatisfy input predicate =
-    liftTdm $ ParserCase input (ParsedShouldSatisfy predicate) (input <> " should parse and satisfy predicate") ""
+    liftTdm $ ParserCase input (ParsedShouldSatisfy predicate) "" (input <> " should parse and satisfy predicate")
 
 {- | The parser given in `parserDesc` should fail to parse the input with the given reason.
 Must be followed by `andRemainder` to specify the location of the error within the input.
 -}
 shouldFailWithReason :: (Show a, Eq a) => String -> String -> String -> ParserCaseMonad a ()
 shouldFailWithReason input reason remainder =
-    liftTdm $ ParserCase input (ParseShouldFail reason) (input <> " should fail to parse with reason " <> show reason) ""
+    liftTdm $ ParserCase input (ParseShouldFail reason) remainder (input <> " should fail to parse with reason " <> show reason)
 
 -- | Specifies the error location of `shouldFailWithReason`
 andRemainder :: (String -> ParserCaseMonad a ()) -> String -> ParserCaseMonad a ()
