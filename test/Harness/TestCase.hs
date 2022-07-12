@@ -28,7 +28,7 @@ desc title tcm = do
 liftTc :: String -> Expectation -> TestCaseMonad ()
 liftTc s e = TestCase (s, e) >$ liftTdm
 
-should :: (Show a, Eq a) => a -> (a -> Bool) -> TestCaseMonad ()
+should :: Show a => a -> (a -> Bool) -> TestCaseMonad ()
 a `should` f = liftTc (show a <> " should satisfy predicate") (a `shouldSatisfy` f)
 
 shouldEq :: (Show a, Eq a) => a -> a -> TestCaseMonad ()

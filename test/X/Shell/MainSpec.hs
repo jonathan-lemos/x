@@ -56,7 +56,7 @@ spec = parallel $ do
         let exec a b c =
                 execute a b c
                     >$ snd
-                    >$> show
+                    >$ fmap show
                     >$ intercalate ""
                     >$ splitOn "\n"
                     >$ init

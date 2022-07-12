@@ -1,7 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module X.Control.Try where
-
--- TODO: failures -> failure. join strings with "\n" instead of collecting
+import Control.Applicative
 
 combineErrorMessages :: String -> String -> String
 combineErrorMessages "" s = s
@@ -39,10 +38,16 @@ instance MonadFail Try where
     fail = Failure
 
 instance Semigroup (Try a) where
-    (Success a) <> (Success _) = Success a
-    (Success a) <> (Failure _) = Success a
-    (Failure _) <> (Success b) = Success b
-    (Failure a) <> (Failure b) = Failure $ combineErrorMessages a b
+    Success a <> Success _ = Success a
+    Success a <> Failure _ = Success a
+    Failure _ <> Success b = Success b
+    Failure a <> Failure b = Failure $ combineErrorMessages a b
 
 instance Monoid a => Monoid (Try a) where
     mempty = Success mempty
+
+instance Alternative Try where
+    empty = Failure ""
+    Success a <|> _ = Success a
+    Failure _ <|> Success b = Success b
+    Failure _ <|> Failure b = Failure b

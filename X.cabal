@@ -126,14 +126,18 @@ executable X-exe
 
 test-suite X-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: Main.hs
   other-modules:
       Harness.ParserCase
       Harness.QcCase
       Harness.TestCase
       Harness.TestDSLMonad
+      Harness.Typeclass.ApplicativeCase
+      Harness.Typeclass.FunctorCase
+      Harness.Typeclass.MonadCase
       Harness.With
       LibSpec
+      Spec
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec
       X.Control.Parser.AST.StatementSpec
@@ -144,6 +148,7 @@ test-suite X-test
       X.Control.Parser.Combinator.Branch.CheckSpec
       X.Control.ParserSpec
       X.Control.TerminalSpec
+      X.Control.TrySpec
       X.Data.AST.UnitExpressionSpec
       X.Data.Unit.Metric.MetricSpec
       X.Data.Unit.UnitSpec

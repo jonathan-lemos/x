@@ -36,13 +36,11 @@ spec = do
         umeCase [JustUnit "kg", UnitPower "m" 2, UnitPower "s" (-2)]
 
 
-    let ueFractionCase n d = (right $ ueToUnit (UnitFraction n d) state, right (umToUnit n state) `unitDiv` right (umToUnit d state), show n <> "/" <> show d)
-    let ueProductCase n = (right $ ueToUnit (UnitProduct n) state, right $ umToUnit n state, show n)
+    let ueFractionCase n d = unwrap (ueToUnit (UnitFraction n d) newState) `shouldEq` (unwrap (umToUnit n newState) `unitDiv` unwrap (umToUnit d newState)) `withTitle` (show n <> "/" <> show d)
+    let ueProductCase n = ueToUnit (UnitProduct n) newState `shouldEq` umToUnit n newState `withTitle` show n
 
-    shouldBeSpec
-        "ueToUnit"
-        [ ueFractionCase (ume [JustUnit "m"]) (ume [JustUnit "s"])
-        , ueFractionCase (ume [JustUnit "m", UnitPower "kg" 2]) (ume [UnitPower "s" 2])
-        , ueProductCase (ume [JustUnit "m", UnitPower "kg" 2])
-        , ueProductCase (ume [JustUnit "m"])
-        ]
+    desc "ueToUnit" $ do
+        ueFractionCase (ume [JustUnit "m"]) (ume [JustUnit "s"])
+        ueFractionCase (ume [JustUnit "m", UnitPower "kg" 2]) (ume [UnitPower "s" 2])
+        ueProductCase (ume [JustUnit "m", UnitPower "kg" 2])
+        ueProductCase (ume [JustUnit "m"])
