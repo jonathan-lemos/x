@@ -37,11 +37,11 @@ instance Monad Try where
 instance MonadFail Try where
     fail = Failure
 
-instance Semigroup (Try a) where
-    Success a <> Success _ = Success a
-    Success a <> Failure _ = Success a
-    Failure _ <> Success b = Success b
+instance Semigroup a => Semigroup (Try a) where
+    Success a <> Success b = Success (a <> b)
     Failure a <> Failure b = Failure $ combineErrorMessages a b
+    Failure a <> Success _ = Failure a
+    Success _ <> Failure b = Failure b
 
 instance Monoid a => Monoid (Try a) where
     mempty = Success mempty

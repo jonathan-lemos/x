@@ -38,4 +38,4 @@ spec = parallel $ do
         "f = a + 2 ;foo" `shouldParseAndSatisfy` hasScalar 6 `withRemainder` " ;foo"
 
         "_" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_"
-        "foo = " `shouldFailWithReason` "Expected a number `withRemainder` variable, or ( expression " `andRemainder` ""
+        "foo = " `shouldFailWithReason` "Expected a number, variable, or ( expression )" `andRemainder` ""
