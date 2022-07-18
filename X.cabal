@@ -73,6 +73,7 @@ library
       X.Utils.Function
       X.Utils.Functor
       X.Utils.List
+      X.Utils.LTR
       X.Utils.Map
       X.Utils.Monad
       X.Utils.String

@@ -7,7 +7,7 @@ import X.Control.Parser.Combinator.Precondition
 import X.Data.Value
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 import Control.Applicative
-import X.Utils.Function
+import X.Utils.LTR
 
 -- | Parses a left-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from left operator to right operator.
 leftAssociativeExpression :: Parser Value -> Parser op -> (Value -> op -> Value -> Value) -> Parser Value
@@ -25,7 +25,12 @@ rightAssociativeExpression subexpressionParser operatorParser combineValues =
     do
         head <- subexpressionParser
         next <- lookaheadParse [
-            operatorParser >> pure (liftA2 ((,) ||> Just) operatorParser subexpressionParser),
+            operatorParser >> pure (
+                liftA2
+                ((,) ||@>|| Just)
+                operatorParser
+                (rightAssociativeExpression subexpressionParser operatorParser combineValues)
+                ),
             (pure . pure) Nothing]
 
         return $ case next of
