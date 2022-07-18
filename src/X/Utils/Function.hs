@@ -5,6 +5,9 @@ module X.Utils.Function where
 (|>) = flip (.)
 infixl 4 |>
 
+(||>) :: (a -> b -> c) -> (c -> d) -> (a -> b -> d)
+f ||> g = \a b -> f a b >$ g
+
 -- Applies the given argument to the given function. Flipped version of ($)
 (>$) :: a -> (a -> b) -> b
 (>$) = flip ($)

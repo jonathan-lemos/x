@@ -31,9 +31,6 @@ library
       X.Control.Parser.AST.Assignment
       X.Control.Parser.AST.Statement
       X.Control.Parser.AST.Token.Identifier
-      X.Control.Parser.AST.Value.Scalar
-      X.Control.Parser.AST.Value.UnitExpression
-      X.Control.Parser.AST.Value.UnitFactor
       X.Control.Parser.Combinator.Atomic
       X.Control.Parser.Combinator.Branch.Check
       X.Control.Parser.Combinator.Branch.Conditional
@@ -62,25 +59,13 @@ library
       X.Control.Parser.Text.Whitespace
       X.Control.Terminal
       X.Control.Try
-      X.Data.AST.ArithmeticExpression
       X.Data.AST.Assignment
       X.Data.AST.Statement
-      X.Data.AST.Token.Scalar
-      X.Data.AST.UnitExpression
+      X.Data.Context
+      X.Data.Operator
       X.Data.ParseError
-      X.Data.State.Value
-      X.Data.State.XState
-      X.Data.Unit.Arithmetic
-      X.Data.Unit.Context
-      X.Data.Unit.Exponential
-      X.Data.Unit.Metric.Metric
-      X.Data.Unit.Metric.Prefix
-      X.Data.Unit.Prelude
-      X.Data.Unit.Unit
-      X.Data.Unit.UnitLike
-      X.Data.Unit.UnitScaleOperation
-      X.Evaluation.Arithmetic
-      X.Evaluation.ToValue
+      X.Data.Value
+      X.Shell.Execution
       X.Shell.Formatting
       X.Shell.Main
       X.Shell.Repl
@@ -93,6 +78,7 @@ library
       X.Utils.String
       X.Utils.Trim
       X.Utils.Try
+      X.Utils.Value
   other-modules:
       Paths_X
   hs-source-dirs:
@@ -142,27 +128,18 @@ test-suite X-test
       X.Control.Parser.AST.AssignmentSpec
       X.Control.Parser.AST.StatementSpec
       X.Control.Parser.AST.Token.IdentifierSpec
-      X.Control.Parser.AST.Value.ScalarSpec
-      X.Control.Parser.AST.Value.UnitExpressionSpec
-      X.Control.Parser.AST.Value.UnitFactorSpec
       X.Control.Parser.Combinator.Branch.CheckSpec
       X.Control.ParserSpec
       X.Control.TerminalSpec
       X.Control.TrySpec
-      X.Data.AST.UnitExpressionSpec
-      X.Data.Unit.Metric.MetricSpec
-      X.Data.Unit.UnitSpec
-      X.Evaluation.ArithmeticSpec
       X.Shell.MainSpec
       X.TestUtils.Arbitrary
-      X.TestUtils.ArithmeticExpression
+      X.TestUtils.Context
       X.TestUtils.Either
       X.TestUtils.List
       X.TestUtils.MockTerminal
       X.TestUtils.Should
-      X.TestUtils.State
       X.TestUtils.Try
-      X.TestUtils.Unit
       X.TestUtils.Unwrap
       Paths_X
   hs-source-dirs:

@@ -1,9 +1,9 @@
 module Lib where
 
 import X.Shell.Main
-import X.Data.State.XState
 import X.Shell.Repl
 import X.Control.Terminal
+import qualified X.Data.Context as Context
 
 mainLoop :: Terminal ()
-mainLoop = repl newState readCommand executeCommand
+mainLoop = repl Context.new readCommand executeCommand

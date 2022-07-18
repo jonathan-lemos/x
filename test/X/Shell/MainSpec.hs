@@ -11,11 +11,7 @@ import X.Control.Parser.AST.ArithmeticExpressionSpec
 import X.Control.Terminal
 import X.Control.Try
 import X.Data.ParseError
-import X.Data.State.Value
-import X.Data.Unit.Unit
 import X.Shell.Main
-import X.TestUtils.ArithmeticExpression
-import X.TestUtils.State
 import X.Utils.Function
 import X.Utils.Functor
 import X.Utils.Try (eitherToTry)
