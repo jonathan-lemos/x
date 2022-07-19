@@ -8,12 +8,12 @@ import X.Data.AST.Statement
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 import X.Control.Parser.AST.Assignment
 import X.Control.Parser.AST.ArithmeticExpression
-import X.Utils.Functor
+import X.Utils.LeftToRight
 
 statement :: Parser Statement
 statement =
     whitespace
         >> lookaheadParse [
             identifier >> whitespace >> charEq '=' >> pure (StmtAssignment <$> assignment),
-            pure (additiveExpression >$> StmtValue)
+            pure (additiveExpression |@>| StmtValue)
         ]

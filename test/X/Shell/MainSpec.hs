@@ -12,8 +12,6 @@ import X.Control.Terminal
 import X.Control.Try
 import X.Data.ParseError
 import X.Shell.Main
-import X.Utils.Function
-import X.Utils.Functor
 import X.Utils.Try (eitherToTry)
 import X.TestUtils.Context
 import X.Data.Value
@@ -21,7 +19,7 @@ import X.Shell.Execution
 import X.Data.AST.Statement (Statement(StmtValue, StmtAssignment))
 import X.Data.Operator
 import X.Data.AST.Assignment
-import X.Utils.LTR
+import X.Utils.LeftToRight
 
 ioListToString :: [PrintCmd] -> String
 ioListToString = intercalate "" . fmap show

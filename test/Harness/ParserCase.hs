@@ -7,8 +7,7 @@ import Harness.With
 import Test.Hspec
 import X.Control.Parser
 import X.Data.ParseError
-import X.Utils.Function
-import X.Utils.Functor
+import X.Utils.LeftToRight
 
 data ParserExpectation a = ParsedShouldEqual a | ParsedShouldSatisfy (a -> Bool) | ParseShouldFail String
 
@@ -45,9 +44,9 @@ parserDesc :: (Show a, Eq a) => Parser a -> String -> ParserCaseMonad a b -> Spe
 parserDesc parser title ps =
     describe title $ do
         tdmItems ps
-            >$> pcToTitleAndExpectation
-            >$> ($ parser)
-            >$> uncurry it >$ sequence_
+            |@>| pcToTitleAndExpectation
+            |@>| ($ parser)
+            |@>| uncurry it @> sequence_
 
 {- | The parser given in `parserDesc` should parse the **entire** input into the given value.
 Use `withRemainder` if the parser should only parse some of the input.

@@ -1,4 +1,4 @@
-module X.Utils.LTR where
+module X.Utils.LeftToRight where
 
 -- | Takes a value and applies it to a function. Flipped version of $.
 (@>) :: a -> (a -> b) -> b

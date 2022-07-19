@@ -1,15 +1,15 @@
 module X.Control.Parser.Combinator.Branch.CheckSpec where
 
 import Test.Hspec
-import X.Utils.Function
 import X.Control.Parser.Combinator.Branch.Check
 import X.Control.Parser.AST.Token.Identifier
 import Harness.With
 import Harness.ParserCase
+import X.Utils.LeftToRight
 
 spec :: Spec
 spec = do
-    let sampleParser = check (length |> (< 5)) (<> " failed") identifier
+    let sampleParser = check (length |@>| (< 5)) (<> " failed") identifier
 
     parserDesc sampleParser "check identifier with length < 5" $ do
         "abc" `shouldParseTo` "abc"

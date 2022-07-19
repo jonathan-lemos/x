@@ -6,11 +6,10 @@ import Harness.TestDSLMonad
 import Harness.With
 import Test.Hspec
 import Test.Hspec.QuickCheck
-import Test.QuickCheck (Arbitrary)
+import Test.QuickCheck
 import X.Control.Parser
 import X.Data.ParseError
-import X.Utils.Function
-import X.Utils.Functor
+import X.Utils.LeftToRight
 
 data QcCase a = QcCase
     { qcTitle :: String
@@ -29,8 +28,8 @@ qcDesc :: (Arbitrary a, Show a, Eq a) => String -> QcCaseMonad a b -> SpecWith (
 qcDesc title ps =
     describe title $ do
         tdmItems ps
-            >$> qcToSpec
-            >$ sequence_
+            |@>| qcToSpec
+            @> sequence_
 
 shouldQcEq :: (Show a, Arbitrary a, Show b, Eq b) => (a -> b) -> (a -> b) -> QcCaseMonad a ()
 shouldQcEq function expected =

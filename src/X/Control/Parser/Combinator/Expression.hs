@@ -7,7 +7,7 @@ import X.Control.Parser.Combinator.Precondition
 import X.Data.Value
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 import Control.Applicative
-import X.Utils.LTR
+import X.Utils.LeftToRight
 
 -- | Parses a left-associative expression, which is `n >= 1` "subexpressions" joined by `n - 1` operators, processed from left operator to right operator.
 leftAssociativeExpression :: Parser Value -> Parser op -> (Value -> op -> Value -> Value) -> Parser Value

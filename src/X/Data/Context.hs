@@ -2,8 +2,8 @@ module X.Data.Context where
 
 import qualified Data.Map as DM
 import X.Data.Value
-import X.Utils.Function
 import Data.Foldable
+import X.Utils.LeftToRight
 
 type Context = [DM.Map String Value]
 
@@ -15,7 +15,7 @@ put key value (x:xs) = DM.insert key value x : xs
 put _ _ [] = []
 
 get :: String -> Context -> Maybe Value
-get key = fmap (DM.lookup key) |> asum
+get key = fmap (DM.lookup key) |@>| asum
 
 push :: Context -> Context
 push = (DM.empty :)

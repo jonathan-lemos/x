@@ -70,10 +70,8 @@ library
       X.Shell.Main
       X.Shell.Repl
       X.Utils.CReal
-      X.Utils.Function
-      X.Utils.Functor
+      X.Utils.LeftToRight
       X.Utils.List
-      X.Utils.LTR
       X.Utils.Map
       X.Utils.Monad
       X.Utils.String

@@ -6,7 +6,7 @@ import X.Control.Parser.AST.Token.Identifier
 import X.Control.Parser.Text.Whitespace
 import X.Control.Parser.Text.CharEq
 import X.Control.Parser.AST.ArithmeticExpression
-import X.Utils.Functor
+import X.Utils.LeftToRight
 
 assignment :: Parser Assignment
 assignment = do
@@ -15,5 +15,5 @@ assignment = do
     whitespace
     charEq '='
     whitespace
-    additiveExpression >$> Assignment ident
+    additiveExpression |@>| Assignment ident
 

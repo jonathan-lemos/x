@@ -3,12 +3,10 @@
 module Harness.TestCase where
 
 import Test.Hspec
-import X.Utils.Function
-import X.Utils.Functor
 import Harness.With
 import Harness.TestDSLMonad
-import Data.Data (tyConModule)
 import Test.QuickCheck
+import X.Utils.LeftToRight
 
 newtype TestCase = TestCase { getTc :: (String, Expectation) }
 
@@ -21,12 +19,12 @@ desc :: String -> TestCaseMonad () -> SpecWith ()
 desc title tcm = do
     describe title $ do
         tdmItems tcm
-            >$> getTc
-            >$> uncurry it
-            >$ sequence_
+            |@>| getTc
+            |@>| uncurry it
+            @> sequence_
 
 liftTc :: String -> Expectation -> TestCaseMonad ()
-liftTc s e = TestCase (s, e) >$ liftTdm
+liftTc s e = TestCase (s, e) @> liftTdm
 
 should :: Show a => a -> (a -> Bool) -> TestCaseMonad ()
 a `should` f = liftTc (show a <> " should satisfy predicate") (a `shouldSatisfy` f)
