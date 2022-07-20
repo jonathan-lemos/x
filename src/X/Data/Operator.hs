@@ -2,19 +2,15 @@ module X.Data.Operator where
 import Data.Number.CReal
 import X.Utils.CReal
 
-data Operator = Add | Sub | Mul | Div | Exp
+data AdditiveOperator = Add | Sub
     deriving Eq
 
-instance Show Operator where
+data MultiplicativeOperator = Mul | Div
+    deriving Eq
+
+instance Show AdditiveOperator where
     show Add = "+"
     show Sub = "-"
+instance Show MultiplicativeOperator where
     show Mul = "*"
     show Div = "/"
-    show Exp = "^"
-
-applyOp :: Operator -> CReal -> CReal -> CReal
-applyOp Add = (+)
-applyOp Sub = (-)
-applyOp Mul = (*)
-applyOp Div = safeDiv
-applyOp Exp = safeExp
