@@ -1,12 +1,10 @@
 module X.Data.Operator where
-import Data.Number.CReal
-import X.Utils.CReal
 
 data AdditiveOperator = Add | Sub
-    deriving Eq
+    deriving (Eq, Ord, Enum)
 
 data MultiplicativeOperator = Mul | Div
-    deriving Eq
+    deriving (Eq, Ord, Enum)
 
 instance Show AdditiveOperator where
     show Add = "+"

@@ -14,7 +14,7 @@ isScalar _ = False
 _simplifyMultiplyBy0 :: Value -> Value
 _simplifyMultiplyBy0 v =
     case v of
-        MultiplicativeChain 0 _ -> Scalar 0
+        MultiplicativeChain (Scalar 0) _ -> Scalar 0
         MultiplicativeChain _ xs | any (snd |@>| (== Scalar 0)) xs -> Scalar 0
         v -> v
 
@@ -57,6 +57,7 @@ _simplifyChainIdentity v =
 
 -- | Sums up the scalar terms of an additive chain. Multiplies up the scalar terms of a multiplicative chain.
 -- If the expression reduces to a single term, lifts it out of the (now redundant) chain layer.
+_groupChainScalars :: Value -> Value
 _groupChainScalars v =
     case v of
         AdditiveChain v vs ->
@@ -80,6 +81,16 @@ _groupChainScalars v =
                 v -> (0, [v]))
             vs
         v -> v
+
+_sortChainTerms :: Value -> Value
+_sortChainTerms v =
+    let sortVs = groupMap (length . show) |@>| toAscList ||@>|| sort
+    in case v of
+        AdditiveChain v vs ->
+            let allVs = (Add, v) : vs
+                (scalars, notScalars) = partition isScalar allVs
+                allVsSorted = sortVs notScalars <> sortVs scalars
+            in
 
 _simplifyValue :: Value -> Value
 _simplifyValue = _simplifyChainIdentity
