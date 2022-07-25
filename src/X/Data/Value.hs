@@ -10,7 +10,6 @@ data Value
     | AdditiveChain Value [(AdditiveOperator, Value)]
     | MultiplicativeChain Value [(MultiplicativeOperator, Value)]
     | ExpChain Value Value
-    | Negate Value
     deriving (Eq, Ord)
 
 transformAdditiveChain :: ([(AdditiveOperator, Value)] -> Value) -> Value -> Value
