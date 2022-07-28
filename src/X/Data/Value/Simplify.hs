@@ -1,12 +1,17 @@
+{-# LANGUAGE TupleSections #-}
 module X.Data.Value.Simplify where
 
 import Data.Bifunctor
+import Data.Foldable
+import qualified Data.Map as DM
 import Data.Number.CReal
 import X.Data.Operator
 import X.Data.Value
 import X.Utils.Function
 import X.Utils.LeftToRight
 import X.Utils.List
+import X.Utils.Map
+import Data.List
 
 {- | A simplifier turns a value into an identical, but less complicated version of itself
 A simplifier should be idempotent, meaning f(f(x)) == f(x).
@@ -61,8 +66,8 @@ _simplifyAddingNegative =
      in mapAdditiveChain (fmap mapAdditiveTerm)
 
 -- | Converts *(1/x) to /x, /(1/x) to *x
-_simplifyMultiplyingReciprocal :: Value -> Value
-_simplifyMultiplyingReciprocal =
+_simplifyMultiplyingByReciprocal :: Simplifier
+_simplifyMultiplyingByReciprocal =
     let mapMultiplicativeTerm t =
             case t of
                 (Mul, Scalar x) | abs x > 0 && abs x < 1 -> (Div, Scalar (1 / x))
@@ -70,87 +75,105 @@ _simplifyMultiplyingReciprocal =
                 (x, y) -> (x, y)
      in mapMultiplicativeChain (fmap mapMultiplicativeTerm)
 
-{- | Removes +- 0's from additive chains and */ 1's from multiplicative chains.
- If the expression reduces to a single term, lifts it out of the (now redundant) chain layer.
--}
-_simplifyChainIdentity :: Value -> Value
-_simplifyChainIdentity =
-    let stripIdentities identity =
-            fmap (second _simplifyChainIdentity)
-                |@>| filter (snd |@>| (/= identity))
-     in mapAdditiveChain (stripIdentities (Scalar 0))
-            |@>| mapMultiplicativeChain (stripIdentities (Scalar 1))
-
-{- | Sums up the scalar terms of an additive chain. Multiplies up the scalar terms of a multiplicative chain.
- If the expression reduces to a single term, lifts it out of the (now redundant) chain layer.
--}
-_simplifyGroupChainScalars :: Value -> Value
-_simplifyGroupChainScalars =
-    mapAdditiveChain
-        ( \ms ->
-            foldr
-                ( \(op, v) (s, l) -> case (op, v) of
-                    (Add, Scalar sc) -> (s + sc, l)
-                    (Sub, Scalar sc) -> (s - sc, l)
-                    (op, val) -> (s, (op, val) : l)
-                )
-                (0, [])
-                ms
-                @> \(sc, rest) -> rest <> [(Add, Scalar sc)]
-        )
-        |@>| mapMultiplicativeChain
-            ( \ms ->
-                foldr
-                    ( \(op, v) (s, l) -> case (op, v) of
-                        (Mul, Scalar sc) -> (s * sc, l)
-                        (Div, Scalar sc) -> (s / sc, l)
-                        (op, val) -> (s, (op, val) : l)
-                    )
-                    (1, [])
-                    ms
-                    @> \(sc, rest) -> (Mul, Scalar sc) : rest
-            )
-
-_partitionChainTerms :: [(o, Value)] -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
+_partitionChainTerms :: [(o, Value)] -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
 _partitionChainTerms =
     foldr
-        ( \(o, v) (scalars, variables, additiveChains, multiplicativeChains, expChains, negates) ->
+        ( \(o, v) (scalars, variables, additiveChains, multiplicativeChains, expChains) ->
             case v of
-                Scalar _ -> ((o, v) : scalars, variables, additiveChains, multiplicativeChains, expChains, negates)
-                Variable _ -> (scalars, (o, v) : variables, additiveChains, multiplicativeChains, expChains, negates)
-                AdditiveChain _ _ -> (scalars, variables, (o, v) : additiveChains, multiplicativeChains, expChains, negates)
-                MultiplicativeChain _ _ -> (scalars, variables, additiveChains, (o, v) : multiplicativeChains, expChains, negates)
-                ExpChain _ _ -> (scalars, variables, additiveChains, multiplicativeChains, (o, v) : expChains, negates)
-                Negate _ -> (scalars, variables, additiveChains, multiplicativeChains, expChains, (o, v) : negates)
+                Scalar _ -> ((o, v) : scalars, variables, additiveChains, multiplicativeChains, expChains)
+                Variable _ -> (scalars, (o, v) : variables, additiveChains, multiplicativeChains, expChains)
+                AdditiveChain _ _ -> (scalars, variables, (o, v) : additiveChains, multiplicativeChains, expChains)
+                MultiplicativeChain _ _ -> (scalars, variables, additiveChains, (o, v) : multiplicativeChains, expChains)
+                ExpChain _ _ -> (scalars, variables, additiveChains, multiplicativeChains, (o, v) : expChains)
         )
-        ([], [], [], [], [], [])
+        ([], [], [], [], [])
 
-_mapPartitionOutput :: ([(o, Value)] -> [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
-_mapPartitionOutput fn (a, b, c, d, e, f) = (fn a, fn b, fn c, fn d, fn e, fn f)
+_mapPartitionOutput :: ([(o, Value)] -> [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
+_mapPartitionOutput fn (a, b, c, d, e) = (fn a, fn b, fn c, fn d, fn e)
 
-_simplifySortChainTerms :: Value -> Value
+_simplifySortChainTerms :: Simplifier
 _simplifySortChainTerms =
     let sortGroup :: Ord o => [(o, Value)] -> [(o, Value)]
         sortGroup = sortByKey (\(_, l) -> (length (show l), show l))
      in mapAdditiveChain
             ( \ms ->
-                let (scalars, variables, additiveChains, multiplicativeChains, expChains, negates) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
-                 in variables <> expChains <> multiplicativeChains <> additiveChains <> negates <> scalars
+                let (scalars, variables, additiveChains, multiplicativeChains, expChains) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
+                 in variables <> expChains <> multiplicativeChains <> additiveChains <> scalars
             )
             |@>| mapMultiplicativeChain
                 ( \ms ->
-                    let (scalars, variables, additiveChains, multiplicativeChains, expChains, negates) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
-                     in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains <> negates)
+                    let (scalars, variables, additiveChains, multiplicativeChains, expChains) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
+                     in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains)
                 )
 
-_valueToCoefficientAndMultiplier :: Value -> (CReal, Maybe Value)
+_valueToCoefficientAndMultiplier :: Value -> (CReal, Value)
 _valueToCoefficientAndMultiplier v =
     case v of
-        Scalar _ -> (sc, Nothing)
-        Variable _ -> (1, Just v)
+        Scalar sc -> (sc, Scalar 1)
+        MultiplicativeChain (Scalar sc) (x : xs) -> (sc, multiplicativeChainFromList (x : xs))
+        _ -> (1, v)
 
-_simplifyLikeTerms :: Value -> Value
-_simplifyLikeTerms = undefined
+_groupLikeChainTerms :: [(o, Value)] -> [[(CReal, (o, Value))]]
+_groupLikeChainTerms ms =
+    let groupKey (_op, val) = val @> _valueToCoefficientAndMultiplier @> snd
+        groupVal (op, val) = (val @> _valueToCoefficientAndMultiplier @> fst, (op, val))
+        terms = groupMap groupKey groupVal ms @> DM.toAscList
+     in terms |@>| snd
+
+_condenseAdditiveTerms :: [(AdditiveOperator, Value)] -> [(CReal, (AdditiveOperator, Value))]
+_condenseAdditiveTerms as =
+    let sumGroup =
+            foldl'
+                ( \totalCount (count, (op, _value)) ->
+                    case op of
+                        Add -> totalCount + count
+                        Sub -> totalCount - count
+                )
+                0
+        groupedTerms = _groupLikeChainTerms as
+     in (groupedTerms |@>| \g -> (sumGroup g, (Add, head g @> snd @> snd)))
+
+_condenseMultiplicativeTerms :: [(MultiplicativeOperator, Value)] -> [(CReal, (MultiplicativeOperator, Value))]
+_condenseMultiplicativeTerms ms =
+    let productGroup =
+            foldl'
+                ( \totalProduct (count, (op, _value)) ->
+                    case op of
+                        Mul -> totalProduct * count
+                        Div -> totalProduct / count
+                )
+                1
+        groupedTerms = _groupLikeChainTerms ms
+     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd) (length ms @> fromIntegral @> Scalar))))
+
+_simplifyLikeAdditiveTerms :: Simplifier
+_simplifyLikeAdditiveTerms = mapAdditiveChain $ \as ->
+    _condenseAdditiveTerms as
+        |@>| \(scalar, (op, val)) ->
+            (Add, MultiplicativeChain (Scalar scalar) [(Mul, additiveChainFromList [(op, val)])])
+
+-- TODO: support combining x^2 and x
+_simplifyLikeMultiplicativeTerms :: Simplifier
+_simplifyLikeMultiplicativeTerms = mapMultiplicativeChain $ \ms ->
+    _condenseMultiplicativeTerms ms
+        |@>| \(scalar, (op, val)) ->
+            (Mul, MultiplicativeChain (Scalar scalar) [(Mul, multiplicativeChainFromList [(op, val)])])
+
+_condenseExpTerms :: [(MultiplicativeOperator, Value)] -> [(MultiplicativeOperator, Value)]
+_condenseExpTerms =
+    let groupKv (op, val) =
+            case (op, val) of
+                (Mul, ExpChain b e) -> (b, (Add, e))
+                (Div, ExpChain b e) -> (b, (Sub, e))
+                (Mul, v) -> (v, (Add, Scalar 1))
+                (Div, v) -> (v, (Sub, Scalar 1))
+        groups = groupMap (groupKv |@>| fst) (groupKv |@>| snd) |@>| DM.toAscList
+        mapGroup (b, es) = ExpChain b (additiveChainFromList es)
+        in groups ||@>|| mapGroup ||@>|| (Mul,)
+
+-- | Combines exponential terms with the same base, e.g. x*x^2*x^y -> x^(3+y)
+_simplifyLikeExpTerms :: Simplifier
+_simplifyLikeExpTerms = mapMultiplicativeChain _condenseExpTerms
 
 _deepSimplify :: (Value -> Value) -> Value -> Value
 _deepSimplify f v =
@@ -161,14 +184,21 @@ _deepSimplify f v =
             ExpChain b e -> ExpChain (ds b) (ds e)
             Scalar sc -> Scalar sc
             Variable v -> Variable v
-            Negate x -> Negate (ds x)
+
+simplifiers :: [Simplifier]
+simplifiers = [
+    _simplifySingleElementChain,
+    _simplifyExponentiationBy0Or1,
+    _simplifyMultiplyBy0,
+    _simplifyAdd0,
+    _simplifyMultiply1,
+    _simplifyMultiplyingByReciprocal,
+    _simplifySortChainTerms,
+    _simplifyLikeAdditiveTerms,
+    _simplifyLikeMultiplicativeTerms,
+    _simplifyLikeExpTerms]
 
 simplify :: Value -> Value
 simplify =
-    let simplifyPass =
-            _simplifyMultiplyBy0
-                |@>| _simplifyDoubleNegatives
-                |@>| _simplifyChainIdentity
-                |@>| _simplifyGroupChainScalars
-                |@>| _simplifySortChainTerms
+    let simplifyPass = foldl1' (|@>|) simplifiers
      in fixedPoint (_deepSimplify simplifyPass)

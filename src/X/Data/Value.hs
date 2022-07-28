@@ -24,7 +24,7 @@ additiveChainFromList :: [(AdditiveOperator, Value)] -> Value
 additiveChainFromList ((opHead, valueHead) : tail) =
     let newHead = case opHead of
             Add -> valueHead
-            Sub -> Negate valueHead
+            Sub -> MultiplicativeChain (Scalar (-1)) [(Mul, valueHead)]
      in AdditiveChain newHead tail
 additiveChainFromList [] = Scalar 0
 
@@ -55,4 +55,3 @@ instance Show Value where
     show (AdditiveChain x xs) = _showLeftAssociativeChain x xs
     show (MultiplicativeChain x xs) = _showLeftAssociativeChain x xs
     show (ExpChain b e) = show b <> "^" <> show e
-    show (Negate v) = "-" <> show v

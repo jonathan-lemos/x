@@ -5,6 +5,8 @@ import X.Data.Context
 import X.Data.Operator
 import Data.Maybe
 import qualified Data.Map as DM
+import Data.IntMap.Merge.Lazy (SimpleWhenMatched)
+import X.Data.Value.Simplify (Simplifier)
 
 isScalar :: Value -> Bool
 isScalar (Scalar _) = True
@@ -82,17 +84,7 @@ _groupChainScalars v =
             vs
         v -> v
 
-_sortChainTerms :: Value -> Value
-_sortChainTerms v =
-    let sortVs = groupMap (length . show) |@>| toAscList ||@>|| sort
-    in case v of
-        AdditiveChain v vs ->
-            let allVs = (Add, v) : vs
-                (scalars, notScalars) = partition isScalar allVs
-                allVsSorted = sortVs notScalars <> sortVs scalars
-            in
-
-_simplifyValue :: Value -> Value
+_simplifyValue :: Simplifier
 _simplifyValue = _simplifyChainIdentity
 
 _valueWithoutCoefficient :: Value -> Maybe Value
