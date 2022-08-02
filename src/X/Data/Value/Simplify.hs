@@ -1,17 +1,19 @@
 {-# LANGUAGE TupleSections #-}
+
 module X.Data.Value.Simplify where
 
 import Data.Bifunctor
 import Data.Foldable
+import Data.List
 import qualified Data.Map as DM
 import Data.Number.CReal
 import X.Data.Operator
 import X.Data.Value
+import X.Utils.CReal (safeExp)
 import X.Utils.Function
 import X.Utils.LeftToRight
 import X.Utils.List
 import X.Utils.Map
-import Data.List
 
 {- | A simplifier turns a value into an identical, but less complicated version of itself
 A simplifier should be idempotent, meaning f(f(x)) == f(x).
@@ -19,8 +21,8 @@ A simplifier should be idempotent, meaning f(f(x)) == f(x).
 type Simplifier = Value -> Value
 
 -- | Converts an additive/multiplicative chain of a single element into that element.
-_simplifySingleElementChain :: Simplifier
-_simplifySingleElementChain v =
+simplifySingleElementChain :: Simplifier
+simplifySingleElementChain v =
     case v of
         AdditiveChain x [] -> x
         MultiplicativeChain x [] -> x
@@ -30,16 +32,16 @@ _simplifySingleElementChain v =
 
  0^0 will be simplified to 1. This will be changed when the evaluation engine can report errors.
 -}
-_simplifyExponentiationBy0Or1 :: Simplifier
-_simplifyExponentiationBy0Or1 v =
+simplifyExponentiationBy0Or1 :: Simplifier
+simplifyExponentiationBy0Or1 v =
     case v of
         ExpChain b (Scalar 1) -> b
         ExpChain _ (Scalar 0) -> Scalar 1
         x -> x
 
 -- | Converts 0x to 0
-_simplifyMultiplyBy0 :: Simplifier
-_simplifyMultiplyBy0 =
+simplifyMultiplyBy0 :: Simplifier
+simplifyMultiplyBy0 =
     transformMultiplicativeChain
         ( \ms ->
             if any (snd |@>| (== Scalar 0)) ms
@@ -48,16 +50,16 @@ _simplifyMultiplyBy0 =
         )
 
 -- | Converts x+0 to x
-_simplifyAdd0 :: Simplifier
-_simplifyAdd0 = mapAdditiveChain (filter $ snd |@>| (/= Scalar 0))
+simplifyAdd0 :: Simplifier
+simplifyAdd0 = mapAdditiveChain (filter $ snd |@>| (/= Scalar 0))
 
 -- | Converts 1x to x
-_simplifyMultiply1 :: Simplifier
-_simplifyMultiply1 = mapMultiplicativeChain (filter $ snd |@>| (/= Scalar 1))
+simplifyMultiply1 :: Simplifier
+simplifyMultiply1 = mapMultiplicativeChain (filter $ snd |@>| (/= Scalar 1))
 
 -- | Converts + (-x) to - x and - (-x) to + x
-_simplifyAddingNegative :: Simplifier
-_simplifyAddingNegative =
+simplifyAddingNegative :: Simplifier
+simplifyAddingNegative =
     let mapAdditiveTerm t =
             case t of
                 (Add, Scalar x) | x < 0 -> (Sub, Scalar (-x))
@@ -66,8 +68,8 @@ _simplifyAddingNegative =
      in mapAdditiveChain (fmap mapAdditiveTerm)
 
 -- | Converts *(1/x) to /x, /(1/x) to *x
-_simplifyMultiplyingByReciprocal :: Simplifier
-_simplifyMultiplyingByReciprocal =
+simplifyMultiplyingByReciprocal :: Simplifier
+simplifyMultiplyingByReciprocal =
     let mapMultiplicativeTerm t =
             case t of
                 (Mul, Scalar x) | abs x > 0 && abs x < 1 -> (Div, Scalar (1 / x))
@@ -91,8 +93,9 @@ _partitionChainTerms =
 _mapPartitionOutput :: ([(o, Value)] -> [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
 _mapPartitionOutput fn (a, b, c, d, e) = (fn a, fn b, fn c, fn d, fn e)
 
-_simplifySortChainTerms :: Simplifier
-_simplifySortChainTerms =
+-- | Sorts terms of a chain
+simplifySortChainTerms :: Simplifier
+simplifySortChainTerms =
     let sortGroup :: Ord o => [(o, Value)] -> [(o, Value)]
         sortGroup = sortByKey (\(_, l) -> (length (show l), show l))
      in mapAdditiveChain
@@ -116,7 +119,7 @@ _valueToCoefficientAndMultiplier v =
 _groupLikeChainTerms :: [(o, Value)] -> [[(CReal, (o, Value))]]
 _groupLikeChainTerms ms =
     let groupKey (_op, val) = val @> _valueToCoefficientAndMultiplier @> snd
-        groupVal (op, val) = (val @> _valueToCoefficientAndMultiplier @> fst, (op, val))
+        groupVal (op, val) = (val @> _valueToCoefficientAndMultiplier @> fst, (op, val @> _valueToCoefficientAndMultiplier @> snd))
         terms = groupMap groupKey groupVal ms @> DM.toAscList
      in terms |@>| snd
 
@@ -144,17 +147,18 @@ _condenseMultiplicativeTerms ms =
                 )
                 1
         groupedTerms = _groupLikeChainTerms ms
-     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd) (length ms @> fromIntegral @> Scalar))))
+     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd @> simplifyMultiply1) (length ms @> fromIntegral @> Scalar) @> simplifyExponentiationBy0Or1)))
 
-_simplifyLikeAdditiveTerms :: Simplifier
-_simplifyLikeAdditiveTerms = mapAdditiveChain $ \as ->
+-- | Combines like additive terms e.g. x + 2x + 2 + 3 -> 3x + 5
+simplifyLikeAdditiveTerms :: Simplifier
+simplifyLikeAdditiveTerms = mapAdditiveChain $ \as ->
     _condenseAdditiveTerms as
         |@>| \(scalar, (op, val)) ->
             (Add, MultiplicativeChain (Scalar scalar) [(Mul, additiveChainFromList [(op, val)])])
 
--- TODO: support combining x^2 and x
-_simplifyLikeMultiplicativeTerms :: Simplifier
-_simplifyLikeMultiplicativeTerms = mapMultiplicativeChain $ \ms ->
+-- | Combines like multiplicative terms e.g. x * 3x * 2 * 5 -> 15x
+simplifyLikeMultiplicativeTerms :: Simplifier
+simplifyLikeMultiplicativeTerms = mapMultiplicativeChain $ \ms ->
     _condenseMultiplicativeTerms ms
         |@>| \(scalar, (op, val)) ->
             (Mul, MultiplicativeChain (Scalar scalar) [(Mul, multiplicativeChainFromList [(op, val)])])
@@ -168,16 +172,24 @@ _condenseExpTerms =
                 (Mul, v) -> (v, (Add, Scalar 1))
                 (Div, v) -> (v, (Sub, Scalar 1))
         groups = groupMap (groupKv |@>| fst) (groupKv |@>| snd) |@>| DM.toAscList
-        mapGroup (b, es) = ExpChain b (additiveChainFromList es)
-        in groups ||@>|| mapGroup ||@>|| (Mul,)
+        mapGroup (b, es) = ExpChain b (additiveChainFromList es) @> simplifyExponentiationBy0Or1
+     in groups ||@>|| mapGroup ||@>|| (Mul,)
 
 -- | Combines exponential terms with the same base, e.g. x*x^2*x^y -> x^(3+y)
-_simplifyLikeExpTerms :: Simplifier
-_simplifyLikeExpTerms = mapMultiplicativeChain _condenseExpTerms
+simplifyLikeExpTerms :: Simplifier
+simplifyLikeExpTerms = mapMultiplicativeChain _condenseExpTerms
 
-_deepSimplify :: (Value -> Value) -> Value -> Value
-_deepSimplify f v =
-    let ds = _deepSimplify f
+-- | Evaluates x^y expressions when x and y are both scalars.
+simplifyEvaluateScalarExp :: Simplifier
+simplifyEvaluateScalarExp v =
+    case v of
+        ExpChain (Scalar x) (Scalar y) -> Scalar (x `safeExp` y)
+        x -> x
+
+-- | Applies the given simplifier to all children of the given Value, then to the given Value itself
+deepSimplify :: Simplifier -> Simplifier
+deepSimplify f v =
+    let ds = deepSimplify f
      in f $ case v of
             AdditiveChain x xs -> AdditiveChain (ds x) (xs |@>| second ds)
             MultiplicativeChain x xs -> MultiplicativeChain (ds x) (xs |@>| second ds)
@@ -186,19 +198,22 @@ _deepSimplify f v =
             Variable v -> Variable v
 
 simplifiers :: [Simplifier]
-simplifiers = [
-    _simplifySingleElementChain,
-    _simplifyExponentiationBy0Or1,
-    _simplifyMultiplyBy0,
-    _simplifyAdd0,
-    _simplifyMultiply1,
-    _simplifyMultiplyingByReciprocal,
-    _simplifySortChainTerms,
-    _simplifyLikeAdditiveTerms,
-    _simplifyLikeMultiplicativeTerms,
-    _simplifyLikeExpTerms]
+simplifiers =
+    [ simplifySingleElementChain
+    , simplifyExponentiationBy0Or1
+    , simplifyMultiplyBy0
+    , simplifyAdd0
+    , simplifyMultiply1
+    , simplifyMultiplyingByReciprocal
+    , simplifySortChainTerms
+    , simplifyLikeAdditiveTerms
+    , simplifyLikeMultiplicativeTerms
+    , simplifyLikeExpTerms
+    , simplifyEvaluateScalarExp
+    ]
 
+-- | Simplifies a value
 simplify :: Value -> Value
 simplify =
     let simplifyPass = foldl1' (|@>|) simplifiers
-     in fixedPoint (_deepSimplify simplifyPass)
+     in fixedPoint (deepSimplify simplifyPass)

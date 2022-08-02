@@ -6,13 +6,13 @@ import qualified X.Data.Context as Ctx
 import X.Data.AST.Assignment
 import X.Control.Terminal
 import X.Shell.Formatting
-import X.Utils.Value
 import Control.Applicative
 import X.Control.Parser
 import X.Control.Parser.AST.Statement
 import X.Control.Parser.Combinator.WithTrailingWhitespace
 import X.Control.Parser.Combinator.Complete
 import X.Utils.LeftToRight
+import X.Data.Value.Evaluate
 
 -- | Parses input, returning Either an error or the result of said input
 parseStatement :: String -> Either ParseError Statement

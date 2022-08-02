@@ -3,6 +3,8 @@ module X.Data.Value where
 import Data.Number.CReal
 import X.Data.Operator
 import X.Utils.LeftToRight
+import X.Utils.String (parenthesize)
+import Data.List
 
 data Value
     = Scalar CReal
@@ -42,12 +44,12 @@ mapAdditiveChain f = transformAdditiveChain (f |@>| additiveChainFromList)
 mapMultiplicativeChain :: ([(MultiplicativeOperator, Value)] -> [(MultiplicativeOperator, Value)]) -> Value -> Value
 mapMultiplicativeChain f = transformMultiplicativeChain (f |@>| multiplicativeChainFromList)
 
-_showLeftAssociativeChain :: (Show a, Show b, Show c) => a -> [(b, c)] -> String
+_showLeftAssociativeChain :: (Show op) => Value -> [(op, Value)] -> String
 _showLeftAssociativeChain x xs =
     xs
-        |@>| (\(op, v) -> show op <> " " <> show v)
-        @> mconcat
-        @> (show x <>)
+        |@>| (\(op, v) -> " " <> show op <> " " <> innerShow v)
+        @> intercalate ""
+        @> (innerShow x <>)
 
 instance Show Value where
     show (Scalar sc) = show sc
@@ -55,3 +57,9 @@ instance Show Value where
     show (AdditiveChain x xs) = _showLeftAssociativeChain x xs
     show (MultiplicativeChain x xs) = _showLeftAssociativeChain x xs
     show (ExpChain b e) = show b <> "^" <> show e
+
+innerShow :: Value -> String
+innerShow (Scalar sc) | sc < 0 = parenthesize (show $ Scalar sc)
+innerShow (AdditiveChain x xs) = parenthesize (show $ AdditiveChain x xs)
+innerShow (MultiplicativeChain x xs) = parenthesize (show $ MultiplicativeChain x xs)
+innerShow v = show v

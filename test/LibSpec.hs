@@ -11,17 +11,17 @@ spec :: Spec
 spec = do
     let tcs =
             [
-                (
-                    [ "f = 2 + 3"
-                    , "f + 7"
-                    ]
-                , []
-                ,
-                    [ "f <- 5.0\n"
-                    , "12.0\n"
-                    ]
-                , "arithmetic"
-                )
+--                (
+--                    [ "f = 2 + 3"
+--                    , "f + 7"
+--                    ]
+--                , []
+--                ,
+--                    [ "f <- 5.0\n"
+--                    , "12.0\n"
+--                    ]
+--                , "arithmetic"
+--                )
             ]
 
     let tcToSpecCase (input, dims, output, name) =

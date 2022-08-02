@@ -31,7 +31,7 @@ spec = parallel $ do
     describe "parseCommand tests" $ do
         desc "parses basic expressions" $ do
             parseStatement "f = 2" `shouldEq` Right (StmtAssignment (Assignment "f" (Scalar 2)))
-            parseStatement "2 + 3" `shouldEq` Right (StmtValue (InfixCall (Scalar 2) Add (Scalar 3)))
+            parseStatement "2 + 3" `shouldEq` Right (StmtValue (AdditiveChain (Scalar 2) [(Add, Scalar 3)]))
 
         desc "errors on invalid expressions" $ do
             parseStatement "2 +" `shouldEq` Left (ParseError "Expected a number, variable, or ( expression )" "")

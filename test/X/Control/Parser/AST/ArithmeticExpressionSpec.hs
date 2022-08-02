@@ -14,7 +14,7 @@ import Harness.With
 import X.Data.Value
 import X.Data.Operator
 import X.TestUtils.Context
-import X.Utils.Value
+import X.Data.Value.Evaluate
 
 
 spec :: Spec
@@ -24,7 +24,7 @@ spec = parallel $ do
         "2" `shouldParseTo` Scalar 2
         "(2)" `shouldParseTo` Scalar 2
         "( 2 )" `shouldParseTo` Scalar 2
-        "(2 + 2)" `shouldParseTo` InfixCall (Scalar 2) Add (Scalar 2)
+        "(2 + 2)" `shouldParseTo` AdditiveChain (Scalar 2) [(Add, Scalar 2)]
         "a" `shouldParseTo` Variable "a"
         "foobar" `shouldParseTo` Variable "foobar"
 
