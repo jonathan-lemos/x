@@ -1,8 +1,8 @@
 module X.TestUtils.Either where
 
-right :: Either String b -> b
+right :: (Show a) => Either a b -> b
 right (Right x) = x
-right (Left e) = error e
+right (Left e) = error $ "Expected Right, got " <> show e
 
 rightIs :: (b -> Bool) -> Either a b -> Bool
 rightIs predicate (Right b) = predicate b
