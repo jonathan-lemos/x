@@ -126,6 +126,10 @@ test-suite X-test
       Harness.With
       LibSpec
       Spec
+      TestUtils.Assertions.FunctionAssertion
+      TestUtils.Assertions.ParserAssertion
+      TestUtils.Assertions.Utils
+      TestUtils.Collector
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec
       X.Control.Parser.AST.StatementSpec
@@ -135,6 +139,7 @@ test-suite X-test
       X.Control.TerminalSpec
       X.Control.TrySpec
       X.Data.Value.SimplifySpec
+      X.Data.ValueSpec
       X.Shell.MainSpec
       X.TestUtils.Arbitrary
       X.TestUtils.Context
@@ -149,13 +154,12 @@ test-suite X-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck
+      HTF
     , X
     , ansi-terminal
     , base >=4.7 && <5
     , containers
     , free
-    , hspec
     , numbers
     , split
     , terminal-size

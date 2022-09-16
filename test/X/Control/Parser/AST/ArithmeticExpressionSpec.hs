@@ -15,6 +15,7 @@ import X.Data.Value
 import X.Data.Operator
 import X.TestUtils.Context
 import X.Data.Value.Evaluate
+import X.Utils.LeftToRight
 
 
 spec :: Spec
@@ -35,7 +36,7 @@ spec = parallel $ do
 
     let state = mkCtx [("a", Scalar 4), ("foo", Scalar 9)]
 
-    let evaluateAdditiveExpression = (`evaluateValue` state) <$> additiveExpression
+    let evaluateAdditiveExpression = additiveExpression |@>| (`evaluateValue` state)
 
     parserDesc evaluateAdditiveExpression "arithmetic expression evaluation" $ do
         "2" `shouldParseTo` Scalar 2

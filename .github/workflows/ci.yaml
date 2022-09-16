@@ -16,7 +16,7 @@ jobs:
       matrix:
         stack: ["2.7.5"]
         cabal: ["3.6.2.0"]
-        ghc: ["8.10.7", "9.0.2", "9.2.2"]
+        ghc: ["8.10.7"]
 
     steps:
     - uses: actions/checkout@v3

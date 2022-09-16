@@ -60,6 +60,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - X
-    - hspec
-    - QuickCheck
+    - HTF
     - split

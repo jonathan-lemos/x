@@ -47,7 +47,7 @@ mapMultiplicativeChain f = transformMultiplicativeChain (f |@>| multiplicativeCh
 _showLeftAssociativeChain :: (Show op) => Value -> [(op, Value)] -> String
 _showLeftAssociativeChain x xs =
     xs
-        |@>| (\(op, v) -> " " <> show op <> " " <> innerShow v)
+        |@>| (\(op, v) -> show op <> innerShow v)
         @> intercalate ""
         @> (innerShow x <>)
 
