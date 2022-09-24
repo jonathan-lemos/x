@@ -1,74 +1,88 @@
+{-# OPTIONS_GHC -F -pgmF htfpp #-}
 module X.Shell.MainSpec where
 
+import Test.Framework hiding (reason)
 import Control.Monad
 import Data.Bifunctor
 import Data.Either
 import Data.List
 import Data.List.Split
-import Harness.TestCase
-import Test.Hspec
+import Test.Framework.TestInterface
+import TestUtils.Assertions.BasicAssertion
+import TestUtils.Assertions.FunctionAssertion
 import X.Control.Parser.AST.ArithmeticExpressionSpec
 import X.Control.Terminal
 import X.Control.Try
+import X.Data.AST.Assignment
+import X.Data.AST.Statement (Statement (StmtAssignment, StmtValue))
+import X.Data.Context
+import X.Data.Operator
 import X.Data.ParseError
-import X.Shell.Main
-import X.Utils.Try (eitherToTry)
-import X.TestUtils.Context
 import X.Data.Value
 import X.Shell.Execution
-import X.Data.AST.Statement (Statement(StmtValue, StmtAssignment))
-import X.Data.Operator
-import X.Data.AST.Assignment
+import X.Shell.Main
+import X.TestUtils.Context
 import X.Utils.LeftToRight
+import X.Utils.Try (eitherToTry)
 
 ioListToString :: [PrintCmd] -> String
 ioListToString = intercalate "" . fmap show
 
-spec :: Spec
-spec = parallel $ do
-    let sState = mkCtx [("a", Scalar 4), ("foo", Scalar 9)]
+sState :: Context
+sState = mkCtx [("a", Scalar 4), ("foo", Scalar 9)]
 
-    describe "parseCommand tests" $ do
-        desc "parses basic expressions" $ do
-            parseStatement "f = 2" `shouldEq` Right (StmtAssignment (Assignment "f" (Scalar 2)))
-            parseStatement "2 + 3" `shouldEq` Right (StmtValue (AdditiveChain (Scalar 2) [(Add, Scalar 3)]))
+test_parseStatementWorksOnBasicStatements :: Assertion
+test_parseStatementWorksOnBasicStatements = functionAssertion parseStatement $ do
+    "f = 2" `shouldEvalTo` Right (StmtAssignment (Assignment "f" (Scalar 2)))
+    "2 + 3" `shouldEvalTo` Right (StmtValue (AdditiveChain (Scalar 2) [(Add, Scalar 3)]))
 
-        desc "errors on invalid expressions" $ do
-            parseStatement "2 +" `shouldEq` Left (ParseError "Expected a number, variable, or ( expression )" "")
-            parseStatement "" `shouldEq` Left (ParseError "Expected a number, variable, or ( expression )" "")
+test_parseStatementFailsOnInvalidStatements :: Assertion
+test_parseStatementFailsOnInvalidStatements = functionAssertion parseStatement $ do
+    "2 +" `shouldEvalTo` Left (ParseError "Expected a number, variable, or ( expression )" "")
+    "" `shouldEvalTo` Left (ParseError "Expected a number, variable, or ( expression )" "")
 
-    describe "evaluateStatement tests" $ do
-        let parseAndEval = parseStatement ||@>|| evaluateStatement sState
-        let parseAndEvalResult = parseAndEval ||@>|| snd
-        let parseAndEvalState = parseAndEval ||@>|| fst
+parseAndEval :: String -> Either ParseError (Context, String)
+parseAndEval = parseStatement ||@>|| evaluateStatement sState
 
-        desc "calculates basic expressions properly" $ do
-            parseAndEvalResult "2 + 3" `shouldEq` Right "5.0"
-            parseAndEvalResult "    2     +     3" `shouldEq` Right "5.0"
-            parseAndEvalResult "2+3" `shouldEq` Right "5.0"
+parseAndEvalResult :: String -> Either ParseError String
+parseAndEvalResult = parseAndEval ||@>|| snd
 
-        desc "executes expression with trailing whitespace" $ do
-            parseAndEvalResult "2+3 " `shouldEq` Right "5.0"
+test_evaluateStatementCalculatesBasicExpressions :: Assertion
+test_evaluateStatementCalculatesBasicExpressions =
+    functionAssertion parseAndEvalResult $ do
+        "2 + 3" `shouldEvalTo` Right "5.0"
+        "    2     +     3" `shouldEvalTo` Right "5.0"
+        "2+3" `shouldEvalTo` Right "5.0"
 
-        desc "reports syntax error on invalid expressions" $ do
-            parseAndEvalResult "2+" `shouldEq` Left (ParseError {reason = "Expected a number, variable, or ( expression )", currentInput = ""})
+test_evaluateStatementWorksOnTrailingWhitespace :: Assertion
+test_evaluateStatementWorksOnTrailingWhitespace =
+    functionAssertion parseAndEvalResult $ do
+        "2+3 " `shouldEvalTo` Right "5.0"
 
-    describe "execute tests" $ do
-        let exec a b c =
-                execute a b c
-                    @> snd
-                    @> fmap show
-                    @> intercalate ""
-                    @> splitOn "\n"
-                    @> init
+test_evaluateStatementReportsSyntaxError :: Assertion
+test_evaluateStatementReportsSyntaxError =
+    functionAssertion parseAndEvalResult $ do
+        "2+" `shouldEvalTo` Left (ParseError{reason = "Expected a number, variable, or ( expression )", currentInput = ""})
 
-        desc "prints value if value is present" $ do
-            exec sState 80 "123.45" `shouldEq` ["123.45"]
+execAndGetLines a b c =
+    execute a b c
+        @> snd
+        @> fmap show
+        @> intercalate ""
+        @> splitOn "\n"
+        @> init
 
-        desc "prints error if error is present" $ do
-            exec sState 80 "2 + _ + 7"
-                `shouldEq` [ "error: Expected a number, variable, or ( expression )"
-                           , ""
-                           , "2 + _ + 7"
-                           , "    ^"
-                           ]
+test_executePrintsValue :: Assertion
+test_executePrintsValue =
+    basicAssertion $ do
+        execAndGetLines sState 80 "123.45" `shouldBe` ["123.45"]
+
+test_executePrintsError :: Assertion
+test_executePrintsError =
+    basicAssertion $ do
+        execAndGetLines sState 80 "2 + _ + 7"
+            `shouldBe` [ "error: Expected a number, variable, or ( expression )"
+                       , ""
+                       , "2 + _ + 7"
+                       , "    ^"
+                       ]

@@ -15,7 +15,7 @@ data ParserAssertion a
     = SuccessfulParseAssertion Input a Remainder Title
     | FailedParseAssertion Input Remainder Reason Title
 
-instance WithTitle (ParserAssertion a) where
+instance ModifyAssertionTitle (ParserAssertion a) where
     modifyAssertionTitle (SuccessfulParseAssertion input value remainder _title) = SuccessfulParseAssertion input value remainder
     modifyAssertionTitle (FailedParseAssertion input remainder reason _title) = FailedParseAssertion input remainder reason
 
@@ -29,10 +29,10 @@ withRemainder c newRemainder =
         modifyAssertion failed = failed
      in modifyLast modifyAssertion c
 
-shouldFailWithRemainder :: String -> String -> (String -> ParserAssertion a)
-shouldFailWithRemainder input remainder reason = FailedParseAssertion input remainder reason (show input <> " should fail to parse with remainder " <> show remainder)
+shouldFailWithRemainder :: String -> String -> (String -> Collector (ParserAssertion a) ())
+shouldFailWithRemainder input remainder reason = FailedParseAssertion input remainder reason (show input <> " should fail to parse with remainder " <> show remainder) @> singleton
 
-andReason :: (String -> ParserAssertion a) -> String -> ParserAssertion a
+andReason :: (String -> Collector (ParserAssertion a) ()) -> String -> Collector (ParserAssertion a) ()
 andReason = ($)
 
 parserAssertion :: (Show a, Eq a) => Parser a -> Collector (ParserAssertion a) b -> Assertion

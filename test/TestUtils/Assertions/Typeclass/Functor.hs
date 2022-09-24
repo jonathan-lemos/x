@@ -1,12 +1,13 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Harness.Typeclass.FunctorCase where
+module TestUtils.Assertions.Typeclass.Functor where
 
 import Test.Framework
 import Test.Framework.TestInterface
 import TestUtils.Assertions.BasicAssertion
 import TestUtils.Assertions.FunctionAssertion
+import TestUtils.Collector
 
 {- | Verifies properties for the "happy path" functor e.g. Right and not Left, Just and not Nothing, etc.
 

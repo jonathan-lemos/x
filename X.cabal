@@ -115,19 +115,14 @@ test-suite X-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Harness.FnCase
-      Harness.ParserCase
-      Harness.QcCase
-      Harness.TestCase
-      Harness.TestDSLMonad
-      Harness.Typeclass.ApplicativeCase
-      Harness.Typeclass.FunctorCase
-      Harness.Typeclass.MonadCase
-      Harness.With
       LibSpec
-      Spec
+      TestUtils.Assertions.BasicAssertion
       TestUtils.Assertions.FunctionAssertion
       TestUtils.Assertions.ParserAssertion
+      TestUtils.Assertions.QuickCheckAssertion
+      TestUtils.Assertions.Typeclass.Applicative
+      TestUtils.Assertions.Typeclass.Functor
+      TestUtils.Assertions.Typeclass.Monad
       TestUtils.Assertions.Utils
       TestUtils.Collector
       X.Control.Parser.AST.ArithmeticExpressionSpec
@@ -139,14 +134,12 @@ test-suite X-test
       X.Control.TerminalSpec
       X.Control.TrySpec
       X.Data.Value.SimplifySpec
-      X.Data.ValueSpec
       X.Shell.MainSpec
       X.TestUtils.Arbitrary
       X.TestUtils.Context
       X.TestUtils.Either
       X.TestUtils.List
       X.TestUtils.MockTerminal
-      X.TestUtils.Should
       X.TestUtils.Try
       X.TestUtils.Unwrap
       Paths_X
@@ -155,6 +148,7 @@ test-suite X-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HTF
+    , QuickCheck
     , X
     , ansi-terminal
     , base >=4.7 && <5

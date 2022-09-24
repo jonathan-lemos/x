@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         stack: ["2.7.5"]
-        cabal: ["3.6.2.0"]
-        ghc: ["8.10.7"]
+        cabal: ["3.6.2.0", "3.8.1.0"]
+        ghc: ["8.10.7", 9.4.2"]
 
     steps:
     - uses: actions/checkout@v3
@@ -34,12 +34,13 @@ jobs:
       run: echo "${HOME}/.cabal/bin" >> $GITHUB_PATH
 
     - uses: actions/cache@v3
-      name: Cache Cabal and Stack work directories
+      name: Cache Cabal, Stack, and HTF work directories
       with:
         path: |
           ~/.stack
           .stack-work
           ~/.cabal
+          .HTF
         key: ${{ matrix.ghc }}-${{ matrix.cabal }}-${{ matrix.stack }}
 
     - name: Update Cabal mirrors
@@ -59,5 +60,5 @@ jobs:
         path: src/
         fail-on: warning
 
-    - name: Run hSpec tests
-      run: stack test
+    - name: Run HTF tests
+      run: stack test --test-arguments='--max-cur-ms=10000 -j'$(nproc)

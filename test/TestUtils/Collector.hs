@@ -30,10 +30,10 @@ modifyLast f (Collector list val) =
 
 type Title = String
 
-class WithTitle a where
+class ModifyAssertionTitle a where
     modifyAssertionTitle :: a -> Title -> a
 
-    withTitle :: Collector a b -> Title -> Collector a b
-    withTitle c title =
-        modifyLast (`modifyAssertionTitle` title) c
+withTitle :: (ModifyAssertionTitle a) => Collector a b -> Title -> Collector a b
+withTitle c title =
+    modifyLast (`modifyAssertionTitle` title) c
 

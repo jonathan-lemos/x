@@ -13,7 +13,7 @@ shouldBe a b = BasicAssertion (a == b) (show a <> " should be " <> show b) @> si
 assert :: Bool -> Collector BasicAssertion ()
 assert a = BasicAssertion a "assert" @> singleton
 
-instance WithTitle BasicAssertion where
+instance ModifyAssertionTitle BasicAssertion where
     modifyAssertionTitle (BasicAssertion value _oldMsg) = BasicAssertion value
 
 basicAssertion :: Collector BasicAssertion a -> Assertion

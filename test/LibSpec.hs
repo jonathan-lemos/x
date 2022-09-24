@@ -1,32 +1,35 @@
+{-# OPTIONS_GHC -F -pgmF htfpp #-}
 module LibSpec where
 
-import X.Control.Terminal
 import Lib
-import Test.Hspec
-import X.TestUtils.MockTerminal
-import X.TestUtils.Should (shouldBeSpec)
+import Test.Framework
+import Test.Framework.TestInterface
+import TestUtils.Assertions.BasicAssertion
+import X.Control.Terminal
 import X.TestUtils.List
+import X.TestUtils.MockTerminal
+import X.Utils.LeftToRight
 
-spec :: Spec
-spec = do
+test_endToEnd :: Assertion
+test_endToEnd = do
     let tcs =
             [
---                (
---                    [ "f = 2 + 3"
---                    , "f + 7"
---                    ]
---                , []
---                ,
---                    [ "f <- 5.0\n"
---                    , "12.0\n"
---                    ]
---                , "arithmetic"
---                )
+                (
+                    [ "f = 2 + 3"
+                    , "f + 7"
+                    ]
+                , []
+                ,
+                    [ "f <- 5.0\n"
+                    , "12.0\n"
+                    ]
+                )
             ]
 
-    let tcToSpecCase (input, dims, output, name) =
-            (show <$> runPure input dims mainLoop, weave (replicate (length output + 1) "x> ") output, name)
+    let tcToSpecCase (input, dims, output) =
+            (runPure input dims mainLoop |@>| show) `shouldBe` weave (replicate (length output + 1) "x> ") output
 
-    shouldBeSpec
-        "end-to-end tests"
-        $ tcToSpecCase <$> tcs
+    tcs
+        |@>| tcToSpecCase
+        @> sequence_
+        @> basicAssertion

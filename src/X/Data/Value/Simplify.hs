@@ -67,16 +67,6 @@ simplifyAddingNegative =
                 (x, y) -> (x, y)
      in mapAdditiveChain (fmap mapAdditiveTerm)
 
--- | Converts *(1/x) to /x, /(1/x) to *x
-simplifyMultiplyingByReciprocal :: Simplifier
-simplifyMultiplyingByReciprocal =
-    let mapMultiplicativeTerm t =
-            case t of
-                (Mul, Scalar x) | abs x > 0 && abs x < 1 -> (Div, Scalar (1 / x))
-                (Div, Scalar x) | abs x > 0 && abs x < 1 -> (Mul, Scalar (1 / x))
-                (x, y) -> (x, y)
-     in mapMultiplicativeChain (fmap mapMultiplicativeTerm)
-
 _partitionChainTerms :: [(o, Value)] -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
 _partitionChainTerms =
     foldr
@@ -204,7 +194,6 @@ simplifiers =
     , simplifyMultiplyBy0
     , simplifyAdd0
     , simplifyMultiply1
-    , simplifyMultiplyingByReciprocal
     , simplifySortChainTerms
     , simplifyLikeAdditiveTerms
     , simplifyLikeMultiplicativeTerms

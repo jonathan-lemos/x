@@ -1,21 +1,22 @@
+{-# OPTIONS_GHC -F -pgmF htfpp #-}
 module X.Control.Parser.Combinator.Branch.CheckSpec where
 
-import Test.Hspec
+import Test.Framework
 import X.Control.Parser.Combinator.Branch.Check
 import X.Control.Parser.AST.Token.Identifier
-import Harness.With
-import Harness.ParserCase
 import X.Utils.LeftToRight
+import Test.Framework.TestInterface
+import TestUtils.Assertions.ParserAssertion
 
-spec :: Spec
-spec = do
+test_checkIdentifierLengthLt5 :: Assertion
+test_checkIdentifierLengthLt5 = do
     let sampleParser = check (length |@>| (< 5)) (<> " failed") identifier
 
-    parserDesc sampleParser "check identifier with length < 5" $ do
+    parserAssertion sampleParser $ do
         "abc" `shouldParseTo` "abc"
 
         "abc def" `shouldParseTo` "abc" `withRemainder` " def"
 
-        "_" `shouldFailWithReason` "Expected an A-z character" `andRemainder` "_"
-        "abcde" `shouldFailWithReason` "abcde failed" `andRemainder` ""
-        "abcde ghi" `shouldFailWithReason` "abcde failed" `andRemainder` " ghi"
+        "_" `shouldFailWithRemainder` "_" `andReason` "Expected an A-z character"
+        "abcde" `shouldFailWithRemainder` "" `andReason` "abcde failed"
+        "abcde ghi" `shouldFailWithRemainder` " ghi" `andReason` "abcde failed"

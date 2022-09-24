@@ -1,27 +1,26 @@
+{-# OPTIONS_GHC -F -pgmF htfpp #-}
+
 module X.Control.Parser.AST.ArithmeticExpressionSpec where
 
+import Test.Framework
 import Data.Bifunctor
+import Data.Maybe
 import Data.Number.CReal
-import X.Data.ParseError
+import Test.Framework.TestInterface
 import X.Control.Parser
 import X.Control.Parser.AST.ArithmeticExpression
-import Test.Hspec
-import Data.Maybe
 import X.Control.Try
-import Harness.TestCase
-import Harness.ParserCase
-import Harness.With
-import X.Data.Value
 import X.Data.Operator
-import X.TestUtils.Context
+import X.Data.ParseError
+import X.Data.Value
 import X.Data.Value.Evaluate
+import X.TestUtils.Context
 import X.Utils.LeftToRight
+import TestUtils.Assertions.ParserAssertion
 
-
-spec :: Spec
-spec = parallel $ do
-
-    parserDesc factor "factor" $ do
+test_factor :: Assertion
+test_factor = do
+    parserAssertion factor $ do
         "2" `shouldParseTo` Scalar 2
         "(2)" `shouldParseTo` Scalar 2
         "( 2 )" `shouldParseTo` Scalar 2
@@ -32,13 +31,15 @@ spec = parallel $ do
         "2 || 5" `shouldParseTo` Scalar 2 `withRemainder` " || 5"
         "(2) || 5" `shouldParseTo` Scalar 2 `withRemainder` " || 5"
 
-        "@" `shouldFailWithReason` "Expected a number, variable, or ( expression )" `andRemainder` "@"
+        "@" `shouldFailWithRemainder` "@" `andReason` "Expected a number, variable, or ( expression )"
 
+test_evaluation :: Assertion
+test_evaluation = do
     let state = mkCtx [("a", Scalar 4), ("foo", Scalar 9)]
 
     let evaluateAdditiveExpression = additiveExpression |@>| (`evaluateValue` state)
 
-    parserDesc evaluateAdditiveExpression "arithmetic expression evaluation" $ do
+    parserAssertion evaluateAdditiveExpression $ do
         "2" `shouldParseTo` Scalar 2
         "3^2" `shouldParseTo` Scalar 9
         "2^3^2" `shouldParseTo` Scalar 512
@@ -58,7 +59,7 @@ spec = parallel $ do
         "2 + 2 || 5 * 7" `shouldParseTo` Scalar 4 `withRemainder` " || 5 * 7"
         "(5*8),(7*4)" `shouldParseTo` Scalar 40 `withRemainder` ",(7*4)"
 
-        "+" `shouldFailWithReason` "Expected a number, variable, or ( expression )" `andRemainder` "+"
-        "(2+2" `shouldFailWithReason` "Expected ')'" `andRemainder` ""
-        "(2+2(" `shouldFailWithReason` "Expected ')'" `andRemainder` "("
-        "2*" `shouldFailWithReason` "Expected a number, variable, or ( expression )" `andRemainder` ""
+        "+" `shouldFailWithRemainder` "+" `andReason` "Expected a number, variable, or ( expression )"
+        "(2+2" `shouldFailWithRemainder` "" `andReason` "Expected ')'"
+        "(2+2(" `shouldFailWithRemainder` "(" `andReason` "Expected ')'"
+        "2*" `shouldFailWithRemainder` "" `andReason` "Expected a number, variable, or ( expression )"
