@@ -19,7 +19,7 @@ shouldEvalTo a b = EqAssertion a b "" @> singleton
 
 functionAssertion :: (Show a, Show b, Eq b) => (a -> b) -> Collector (FunctionAssertion a b) c -> Assertion
 functionAssertion f as =
-    let mapAssertion (EqAssertion a b title) = assertEqualVerbose title (f a) b
+    let mapAssertion (EqAssertion a b title) = assertEqualVerbose title b (f a)
         mapAssertion (PredicateAssertion a p title) = assertBoolVerbose title (f a @> p)
      in getList as
             |@>| mapAssertion

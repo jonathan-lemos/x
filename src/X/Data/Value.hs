@@ -3,7 +3,6 @@ module X.Data.Value where
 import Data.Number.CReal
 import X.Data.Operator
 import X.Utils.LeftToRight
-import X.Utils.String (parenthesize)
 import Data.List
 
 data Value
@@ -12,7 +11,7 @@ data Value
     | AdditiveChain Value [(AdditiveOperator, Value)]
     | MultiplicativeChain Value [(MultiplicativeOperator, Value)]
     | ExpChain Value Value
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Show)
 
 transformAdditiveChain :: ([(AdditiveOperator, Value)] -> Value) -> Value -> Value
 transformAdditiveChain f (AdditiveChain x xs) = (Add, x) : xs @> f
@@ -44,22 +43,18 @@ mapAdditiveChain f = transformAdditiveChain (f |@>| additiveChainFromList)
 mapMultiplicativeChain :: ([(MultiplicativeOperator, Value)] -> [(MultiplicativeOperator, Value)]) -> Value -> Value
 mapMultiplicativeChain f = transformMultiplicativeChain (f |@>| multiplicativeChainFromList)
 
-_showLeftAssociativeChain :: (Show op) => Value -> [(op, Value)] -> String
-_showLeftAssociativeChain x xs =
+displayValue :: Value -> String
+displayValue (Scalar sc) = show sc
+displayValue (Variable x) = show x
+displayValue (AdditiveChain x xs) =
     xs
-        |@>| (\(op, v) -> show op <> innerShow v)
-        @> intercalate ""
-        @> (innerShow x <>)
+    |@>| (\(a, b) -> show a <> show b)
+    @> intercalate ""
+    @> (show x <>)
+displayValue (MultiplicativeChain x xs) =
+    xs
+    |@>| (\(a, b) -> show a <> show b)
+    @> intercalate ""
+    @> (show x <>)
+displayValue (ExpChain a b) = show a <> "^" <> show b
 
-instance Show Value where
-    show (Scalar sc) = show sc
-    show (Variable v) = v
-    show (AdditiveChain x xs) = _showLeftAssociativeChain x xs
-    show (MultiplicativeChain x xs) = _showLeftAssociativeChain x xs
-    show (ExpChain b e) = show b <> "^" <> show e
-
-innerShow :: Value -> String
-innerShow (Scalar sc) | sc < 0 = parenthesize (show $ Scalar sc)
-innerShow (AdditiveChain x xs) = parenthesize (show $ AdditiveChain x xs)
-innerShow (MultiplicativeChain x xs) = parenthesize (show $ MultiplicativeChain x xs)
-innerShow v = show v

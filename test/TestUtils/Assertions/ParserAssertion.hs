@@ -38,9 +38,9 @@ andReason = ($)
 parserAssertion :: (Show a, Eq a) => Parser a -> Collector (ParserAssertion a) b -> Assertion
 parserAssertion parser assertions =
     let mapAssertion (SuccessfulParseAssertion input value remainder title) =
-            assertEqualVerbose title (parse parser input) (Right (remainder, value))
+            assertEqualVerbose title (Right (remainder, value)) (parse parser input)
         mapAssertion (FailedParseAssertion input remainder reason title) =
-            assertEqualVerbose title (parse parser input) (Left (ParseError reason remainder))
+            assertEqualVerbose title(Left (ParseError reason remainder)) (parse parser input)
      in getList assertions
             |@>| mapAssertion
             @> sequence_

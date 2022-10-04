@@ -13,6 +13,7 @@ import X.Control.Parser.Combinator.WithTrailingWhitespace
 import X.Control.Parser.Combinator.Complete
 import X.Utils.LeftToRight
 import X.Data.Value.Evaluate
+import X.Data.Value
 
 -- | Parses input, returning Either an error or the result of said input
 parseStatement :: String -> Either ParseError Statement
@@ -23,10 +24,10 @@ parseStatement input =
 evaluateStatement :: Ctx.Context -> Statement -> (Ctx.Context, String)
 evaluateStatement ctx (StmtValue val) =
     evaluateValue val ctx
-        @> show
+        @> displayValue
         @> (ctx,)
 evaluateStatement state (StmtAssignment (Assignment a val)) =
-    let toPrintedStatement x = a <> " <- " <> show x
+    let toPrintedStatement x = a <> " <- " <> displayValue x
         newState x = Ctx.put a x state
      in evaluateValue val state
             @> liftA2 (,) newState toPrintedStatement
