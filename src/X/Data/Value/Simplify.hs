@@ -1,29 +1,23 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
 
 module X.Data.Value.Simplify where
 
-import Data.Bifunctor
 import Data.Foldable
-import Data.List
 import qualified Data.Map as DM
 import Data.Number.CReal
 import X.Data.Operator
 import X.Data.Value
-import X.Utils.CReal (safeExp)
-import X.Utils.Function
+import X.Data.Value.Simplifier
+import X.Utils.CReal
 import X.Utils.LeftToRight
 import X.Utils.List
 import X.Utils.Map
 
-{- | A simplifier turns a value into an identical, but less complicated version of itself
-A simplifier should be idempotent, meaning f(f(x)) == f(x).
--}
-type Simplifier = Value -> Value
-
 -- | Converts an additive/multiplicative chain of a single element into that element.
 simplifySingleElementChain :: Simplifier
-simplifySingleElementChain v =
-    case v of
+simplifySingleElementChain =
+    mkSimplifier "single element chain" $ \case
         AdditiveChain x [] -> x
         MultiplicativeChain x [] -> x
         x -> x
@@ -33,8 +27,8 @@ simplifySingleElementChain v =
  0^0 will be simplified to 1. This will be changed when the evaluation engine can report errors.
 -}
 simplifyExponentiationBy0Or1 :: Simplifier
-simplifyExponentiationBy0Or1 v =
-    case v of
+simplifyExponentiationBy0Or1 =
+    mkSimplifier "x^0 and x^1" $ \case
         ExpChain b (Scalar 1) -> b
         ExpChain _ (Scalar 0) -> Scalar 1
         x -> x
@@ -42,30 +36,32 @@ simplifyExponentiationBy0Or1 v =
 -- | Converts 0x to 0
 simplifyMultiplyBy0 :: Simplifier
 simplifyMultiplyBy0 =
-    transformMultiplicativeChain
-        ( \ms ->
-            if any (snd |@>| (== Scalar 0)) ms
-                then Scalar 0
-                else multiplicativeChainFromList ms
-        )
+    mkSimplifier "0x" $
+        transformMultiplicativeChain
+            ( \ms ->
+                if any (snd |@>| (== Scalar 0)) ms
+                    then Scalar 0
+                    else multiplicativeChainFromList ms
+            )
 
 -- | Converts x+0 to x
 simplifyAdd0 :: Simplifier
-simplifyAdd0 = mapAdditiveChain (filter $ snd |@>| (/= Scalar 0))
+simplifyAdd0 = mkSimplifier "x+0" $ mapAdditiveChain (filter $ snd |@>| (/= Scalar 0))
 
 -- | Converts 1x to x
 simplifyMultiply1 :: Simplifier
-simplifyMultiply1 = mapMultiplicativeChain (filter $ snd |@>| (/= Scalar 1))
+simplifyMultiply1 = mkSimplifier "1x" $ mapMultiplicativeChain (filter $ snd |@>| (/= Scalar 1))
 
 -- | Converts + (-x) to - x and - (-x) to + x
 simplifyAddingNegative :: Simplifier
 simplifyAddingNegative =
-    let mapAdditiveTerm t =
-            case t of
-                (Add, Scalar x) | x < 0 -> (Sub, Scalar (-x))
-                (Sub, Scalar x) | x < 0 -> (Add, Scalar (-x))
-                (x, y) -> (x, y)
-     in mapAdditiveChain (fmap mapAdditiveTerm)
+    mkSimplifier "+(-1) and -(1)" $
+        let mapAdditiveTerm t =
+                case t of
+                    (Add, Scalar x) | x < 0 -> (Sub, Scalar (-x))
+                    (Sub, Scalar x) | x < 0 -> (Add, Scalar (-x))
+                    (x, y) -> (x, y)
+         in mapAdditiveChain (fmap mapAdditiveTerm)
 
 _partitionChainTerms :: [(o, Value)] -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
 _partitionChainTerms =
@@ -86,18 +82,19 @@ _mapPartitionOutput fn (a, b, c, d, e) = (fn a, fn b, fn c, fn d, fn e)
 -- | Sorts terms of a chain
 simplifySortChainTerms :: Simplifier
 simplifySortChainTerms =
-    let sortGroup :: Ord o => [(o, Value)] -> [(o, Value)]
-        sortGroup = sortByKey (\(_, l) -> (length (show l), show l))
-     in mapAdditiveChain
-            ( \ms ->
-                let (scalars, variables, additiveChains, multiplicativeChains, expChains) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
-                 in variables <> expChains <> multiplicativeChains <> additiveChains <> scalars
-            )
-            |@>| mapMultiplicativeChain
+    mkSimplifier "sort chain terms" $
+        let sortGroup :: Ord o => [(o, Value)] -> [(o, Value)]
+            sortGroup = sortByKey (\(_, l) -> (length (show l), show l))
+         in mapAdditiveChain
                 ( \ms ->
                     let (scalars, variables, additiveChains, multiplicativeChains, expChains) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
-                     in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains)
+                     in variables <> expChains <> multiplicativeChains <> additiveChains <> scalars
                 )
+                |@>| mapMultiplicativeChain
+                    ( \ms ->
+                        let (scalars, variables, additiveChains, multiplicativeChains, expChains) = _partitionChainTerms ms @> _mapPartitionOutput sortGroup
+                         in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains)
+                    )
 
 _valueToCoefficientAndMultiplier :: Value -> (CReal, Value)
 _valueToCoefficientAndMultiplier v =
@@ -137,18 +134,18 @@ _condenseMultiplicativeTerms ms =
                 )
                 1
         groupedTerms = _groupLikeChainTerms ms
-     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd @> simplifyMultiply1) (length ms @> fromIntegral @> Scalar) @> simplifyExponentiationBy0Or1)))
+     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd) (length ms @> fromIntegral @> Scalar))))
 
 -- | Combines like additive terms e.g. x + 2x + 2 + 3 -> 3x + 5
 simplifyLikeAdditiveTerms :: Simplifier
-simplifyLikeAdditiveTerms = mapAdditiveChain $ \as ->
+simplifyLikeAdditiveTerms = mkSimplifier "add like terms" $ mapAdditiveChain $ \as ->
     _condenseAdditiveTerms as
         |@>| \(scalar, (op, val)) ->
             (Add, MultiplicativeChain (Scalar scalar) [(Mul, additiveChainFromList [(op, val)])])
 
 -- | Combines like multiplicative terms e.g. x * 3x * 2 * 5 -> 15x
 simplifyLikeMultiplicativeTerms :: Simplifier
-simplifyLikeMultiplicativeTerms = mapMultiplicativeChain $ \ms ->
+simplifyLikeMultiplicativeTerms = mkSimplifier "multiply like terms" $ mapMultiplicativeChain $ \ms ->
     _condenseMultiplicativeTerms ms
         |@>| \(scalar, (op, val)) ->
             (Mul, MultiplicativeChain (Scalar scalar) [(Mul, multiplicativeChainFromList [(op, val)])])
@@ -162,30 +159,19 @@ _condenseExpTerms =
                 (Mul, v) -> (v, (Add, Scalar 1))
                 (Div, v) -> (v, (Sub, Scalar 1))
         groups = groupMap (groupKv |@>| fst) (groupKv |@>| snd) |@>| DM.toAscList
-        mapGroup (b, es) = ExpChain b (additiveChainFromList es) @> simplifyExponentiationBy0Or1
+        mapGroup (b, es) = ExpChain b (additiveChainFromList es)
      in groups ||@>|| mapGroup ||@>|| (Mul,)
 
 -- | Combines exponential terms with the same base, e.g. x*x^2*x^y -> x^(3+y)
 simplifyLikeExpTerms :: Simplifier
-simplifyLikeExpTerms = mapMultiplicativeChain _condenseExpTerms
+simplifyLikeExpTerms = mkSimplifier "combine like exponential terms" $ mapMultiplicativeChain _condenseExpTerms
 
 -- | Evaluates x^y expressions when x and y are both scalars.
 simplifyEvaluateScalarExp :: Simplifier
-simplifyEvaluateScalarExp v =
-    case v of
+simplifyEvaluateScalarExp =
+    mkSimplifier "evaluate a^b" $ \case
         ExpChain (Scalar x) (Scalar y) -> Scalar (x `safeExp` y)
         x -> x
-
--- | Applies the given simplifier to all children of the given Value, then to the given Value itself
-deepSimplify :: Simplifier -> Simplifier
-deepSimplify f v =
-    let ds = deepSimplify f
-     in f $ case v of
-            AdditiveChain x xs -> AdditiveChain (ds x) (xs |@>| second ds)
-            MultiplicativeChain x xs -> MultiplicativeChain (ds x) (xs |@>| second ds)
-            ExpChain b e -> ExpChain (ds b) (ds e)
-            Scalar sc -> Scalar sc
-            Variable v -> Variable v
 
 simplifiers :: [Simplifier]
 simplifiers =
@@ -203,6 +189,4 @@ simplifiers =
 
 -- | Simplifies a value
 simplify :: Value -> Value
-simplify =
-    let simplifyPass = foldl1' (|@>|) simplifiers
-     in fixedPoint (deepSimplify simplifyPass)
+simplify = aggregateSimplifier "simplify" simplifiers @> runSimplifier

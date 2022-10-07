@@ -66,6 +66,7 @@ library
       X.Data.ParseError
       X.Data.Value
       X.Data.Value.Evaluate
+      X.Data.Value.Simplifier
       X.Data.Value.Simplify
       X.Shell.Execution
       X.Shell.Formatting

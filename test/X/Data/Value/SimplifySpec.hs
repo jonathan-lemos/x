@@ -1,5 +1,5 @@
-{-# OPTIONS_GHC -F -pgmF htfpp #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -F -pgmF htfpp #-}
 
 module X.Data.Value.SimplifySpec where
 
@@ -29,6 +29,12 @@ instance ValueLike Value where
 
 instance ValueLike String where
     toValue = parseValue
+
+simplifyThenOthers :: String -> (Value -> Value)
+simplifyThenOthers t =
+    let afterSimplify = simplifiers @> filter (simplifierName |@>| (!= t)) @> aggregateSimplifier @> runSimplifier
+        doSimplify = simplifiers @> filter (simplifierName |@>| (== t)) @> head @> runSimplifier
+     in doSimplify |@>| afterSimplify
 
 shouldNotChange :: (ValueLike v) => v -> Collector (FunctionAssertion Value Value) ()
 shouldNotChange v = (toValue v) `shouldEvalTo` (toValue v)
@@ -95,10 +101,10 @@ test_simplifyMultiply1 =
         shouldNotChange "2+3"
         shouldNotChange "2^3"
 
-        "1*5" `shouldSimplifyTo` "5"
-        "5*1" `shouldSimplifyTo` "5"
-        "1*1*5*1" `shouldSimplifyTo` "5"
-        "1*5x" `shouldSimplifyTo` "5x"
+        "1*5" `shouldSimplifyTo` MultiplicativeChain (Scalar 5) []
+        "6*1" `shouldSimplifyTo` MultiplicativeChain (Scalar 6) []
+        "1*1*7*1" `shouldSimplifyTo` MultiplicativeChain (Scalar 7) []
+        "1*8*x" `shouldSimplifyTo` MultiplicativeChain (Scalar 8) [(Mul, Variable "x")]
 
 test_simplifySortChainTerms :: Assertion
 test_simplifySortChainTerms =
@@ -112,27 +118,40 @@ test_simplifySortChainTerms =
         "3+foo" `shouldSimplifyTo` "foo+3"
 
 test_simplifyLikeAdditiveTerms :: Assertion
-test_simplifyLikeAdditiveTerms =
+test_simplifyLikeAdditiveTerms = do
     functionAssertion simplifyLikeAdditiveTerms $ do
         shouldNotChange "1"
         shouldNotChange "foo"
-        shouldNotChange "3+2"
-        shouldNotChange "3*2"
-        shouldNotChange "3^2"
+        shouldNotChange "4*5"
+        shouldNotChange "6^7"
 
-        "3+2" `shouldSimplifyTo` "5"
-        "3-2" `shouldSimplifyTo` "1"
-        "3*x+2*x" `shouldSimplifyTo` "5*x"
-        "3*x-2*x" `shouldSimplifyTo` "1*x"
-        "3+2+3*x+2*x" `shouldSimplifyTo` "5+5*x"
+    functionAssertion simplifyThenOthers "add like terms" $
+        do
+            "8+9"
+            `shouldSimplifyTo` AdditiveChain
+                (MultiplicativeChain (Scalar 17) [(Mul, AdditiveChain (Scalar 1) [])])
+                []
+                "3-2"
+            `shouldSimplifyTo` AdditiveChain
+                (MultiplicativeChain (Scalar 1) [])
+                []
+                "3*x+2*x"
+            `shouldSimplifyTo` AdditiveChain
+                (MultiplicativeChain (Scalar 5) [(Mul, Variable "x")])
+                []
+                "3*x-2*x"
+            `shouldSimplifyTo` AdditiveChain
+                (MultiplicativeChain (Scalar 1) [(Mul, Variable "x")])
+                []
+                "3+2+3*x+2*x"
+            `shouldSimplifyTo` AdditiveChain (Scalar 5) [(Add, AdditiveChain (MultiplicativeChain (Scalar 1) [(Mul, Variable "x")]) [])]
 
 test_simplifyLikeMultiplicativeTerms :: Assertion
 test_simplifyLikeMultiplicativeTerms =
-    functionAssertion simplifyLikeAdditiveTerms $ do
+    functionAssertion simplifyLikeMultiplicativeTerms $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "3+2"
-        shouldNotChange "3*2"
         shouldNotChange "3^2"
 
         "3*2" `shouldSimplifyTo` "6"
