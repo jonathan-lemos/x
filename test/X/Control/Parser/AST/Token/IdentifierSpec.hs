@@ -4,8 +4,6 @@ module X.Control.Parser.AST.Token.IdentifierSpec where
 
 import Test.Framework
 import X.Control.Parser.AST.Token.Identifier
-import Control.Applicative
-import X.Data.ParseError
 import Test.Framework.TestInterface
 import TestUtils.Assertions.ParserAssertion
 

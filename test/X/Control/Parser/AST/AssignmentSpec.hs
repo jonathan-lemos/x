@@ -3,11 +3,8 @@
 module X.Control.Parser.AST.AssignmentSpec where
 
 import Test.Framework
-import X.Control.Parser
 import X.Control.Parser.AST.Assignment
 import X.Data.AST.Assignment
-import X.Control.Try
-import X.TestUtils.Context
 import X.Data.Value
 import X.Data.Operator
 import Test.Framework.TestInterface

@@ -16,4 +16,4 @@ instance Unwrap Try where
     unwrap (Success v) = v
 
 instance Unwrap [] where
-    unwrap (x:xs) = x
+    unwrap (x:_xs) = x

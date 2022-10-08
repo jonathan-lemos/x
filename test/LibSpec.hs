@@ -5,7 +5,6 @@ import Lib
 import Test.Framework
 import Test.Framework.TestInterface
 import TestUtils.Assertions.BasicAssertion
-import X.Control.Terminal
 import X.TestUtils.List
 import X.TestUtils.MockTerminal
 import X.Utils.LeftToRight

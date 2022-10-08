@@ -58,6 +58,10 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wall
+    - -Werror
+    - -Wno-unused-do-bind
+    - -Wno-name-shadowing
     dependencies:
     - X
     - HTF

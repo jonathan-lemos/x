@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Main ( main ) where
 
 import Test.Framework

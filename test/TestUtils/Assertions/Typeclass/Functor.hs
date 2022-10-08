@@ -3,10 +3,8 @@
 
 module TestUtils.Assertions.Typeclass.Functor where
 
-import Test.Framework
 import Test.Framework.TestInterface
 import TestUtils.Assertions.BasicAssertion
-import TestUtils.Assertions.FunctionAssertion
 import TestUtils.Collector
 
 {- | Verifies properties for the "happy path" functor e.g. Right and not Left, Just and not Nothing, etc.
@@ -17,7 +15,7 @@ verifyFunctorHappyPathWithEqFn :: (Functor f, forall a. Show a => Show (f a)) =>
 verifyFunctorHappyPathWithEqFn constructor name eq =
     basicAssertion $ do
         assert (fmap length (constructor "abc") `eq` constructor (length "abc")) `withTitle` ("length <$> " <> name <> " \"abc\" == " <> name <> " 3")
-        assert (fmap show (constructor 123) `eq` constructor (show 123)) `withTitle` ("show <$> " <> name <> " 123 == " <> name <> " \"123\"")
+        assert (fmap show (constructor (123 :: Int)) `eq` constructor (show (123 :: Int))) `withTitle` ("show <$> " <> name <> " 123 == " <> name <> " \"123\"")
 
 {- | Verifies properties for the "happy path" functor e.g. Right and not Left, Just and not Nothing, given that functor's data constructor and its name.
 
@@ -34,10 +32,10 @@ verifyFunctorLawsWithEqFn :: (Functor f, forall a. Show a => Show (f a)) => (for
 verifyFunctorLawsWithEqFn constructor name eq =
     basicAssertion $ do
         assert (fmap id (constructor "abc") `eq` constructor "abc") `withTitle` ("fmap id " <> name <> " \"abc\" == " <> name <> " \"abc\"")
-        assert (fmap id (constructor 3) `eq` constructor 3) `withTitle` ("fmap id " <> name <> " 3 == " <> name <> " 3")
+        assert (fmap id (constructor (3 :: Int)) `eq` constructor (3 :: Int)) `withTitle` ("fmap id " <> name <> " 3 == " <> name <> " 3")
 
         assert (fmap (show . length) (constructor "abc") `eq` (fmap show . fmap length) (constructor "abc")) `withTitle` ("fmap (show . length) " <> name <> " \"abc\" == " <> "(fmap show . fmap length) " <> name <> " \"abc\"")
-        assert (fmap (length . show) (constructor 3) `eq` (fmap length . fmap show) (constructor 3)) `withTitle` ("fmap (length . show) " <> name <> " 3 == " <> "(fmap length . fmap show) " <> name <> " 3")
+        assert (fmap (length . show) (constructor (3 :: Int)) `eq` (fmap length . fmap show) (constructor (3 :: Int))) `withTitle` ("fmap (length . show) " <> name <> " 3 == " <> "(fmap length . fmap show) " <> name <> " 3")
 
 {- | Verifies that a Functor instance is valid, given that functor's data constructor and its name.
 

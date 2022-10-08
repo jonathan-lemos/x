@@ -5,7 +5,6 @@ module X.Control.Parser.AST.StatementSpec where
 import Test.Framework
 import Test.Framework.TestInterface
 import TestUtils.Assertions.ParserAssertion
-import X.Control.Parser
 import X.Control.Parser.AST.Statement
 import X.Data.AST.Assignment
 import X.Data.AST.Statement

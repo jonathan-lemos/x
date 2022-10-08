@@ -3,15 +3,9 @@
 module X.Control.Parser.AST.ArithmeticExpressionSpec where
 
 import Test.Framework
-import Data.Bifunctor
-import Data.Maybe
-import Data.Number.CReal
 import Test.Framework.TestInterface
-import X.Control.Parser
 import X.Control.Parser.AST.ArithmeticExpression
-import X.Control.Try
 import X.Data.Operator
-import X.Data.ParseError
 import X.Data.Value
 import X.Data.Value.Evaluate
 import X.TestUtils.Context

@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
 module X.TestUtils.Arbitrary where
 
 import Test.QuickCheck

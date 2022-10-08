@@ -1,18 +1,14 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
+
 module X.Shell.MainSpec where
 
-import Test.Framework hiding (reason)
-import Control.Monad
-import Data.Bifunctor
-import Data.Either
 import Data.List
 import Data.List.Split
+import Test.Framework hiding (reason)
 import Test.Framework.TestInterface
 import TestUtils.Assertions.BasicAssertion
 import TestUtils.Assertions.FunctionAssertion
-import X.Control.Parser.AST.ArithmeticExpressionSpec
 import X.Control.Terminal
-import X.Control.Try
 import X.Data.AST.Assignment
 import X.Data.AST.Statement (Statement (StmtAssignment, StmtValue))
 import X.Data.Context
@@ -20,10 +16,8 @@ import X.Data.Operator
 import X.Data.ParseError
 import X.Data.Value
 import X.Shell.Execution
-import X.Shell.Main
 import X.TestUtils.Context
 import X.Utils.LeftToRight
-import X.Utils.Try (eitherToTry)
 
 ioListToString :: [PrintCmd] -> String
 ioListToString = intercalate "" . fmap show
@@ -64,6 +58,7 @@ test_evaluateStatementReportsSyntaxError =
     functionAssertion parseAndEvalResult $ do
         "2+" `shouldEvalTo` Left (ParseError{reason = "Expected a number, variable, or ( expression )", currentInput = ""})
 
+execAndGetLines :: Context -> Int -> String -> [String]
 execAndGetLines a b c =
     execute a b c
         @> snd

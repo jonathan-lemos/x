@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module X.Data.Value.Simplifier (Simplifier (runSimplifier, simplifierName), deepSimplify, mkSimplifier, aggregateSimplifier) where
 
 import Data.Bifunctor
@@ -8,13 +9,13 @@ import X.Utils.LeftToRight
 {- | A simplifier turns a value into an identical, but less complicated version of itself
 The simplifying function will be run until the value doesn't change.
 -}
-data Simplifier = Simplifier {simplifierName :: String, runSimplifier :: Value -> Value}
+data Simplifier = Simplifier {simplifierName :: String, runSimplifier :: Value -> Value, originalFunction :: Value -> Value}
 
 instance Eq Simplifier where
-    (Simplifier aTitle _) == (Simplifier bTitle _) = aTitle == bTitle
+    (Simplifier aTitle _ _) == (Simplifier bTitle _ _) = aTitle == bTitle
 
 instance Ord Simplifier where
-    compare (Simplifier aTitle _) (Simplifier bTitle _) = compare aTitle bTitle
+    compare (Simplifier aTitle _ _) (Simplifier bTitle _ _) = compare aTitle bTitle
 
 instance Show Simplifier where
     show = simplifierName |@>| show
@@ -32,7 +33,7 @@ deepSimplify f v =
 
 mkSimplifier :: String -> (Value -> Value) -> Simplifier
 mkSimplifier title f =
-    Simplifier title (deepSimplify f @> fixedPoint)
+    Simplifier title (deepSimplify f @> fixedPoint) f
 
 aggregateSimplifier :: String -> [Simplifier] -> Simplifier
 aggregateSimplifier title xs =

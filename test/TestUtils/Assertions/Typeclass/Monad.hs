@@ -15,7 +15,7 @@ The Monad must implement `Show` given that the underlying type also implements `
 -}
 verifyMonadHappyPathUsageWithEqFn :: (Monad m, forall a. Show a => Show (m a)) => (forall a. a -> m a) -> String -> (forall a. Eq a => m a -> m a -> Bool) -> Assertion
 verifyMonadHappyPathUsageWithEqFn constructor name eq = basicAssertion $ do
-    assert (constructor 123 `eq` return 123) `withTitle` (name <> " 123 == return 123")
+    assert (constructor (123 :: Int) `eq` return 123) `withTitle` (name <> " 123 == return 123")
 
 {- | Verifies properties for the "happy path" monad e.g. Right and not Left, Just and not Nothing, given that monad's data constructor, its name, and a function that verifies if two instances are equal.
 
@@ -34,15 +34,15 @@ verifyMonadLawsWithEqFn constructor name eq = do
     verifyApplicativeLawsWithEqFn constructor name eq
 
     basicAssertion $ do
-        assert ((return 123 >>= constructor . show) `eq` ((constructor . show) 123)) `withTitle` ("return 123 >>= constructor . show == (constructor . show) 123")
+        assert ((return (123 :: Int) >>= constructor . show) `eq` ((constructor . show) (123 :: Int))) `withTitle` ("return 123 >>= constructor . show == (constructor . show) 123")
         assert ((return "abc" >>= constructor . length) `eq` ((constructor . length) "abc")) `withTitle` ("return \"abc\" >>= constructor . length == (constructor . length) \"abc\"")
 
-        assert ((constructor 123 >>= return) `eq` constructor 123) `withTitle` (name <> " 123 >>= return == " <> name <> " 123")
+        assert ((constructor (123 :: Int) >>= return) `eq` constructor 123) `withTitle` (name <> " 123 >>= return == " <> name <> " 123")
         assert ((constructor "abc" >>= return) `eq` constructor "abc") `withTitle` (name <> " \"abc\" >>= return == " <> name <> " \"abc\"")
 
         assert
-            ( ((constructor 123 >>= constructor . show) >>= constructor . length)
-                `eq` (constructor 123 >>= \x -> (constructor . show) x >>= constructor . length)
+            ( ((constructor (123 :: Int) >>= constructor . show) >>= constructor . length)
+                `eq` (constructor (123 :: Int) >>= \x -> (constructor . show) x >>= constructor . length)
             )
             `withTitle` ("(" <> name <> " 123 >>= constructor . show) >>= constructor . length == " <> name <> " 123 >>= (\\x -> (constructor . show) x >>= constructor . length)")
 

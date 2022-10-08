@@ -11,6 +11,7 @@ import X.Control.Parser
 import X.Control.Parser.AST.ArithmeticExpression
 import X.Data.Operator
 import X.Data.Value
+import X.Data.Value.Simplifier
 import X.Data.Value.Simplify
 import X.TestUtils.Either
 import X.Utils.LeftToRight
@@ -32,19 +33,27 @@ instance ValueLike String where
 
 simplifyThenOthers :: String -> (Value -> Value)
 simplifyThenOthers t =
-    let afterSimplify = simplifiers @> filter (simplifierName |@>| (!= t)) @> aggregateSimplifier @> runSimplifier
-        doSimplify = simplifiers @> filter (simplifierName |@>| (== t)) @> head @> runSimplifier
+    let afterSimplify =
+            simplifiers
+                @> filter (simplifierName |@>| (/= t))
+                @> aggregateSimplifier ""
+                @> runSimplifier
+        doSimplify =
+            simplifiers
+                @> filter (simplifierName |@>| (== t))
+                @> head
+                @> runSimplifier
      in doSimplify |@>| afterSimplify
 
 shouldNotChange :: (ValueLike v) => v -> Collector (FunctionAssertion Value Value) ()
-shouldNotChange v = (toValue v) `shouldEvalTo` (toValue v)
+shouldNotChange v = toValue v `shouldEvalTo` toValue v
 
 shouldSimplifyTo :: (ValueLike a, ValueLike b) => a -> b -> (Collector (FunctionAssertion Value Value)) ()
-shouldSimplifyTo a b = (toValue a) `shouldEvalTo` (toValue b)
+shouldSimplifyTo a b = toValue a `shouldEvalTo` toValue b
 
 test_simplifySingleElementChain :: Assertion
 test_simplifySingleElementChain =
-    functionAssertion simplifySingleElementChain $ do
+    functionAssertion (runSimplifier simplifySingleElementChain) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "1^2"
@@ -55,7 +64,7 @@ test_simplifySingleElementChain =
 
 test_simplifyExponentiationBy0Or1 :: Assertion
 test_simplifyExponentiationBy0Or1 =
-    functionAssertion simplifyExponentiationBy0Or1 $ do
+    functionAssertion (runSimplifier simplifyExponentiationBy0Or1) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "foo^2"
@@ -68,7 +77,7 @@ test_simplifyExponentiationBy0Or1 =
 
 test_simplifyMultiplyBy0 :: Assertion
 test_simplifyMultiplyBy0 =
-    functionAssertion simplifyMultiplyBy0 $ do
+    functionAssertion (runSimplifier simplifyMultiplyBy0) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "1^2"
@@ -81,7 +90,7 @@ test_simplifyMultiplyBy0 =
 
 test_simplifyAdd0 :: Assertion
 test_simplifyAdd0 =
-    functionAssertion simplifyAdd0 $ do
+    functionAssertion (runSimplifier simplifyAdd0) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "1^2"
@@ -94,7 +103,7 @@ test_simplifyAdd0 =
 
 test_simplifyMultiply1 :: Assertion
 test_simplifyMultiply1 =
-    functionAssertion simplifyMultiply1 $ do
+    functionAssertion (runSimplifier simplifyMultiply1) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "2*3"
@@ -108,7 +117,7 @@ test_simplifyMultiply1 =
 
 test_simplifySortChainTerms :: Assertion
 test_simplifySortChainTerms =
-    functionAssertion simplifySortChainTerms $ do
+    functionAssertion (runSimplifier simplifySortChainTerms) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "3*foo"
@@ -119,36 +128,22 @@ test_simplifySortChainTerms =
 
 test_simplifyLikeAdditiveTerms :: Assertion
 test_simplifyLikeAdditiveTerms = do
-    functionAssertion simplifyLikeAdditiveTerms $ do
+    functionAssertion (runSimplifier simplifyLikeAdditiveTerms) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "4*5"
         shouldNotChange "6^7"
 
-    functionAssertion simplifyThenOthers "add like terms" $
-        do
-            "8+9"
-            `shouldSimplifyTo` AdditiveChain
-                (MultiplicativeChain (Scalar 17) [(Mul, AdditiveChain (Scalar 1) [])])
-                []
-                "3-2"
-            `shouldSimplifyTo` AdditiveChain
-                (MultiplicativeChain (Scalar 1) [])
-                []
-                "3*x+2*x"
-            `shouldSimplifyTo` AdditiveChain
-                (MultiplicativeChain (Scalar 5) [(Mul, Variable "x")])
-                []
-                "3*x-2*x"
-            `shouldSimplifyTo` AdditiveChain
-                (MultiplicativeChain (Scalar 1) [(Mul, Variable "x")])
-                []
-                "3+2+3*x+2*x"
-            `shouldSimplifyTo` AdditiveChain (Scalar 5) [(Add, AdditiveChain (MultiplicativeChain (Scalar 1) [(Mul, Variable "x")]) [])]
+    functionAssertion (simplifyThenOthers "add like terms") $ do
+        "8+9" `shouldSimplifyTo` Scalar 17
+        "3-2" `shouldSimplifyTo` Scalar 1
+        "3*x+2*x" `shouldSimplifyTo` MultiplicativeChain (Scalar 5) [(Mul, Variable "x")]
+        "5*x-2*x" `shouldSimplifyTo` MultiplicativeChain (Scalar 3) [(Mul, Variable "x")]
+        "3+2+3*x+2*x" `shouldSimplifyTo` AdditiveChain (Scalar 5) [(Add, MultiplicativeChain (Scalar 5) [(Mul, Variable "x")])]
 
 test_simplifyLikeMultiplicativeTerms :: Assertion
 test_simplifyLikeMultiplicativeTerms =
-    functionAssertion simplifyLikeMultiplicativeTerms $ do
+    functionAssertion (runSimplifier simplifyLikeMultiplicativeTerms) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "3+2"
@@ -161,11 +156,22 @@ test_simplifyLikeMultiplicativeTerms =
 
 test_simplifyLikeExpTerms :: Assertion
 test_simplifyLikeExpTerms =
-    functionAssertion simplifyLikeExpTerms $ do
+    functionAssertion (runSimplifier simplifyLikeExpTerms) $ do
+        shouldNotChange "1"
+        shouldNotChange "foo"
+        shouldNotChange "3+2"
+        shouldNotChange "3*2"
+
+        "3*x*x" `shouldSimplifyTo` "3*x^2"
+        "3^2*x*y*x*3^5" `shouldSimplifyTo` "3^7*x^2*y"
+
+test_simplifyEvaluateScalarExp :: Assertion
+test_simplifyEvaluateScalarExp =
+    functionAssertion (runSimplifier simplifyEvaluateScalarExp) $ do
         shouldNotChange "1"
         shouldNotChange "foo"
         shouldNotChange "3+2"
         shouldNotChange "3*2"
 
         "3^2" `shouldSimplifyTo` "9"
-        "3*x*x" `shouldSimplifyTo` "3*x^2"
+        "2^3^2" `shouldSimplifyTo` "512"

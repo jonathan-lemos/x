@@ -8,8 +8,7 @@ import X.Control.Parser
 import X.Control.Parser.Numeric.Digit
 import X.Control.Parser.Numeric.Number
 import X.Control.Parser.Text.Char
-import X.Control.Parser.Text.CharEq (charEq)
-import X.Control.Parser.Text.Literal (literal)
+import X.Control.Parser.Text.Literal
 import X.Data.ParseError
 import Test.Framework.TestInterface
 import TestUtils.Assertions.BasicAssertion
