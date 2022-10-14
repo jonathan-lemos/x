@@ -13,7 +13,7 @@ leftAssociativeExpression :: Parser val -> Parser op -> Parser (LeftAssociativeI
 leftAssociativeExpression subexpressionParser operatorParser =
     let constructor val xs =
             let go leaf [] = InfixLeaf leaf
-                go leaf ((op, val) : xs) = InfixApplication (go leaf xs) op val
+                go leaf ((op, val) : xs) = (go leaf xs) :<: (op, val)
              in go val (reverse xs)
      in liftA2 constructor subexpressionParser (manyMaybe $ precondition operatorParser subexpressionParser)
 

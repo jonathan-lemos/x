@@ -11,13 +11,13 @@ import X.Control.Parser.Text.CharAny
 import X.Control.Parser.Text.CharEq
 import X.Control.Parser.Text.Whitespace
 import X.Utils.Monad
-import X.Data.Value
 import X.Control.Parser.Numeric.CReal
 import X.Control.Parser.AST.Token.Identifier
 import X.Data.Operator
 import X.Utils.LeftToRight
+import X.Data.AST.Arithmetic
 
-additiveExpression :: Parser Value
+additiveExpression :: Parser AdditiveChain
 additiveExpression =
     let operator =
             let mapOp '+' = Just Add
@@ -25,20 +25,20 @@ additiveExpression =
                 mapOp _ = Nothing
              in mapOp <$?> char
     in
-    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) |@>| LeftAssociativeChain
+    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) |@>| AdditiveChain
 
-multiplicativeExpression :: Parser Value
+multiplicativeExpression :: Parser MultiplicativeChain
 multiplicativeExpression =
     let operator =
             let mapOp '*' = Just Mul
                 mapOp '/' = Just Div
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) |@>| LeftAssociativeChain
+     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) |@>| MultiplicativeChain
 
 exponentiationExpression :: Parser Value
 exponentiationExpression =
-    rightAssociativeExpression (whitespace >> factor) (whitespace >> charEq '^') $ \a _op b -> RightAssociativeChain a Exp b
+    rightAssociativeExpression (whitespace >> factor) (whitespace >> charEq '^') $ \a _op b -> ExpChain a b
 
 factor :: Parser Value
 factor =
@@ -48,7 +48,7 @@ factor =
             e <- additiveExpression
             whitespace
             charEq ')'
-            return e
+            return Parentheses e
      in whitespace
             >> lookaheadParse
                 [ charEq '(' >> pure parenExpr
