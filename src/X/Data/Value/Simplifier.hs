@@ -1,10 +1,9 @@
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
-module X.Data.Value.Simplifier (Simplifier (runSimplifier, simplifierName), deepSimplify, mkSimplifier, aggregateSimplifier) where
+module X.Data.Value.Simplifier (Simplifier (runSimplifier, simplifierName), deepSimplify, mkSimplifier, aggregateSimplifier, originalFunction) where
 
-import Data.Bifunctor
 import X.Data.Value
 import X.Utils.Function
 import X.Utils.LeftToRight
+import X.Data.LeftAssociativeInfixList
 
 {- | A simplifier turns a value into an identical, but less complicated version of itself
 The simplifying function will be run until the value doesn't change.
@@ -25,9 +24,12 @@ deepSimplify :: (Value -> Value) -> (Value -> Value)
 deepSimplify f v =
     let ds = deepSimplify f
      in f $ case v of
-            AdditiveChain x xs -> AdditiveChain (ds x) (xs |@>| second ds)
-            MultiplicativeChain x xs -> MultiplicativeChain (ds x) (xs |@>| second ds)
-            ExpChain b e -> ExpChain (ds b) (ds e)
+            LeftAssociativeChain (InfixApplication tree op x) ->
+                case ds (LeftAssociativeChain tree) of
+                  LeftAssociativeChain subtree -> LeftAssociativeChain (InfixApplication subtree op (ds x))
+                  x -> x
+            LeftAssociativeChain (InfixLeaf x) -> ds x
+            RightAssociativeChain b op e -> RightAssociativeChain (ds b) op (ds e)
             Scalar sc -> Scalar sc
             Variable v -> Variable v
 

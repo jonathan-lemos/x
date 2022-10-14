@@ -47,6 +47,7 @@ executables:
     - -Werror
     - -Wno-unused-do-bind
     - -Wno-name-shadowing
+    - -Wno-unused-matches
     dependencies:
     - X
 
@@ -62,6 +63,7 @@ tests:
     - -Werror
     - -Wno-unused-do-bind
     - -Wno-name-shadowing
+    - -Wno-unused-matches
     dependencies:
     - X
     - HTF

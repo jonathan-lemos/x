@@ -96,45 +96,7 @@ simplifySortChainTerms =
                          in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains)
                     )
 
-_valueToCoefficientAndMultiplier :: Value -> (CReal, Value)
-_valueToCoefficientAndMultiplier v =
-    case v of
-        Scalar sc -> (sc, Scalar 1)
-        MultiplicativeChain (Scalar sc) (x : xs) -> (sc, multiplicativeChainFromList (x : xs))
-        _ -> (1, v)
-
-_groupLikeChainTerms :: [(o, Value)] -> [[(CReal, (o, Value))]]
-_groupLikeChainTerms ms =
-    let groupKey (_op, val) = val @> _valueToCoefficientAndMultiplier @> snd
-        groupVal (op, val) = (val @> _valueToCoefficientAndMultiplier @> fst, (op, val @> _valueToCoefficientAndMultiplier @> snd))
-        terms = groupMap groupKey groupVal ms @> DM.toAscList
-     in terms |@>| snd
-
-_condenseAdditiveTerms :: [(AdditiveOperator, Value)] -> [(CReal, (AdditiveOperator, Value))]
-_condenseAdditiveTerms as =
-    let sumGroup =
-            foldl'
-                ( \totalCount (count, (op, _value)) ->
-                    case op of
-                        Add -> totalCount + count
-                        Sub -> totalCount - count
-                )
-                0
-        groupedTerms = _groupLikeChainTerms as
-     in (groupedTerms |@>| \g -> (sumGroup g, (Add, head g @> snd @> snd)))
-
-_condenseMultiplicativeTerms :: [(MultiplicativeOperator, Value)] -> [(CReal, (MultiplicativeOperator, Value))]
-_condenseMultiplicativeTerms ms =
-    let productGroup =
-            foldl'
-                ( \totalProduct (count, (op, _value)) ->
-                    case op of
-                        Mul -> totalProduct * count
-                        Div -> totalProduct / count
-                )
-                1
-        groupedTerms = _groupLikeChainTerms ms
-     in (groupedTerms |@>| \g -> (productGroup g, (Mul, ExpChain (head g @> snd @> snd) (length ms @> fromIntegral @> Scalar))))
+evalLeftAssociativeChain :: Value ->
 
 -- | Combines like additive terms e.g. x + 2x + 2 + 3 -> 3x + 5
 simplifyLikeAdditiveTerms :: Simplifier

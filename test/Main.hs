@@ -13,6 +13,7 @@ import {-@ HTF_TESTS @-} X.Control.Parser.Combinator.Branch.CheckSpec
 import {-@ HTF_TESTS @-} X.Control.ParserSpec
 import {-@ HTF_TESTS @-} X.Control.TerminalSpec
 import {-@ HTF_TESTS @-} X.Control.TrySpec
+import {-@ HTF_TESTS @-} X.Data.LeftAssociativeInfixListSpec
 import {-@ HTF_TESTS @-} X.Data.Value.SimplifySpec
 import {-@ HTF_TESTS @-} X.Shell.MainSpec
 
