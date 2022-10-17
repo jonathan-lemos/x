@@ -2,7 +2,6 @@
 module X.Data.AST.ArithmeticUnion where
 
 import X.Data.AST.Arithmetic
-import X.Data.Display
 
 data ArithmeticUnion
     = AUAdditiveChain AdditiveChain

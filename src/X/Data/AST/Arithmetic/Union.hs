@@ -2,7 +2,6 @@
 module X.Data.AST.Arithmetic.Union where
 
 import X.Data.AST.Arithmetic
-import X.Data.Display
 
 data ArithmeticUnion
     = AUAdditiveChain AdditiveChain
@@ -17,6 +16,4 @@ instance Display ArithmeticUnion where
         AUMultiplicativeChain c -> display c
         AUExpChain c -> display c
         AUFactor f -> display f
-
-liftAU ::
 

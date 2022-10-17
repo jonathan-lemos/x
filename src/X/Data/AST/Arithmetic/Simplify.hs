@@ -7,11 +7,12 @@ import Data.Foldable
 import qualified Data.Map as DM
 import Data.Number.CReal
 import X.Data.Operator
+import X.Data.Value
+import X.Data.Value.Simplifier
 import X.Utils.CReal
 import X.Utils.LeftToRight
 import X.Utils.List
 import X.Utils.Map
-import X.Data.AST.Arithmetic.Simplifier
 
 -- | Converts an additive/multiplicative chain of a single element into that element.
 simplifySingleElementChain :: Simplifier
@@ -62,6 +63,22 @@ simplifyAddingNegative =
                     (x, y) -> (x, y)
          in mapAdditiveChain (fmap mapAdditiveTerm)
 
+_partitionChainTerms :: [(o, Value)] -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
+_partitionChainTerms =
+    foldr
+        ( \(o, v) (scalars, variables, additiveChains, multiplicativeChains, expChains) ->
+            case v of
+                Scalar _ -> ((o, v) : scalars, variables, additiveChains, multiplicativeChains, expChains)
+                Variable _ -> (scalars, (o, v) : variables, additiveChains, multiplicativeChains, expChains)
+                AdditiveChain _ _ -> (scalars, variables, (o, v) : additiveChains, multiplicativeChains, expChains)
+                MultiplicativeChain _ _ -> (scalars, variables, additiveChains, (o, v) : multiplicativeChains, expChains)
+                ExpChain _ _ -> (scalars, variables, additiveChains, multiplicativeChains, (o, v) : expChains)
+        )
+        ([], [], [], [], [])
+
+_mapPartitionOutput :: ([(o, Value)] -> [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)]) -> ([(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)], [(o, Value)])
+_mapPartitionOutput fn (a, b, c, d, e) = (fn a, fn b, fn c, fn d, fn e)
+
 -- | Sorts terms of a chain
 simplifySortChainTerms :: Simplifier
 simplifySortChainTerms =
@@ -79,18 +96,7 @@ simplifySortChainTerms =
                          in (scalars <> variables <> expChains <> multiplicativeChains <> additiveChains)
                     )
 
-groupAdditiveList :: LeftAssociativeInfixList AdditiveOperator MultiplicativeChain -> DM.Map ArithmeticUnion CReal
-groupAdditiveList l =
-    let appendToMap map (op, val) =
-            let opf = applyOp f
-             in case val of
-                    Scalar n -> adjustWithDefault (opf n) (Scalar 1) map
-                    MultiplicativeChain (LeftAssociativeInfixList sl) ->
-                        case toHeadAndList sl of
-                            (Scalar n, rest) -> adjustWithDefault (opf n) rest map
-                            _ -> adjustWithDefault (opf 1) sl map
-                    x -> adjustWithDefault (opf 1) sl map
-     in foldr appendToMap DM.empty (toList Add l)
+evalLeftAssociativeChain :: Value ->
 
 -- | Combines like additive terms e.g. x + 2x + 2 + 3 -> 3x + 5
 simplifyLikeAdditiveTerms :: Simplifier

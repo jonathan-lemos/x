@@ -3,7 +3,6 @@ module X.Data.Context where
 import qualified Data.Map as DM
 import Data.Foldable
 import X.Utils.LeftToRight
-import X.Data.AST.Arithmetic.Union
 
 type Context = [DM.Map String ArithmeticUnion]
 

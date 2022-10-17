@@ -12,6 +12,8 @@ import X.Control.Parser.AST.Statement
 import X.Control.Parser.Combinator.WithTrailingWhitespace
 import X.Control.Parser.Combinator.Complete
 import X.Utils.LeftToRight
+import X.Data.Value.Evaluate
+import X.Data.Value
 
 -- | Parses input, returning Either an error or the result of said input
 parseStatement :: String -> Either ParseError Statement

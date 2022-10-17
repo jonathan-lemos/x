@@ -1,22 +1,21 @@
 module X.Control.Parser.AST.ArithmeticExpression where
 
 import Data.Char
-import qualified Data.List.NonEmpty as NE
 import X.Control.Parser
-import X.Control.Parser.AST.Token.Identifier
 import X.Control.Parser.Combinator.Branch.Conditional
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 import X.Control.Parser.Combinator.Expression
 import X.Control.Parser.Combinator.Possibly
-import X.Control.Parser.Numeric.CReal
 import X.Control.Parser.Text.Char
 import X.Control.Parser.Text.CharAny
 import X.Control.Parser.Text.CharEq
 import X.Control.Parser.Text.Whitespace
-import X.Data.AST.Arithmetic
+import X.Utils.Monad
+import X.Control.Parser.Numeric.CReal
+import X.Control.Parser.AST.Token.Identifier
 import X.Data.Operator
 import X.Utils.LeftToRight
-import X.Utils.Monad
+import X.Data.AST.Arithmetic
 
 additiveExpression :: Parser AdditiveChain
 additiveExpression =
@@ -25,8 +24,8 @@ additiveExpression =
                 mapOp '-' = Just Sub
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator)
-            |@>| AdditiveChain
+    in
+    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) |@>| AdditiveChain
 
 multiplicativeExpression :: Parser MultiplicativeChain
 multiplicativeExpression =
@@ -35,15 +34,13 @@ multiplicativeExpression =
                 mapOp '/' = Just Div
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator)
-            |@>| MultiplicativeChain
+     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) |@>| MultiplicativeChain
 
-exponentiationExpression :: Parser ExpChain
+exponentiationExpression :: Parser Value
 exponentiationExpression =
-    rightAssociativeExpression (whitespace >> factor |@>| NE.singleton) (whitespace >> charEq '^') (\a _op b -> a <> b)
-        |@>| Exponentiation
+    rightAssociativeExpression (whitespace >> factor) (whitespace >> charEq '^') $ \a _op b -> ExpChain a b
 
-factor :: Parser Factor
+factor :: Parser Value
 factor =
     let parenExpr = do
             charEq '('

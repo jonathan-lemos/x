@@ -37,11 +37,6 @@ toHeadAndList :: LeftAssociativeInfixList op val -> (val, [(op, val)])
 toHeadAndList (InfixLeaf v) = (v, [])
 toHeadAndList (tree :<: (op, val)) = toHeadAndList tree @> second (++ [(op, val)])
 
-toList :: op -> LeftAssociativeInfixList op val -> [(op, val)]
-toList initialOp l =
-    let (head, xs) = toHeadAndList l
-     in (initialOp, head):xs
-
 toValueList :: LeftAssociativeInfixList op val -> [val]
 toValueList l =
     let (head, xs) = toHeadAndList l
