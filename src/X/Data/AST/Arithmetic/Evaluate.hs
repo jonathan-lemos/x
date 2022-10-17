@@ -4,8 +4,6 @@ module X.Data.AST.Arithmetic.Evaluate where
 
 import Data.Maybe
 import X.Data.Context
-import X.Data.Value.Simplifier
-import X.Data.Value.Simplify
 import X.Utils.LeftToRight
 
 substituteVariables :: ArithmeticUnion -> Context -> ArithmeticUnion
