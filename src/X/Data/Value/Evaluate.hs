@@ -1,19 +1,20 @@
 {-# LANGUAGE LambdaCase #-}
 
-module X.Data.AST.Arithmetic.Evaluate where
+module X.Data.Value.Evaluate where
 
 import Data.Maybe
 import X.Data.Context
+import X.Data.Value
 import X.Data.Value.Simplifier
 import X.Data.Value.Simplify
 import X.Utils.LeftToRight
 
-substituteVariables :: ArithmeticUnion -> Context -> ArithmeticUnion
+substituteVariables :: Value -> Context -> Value
 substituteVariables val ctx =
     let subVar = mkSimplifier "substitute variables" $ \case
             (Variable s) -> fromMaybe (Variable s) (get s ctx)
             v -> v
      in runSimplifier subVar val
 
-evaluateValue :: ArithmeticUnion -> Context -> ArithmeticUnion
+evaluateValue :: Value -> Context -> Value
 evaluateValue v ctx = substituteVariables v ctx @> simplify

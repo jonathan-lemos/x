@@ -6,24 +6,17 @@ import Data.Bifunctor
 import Data.List
 import X.Utils.LeftToRight
 import Prelude hiding (foldl1, foldr1)
-import X.Data.Display
 
 data LeftAssociativeInfixList op val = LeftAssociativeInfixList op val :<: (op, val) | InfixLeaf val
     deriving (Eq, Ord)
 
-__stringifyLAIL :: (op -> String) -> (val -> String) -> LeftAssociativeInfixList op val -> String
-__stringifyLAIL showOp showVal l =
+instance (Show op, Show val) => Show (LeftAssociativeInfixList op val) where
+    show l =
         let (x, xs) = toHeadAndList l
          in xs
-                |@>| (\(a, b) -> showOp a <> showVal b)
+                |@>| (\(a, b) -> show a <> show b)
                 @> intercalate ""
-                @> (showVal x <>)
-
-instance (Show op, Show val) => Show (LeftAssociativeInfixList op val) where
-    show = __stringifyLAIL show show
-
-instance (Display op, Display val) => Display (LeftAssociativeInfixList op val) where
-    display = __stringifyLAIL display display
+                @> (show x <>)
 
 instance Functor (LeftAssociativeInfixList op) where
     fmap f (InfixLeaf v) = InfixLeaf (f v)

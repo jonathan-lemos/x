@@ -1,19 +1,20 @@
 module X.Data.Context where
 
 import qualified Data.Map as DM
+import X.Data.Value
 import Data.Foldable
 import X.Utils.LeftToRight
 
-type Context = [DM.Map String ArithmeticUnion]
+type Context = [DM.Map String Value]
 
 new :: Context
 new = [DM.empty]
 
-put :: String -> ArithmeticUnion -> Context -> Context
+put :: String -> Value -> Context -> Context
 put key value (x:xs) = DM.insert key value x : xs
 put _ _ [] = []
 
-get :: String -> Context -> Maybe ArithmeticUnion
+get :: String -> Context -> Maybe Value
 get key = fmap (DM.lookup key) |@>| asum
 
 push :: Context -> Context

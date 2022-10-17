@@ -59,19 +59,16 @@ library
       X.Control.Parser.Text.Whitespace
       X.Control.Terminal
       X.Control.Try
-      X.Data.AST.Arithmetic
-      X.Data.AST.Arithmetic.Evaluate
-      X.Data.AST.Arithmetic.Simplifier
-      X.Data.AST.Arithmetic.Simplify
-      X.Data.AST.Arithmetic.Union
-      X.Data.AST.ArithmeticUnion
       X.Data.AST.Assignment
       X.Data.AST.Statement
       X.Data.Context
-      X.Data.Display
       X.Data.LeftAssociativeInfixList
       X.Data.Operator
       X.Data.ParseError
+      X.Data.Value
+      X.Data.Value.Evaluate
+      X.Data.Value.Simplifier
+      X.Data.Value.Simplify
       X.Shell.Execution
       X.Shell.Formatting
       X.Shell.Main

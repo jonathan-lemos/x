@@ -1,9 +1,8 @@
 module X.Data.AST.Assignment where
-
+import X.Data.Value
 import Text.Printf
-import X.Data.AST.Arithmetic
 
-data Assignment = Assignment { to :: String, value :: AdditiveChain }
+data Assignment = Assignment { to :: String, value :: Value }
     deriving Eq
 
 instance Show Assignment where
