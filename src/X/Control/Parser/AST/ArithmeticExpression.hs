@@ -25,7 +25,10 @@ additiveExpression =
                 mapOp _ = Nothing
              in mapOp <$?> char
     in
-    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) |@>| LeftAssociativeChain
+    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) AdditiveChain
+    |@>| (\x -> case x of
+                    AdditiveChain y [] -> y
+                    y -> y)
 
 multiplicativeExpression :: Parser Value
 multiplicativeExpression =
@@ -34,11 +37,14 @@ multiplicativeExpression =
                 mapOp '/' = Just Div
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) |@>| LeftAssociativeChain
+     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) MultiplicativeChain
+     |@>| (\x -> case x of
+                    MultiplicativeChain y [] -> y
+                    y -> y)
 
 exponentiationExpression :: Parser Value
 exponentiationExpression =
-    rightAssociativeExpression (whitespace >> factor) (whitespace >> charEq '^') $ \a _op b -> RightAssociativeChain a Exp b
+    rightAssociativeExpression (whitespace >> factor) (whitespace >> charEq '^') $ \a _op b -> ExpChain a b
 
 factor :: Parser Value
 factor =
