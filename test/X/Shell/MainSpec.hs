@@ -18,6 +18,7 @@ import X.Data.Value
 import X.Shell.Execution
 import X.TestUtils.Context
 import X.Utils.LeftToRight
+import X.TestUtils.Value
 
 ioListToString :: [PrintCmd] -> String
 ioListToString = intercalate "" . fmap show
@@ -28,7 +29,7 @@ sState = mkCtx [("a", Scalar 4), ("foo", Scalar 9)]
 test_parseStatementWorksOnBasicStatements :: Assertion
 test_parseStatementWorksOnBasicStatements = functionAssertion parseStatement $ do
     "f = 2" `shouldEvalTo` Right (StmtAssignment (Assignment "f" (Scalar 2)))
-    "2 + 3" `shouldEvalTo` Right (StmtValue (AdditiveChain (Scalar 2) [(Add, Scalar 3)]))
+    "2 + 3" `shouldEvalTo` Right (StmtValue (ac (Scalar 2) [(Add, Scalar 3)]))
 
 test_parseStatementFailsOnInvalidStatements :: Assertion
 test_parseStatementFailsOnInvalidStatements = functionAssertion parseStatement $ do

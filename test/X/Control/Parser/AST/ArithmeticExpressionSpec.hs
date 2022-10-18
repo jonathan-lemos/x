@@ -11,6 +11,7 @@ import X.Data.Value.Evaluate
 import X.TestUtils.Context
 import X.Utils.LeftToRight
 import TestUtils.Assertions.ParserAssertion
+import X.TestUtils.Value
 
 test_factor :: Assertion
 test_factor = do
@@ -18,7 +19,7 @@ test_factor = do
         "2" `shouldParseTo` Scalar 2
         "(2)" `shouldParseTo` Scalar 2
         "( 2 )" `shouldParseTo` Scalar 2
-        "(2 + 2)" `shouldParseTo` AdditiveChain (Scalar 2) [(Add, Scalar 2)]
+        "(2 + 2)" `shouldParseTo` ac (Scalar 2) [(Add, Scalar 2)]
         "a" `shouldParseTo` Variable "a"
         "foobar" `shouldParseTo` Variable "foobar"
 

@@ -1,7 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module X.Data.Value.Simplifier (Simplifier (runSimplifier, simplifierName), deepSimplify, mkSimplifier, aggregateSimplifier) where
 
-import Data.Bifunctor
 import X.Data.Value
 import X.Utils.Function
 import X.Utils.LeftToRight
@@ -25,8 +24,8 @@ deepSimplify :: (Value -> Value) -> (Value -> Value)
 deepSimplify f v =
     let ds = deepSimplify f
      in f $ case v of
-            AdditiveChain x xs -> AdditiveChain (ds x) (xs |@>| second ds)
-            MultiplicativeChain x xs -> MultiplicativeChain (ds x) (xs |@>| second ds)
+            AdditiveChain xs -> AdditiveChain (xs |@>| ds)
+            MultiplicativeChain xs -> MultiplicativeChain (xs |@>| ds)
             ExpChain b e -> ExpChain (ds b) (ds e)
             Scalar sc -> Scalar sc
             Variable v -> Variable v

@@ -1,14 +1,21 @@
 module X.Data.Operator where
+import Data.Number.CReal
+import X.Utils.CReal
 
 data AdditiveOperator = Add | Sub
-    deriving (Eq, Ord, Enum)
+    deriving (Eq, Ord, Enum, Show)
 
 data MultiplicativeOperator = Mul | Div
-    deriving (Eq, Ord, Enum)
+    deriving (Eq, Ord, Enum, Show)
 
-instance Show AdditiveOperator where
-    show Add = "+"
-    show Sub = "-"
-instance Show MultiplicativeOperator where
-    show Mul = "*"
-    show Div = "/"
+class OperatorLike op where
+    applyOp :: op -> CReal -> CReal -> CReal
+
+instance OperatorLike AdditiveOperator where
+    applyOp Add = (+)
+    applyOp Sub = (-)
+
+instance OperatorLike MultiplicativeOperator where
+    applyOp Mul = (*)
+    applyOp Div = safeDiv
+

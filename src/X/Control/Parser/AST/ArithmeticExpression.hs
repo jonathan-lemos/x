@@ -2,20 +2,20 @@ module X.Control.Parser.AST.ArithmeticExpression where
 
 import Data.Char
 import X.Control.Parser
+import X.Control.Parser.AST.Token.Identifier
 import X.Control.Parser.Combinator.Branch.Conditional
 import X.Control.Parser.Combinator.Choice.LookaheadParse
 import X.Control.Parser.Combinator.Expression
 import X.Control.Parser.Combinator.Possibly
+import X.Control.Parser.Numeric.CReal
 import X.Control.Parser.Text.Char
 import X.Control.Parser.Text.CharAny
 import X.Control.Parser.Text.CharEq
 import X.Control.Parser.Text.Whitespace
-import X.Utils.Monad
-import X.Data.Value
-import X.Control.Parser.Numeric.CReal
-import X.Control.Parser.AST.Token.Identifier
 import X.Data.Operator
+import X.Data.Value
 import X.Utils.LeftToRight
+import X.Utils.Monad
 
 additiveExpression :: Parser Value
 additiveExpression =
@@ -24,11 +24,7 @@ additiveExpression =
                 mapOp '-' = Just Sub
                 mapOp _ = Nothing
              in mapOp <$?> char
-    in
-    leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) AdditiveChain
-    |@>| (\x -> case x of
-                    AdditiveChain y [] -> y
-                    y -> y)
+     in leftAssociativeExpression (whitespace >> multiplicativeExpression) (whitespace >> operator) |@>| AdditiveChain
 
 multiplicativeExpression :: Parser Value
 multiplicativeExpression =
@@ -37,10 +33,7 @@ multiplicativeExpression =
                 mapOp '/' = Just Div
                 mapOp _ = Nothing
              in mapOp <$?> char
-     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) MultiplicativeChain
-     |@>| (\x -> case x of
-                    MultiplicativeChain y [] -> y
-                    y -> y)
+     in leftAssociativeExpression (whitespace >> exponentiationExpression) (whitespace >> operator) |@>| MultiplicativeChain
 
 exponentiationExpression :: Parser Value
 exponentiationExpression =
