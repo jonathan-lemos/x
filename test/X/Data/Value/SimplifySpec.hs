@@ -15,6 +15,7 @@ import X.Data.Value.Simplify
 import X.TestUtils.Either
 import X.Utils.LeftToRight
 import X.TestUtils.Value
+import X.Data.Operator
 
 parseValue :: String -> Value
 parseValue =
@@ -54,11 +55,11 @@ shouldSimplifyTo a b = toValue a `shouldEvalTo` toValue b
 test_simplifySingleElementChain :: Assertion
 test_simplifySingleElementChain =
     functionAssertion (runSimplifier simplifySingleElementChain) $ do
-        shouldNotChange "1"
-        shouldNotChange "foo"
-        shouldNotChange "1^2"
-        shouldNotChange "1+2"
-        shouldNotChange "1*2"
+        shouldNotChange (Scalar 1)
+        shouldNotChange (Variable "foo")
+        shouldNotChange (ExpChain (Scalar 1) (Scalar 2))
+        shouldNotChange (ac (Scalar 1) [(Add, Scalar 2)])
+        shouldNotChange (mc (Scalar 1) [(Mul, Scalar 2)])
         ac (Scalar 1) [] `shouldSimplifyTo` Scalar 1
         mc (Scalar 1) [] `shouldSimplifyTo` Scalar 1
 
