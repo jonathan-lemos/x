@@ -135,6 +135,7 @@ test-suite X-test
       X.Control.ParserSpec
       X.Control.TerminalSpec
       X.Control.TrySpec
+      X.Data.Value.SimplifierSpec
       X.Data.Value.SimplifySpec
       X.Shell.MainSpec
       X.TestUtils.Arbitrary
@@ -142,6 +143,7 @@ test-suite X-test
       X.TestUtils.Either
       X.TestUtils.List
       X.TestUtils.MockTerminal
+      X.TestUtils.Simplifier
       X.TestUtils.Try
       X.TestUtils.Unwrap
       X.TestUtils.Value
