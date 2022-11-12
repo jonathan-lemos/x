@@ -12,6 +12,10 @@ data Value
     | ExpChain Value Value
     deriving (Eq, Ord, Show)
 
+isScalar :: Value -> Bool
+isScalar (Scalar _) = True
+isScalar _ = False
+
 displayValue :: Value -> String
 displayValue = show
 

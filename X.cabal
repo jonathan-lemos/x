@@ -79,9 +79,11 @@ library
       X.Utils.List
       X.Utils.Map
       X.Utils.Monad
+      X.Utils.Operator
       X.Utils.String
       X.Utils.Trim
       X.Utils.Try
+      X.Utils.Value
   other-modules:
       Paths_X
   hs-source-dirs:

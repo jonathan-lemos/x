@@ -28,6 +28,11 @@ toHeadAndList =
         go (Link sublist op val) = go sublist |@>| ((op, val) :)
      in go |@>| second reverse
 
-stringify :: (op -> String) -> (val -> String) -> (LeftAssociativeInfixChain op val) -> String
+toListWithInitialOperator :: op -> LeftAssociativeInfixChain op val -> [(op, val)]
+toListWithInitialOperator op list =
+    let (head, tail) = toHeadAndList list
+     in (op, head) : tail
+
+stringify :: (op -> String) -> (val -> String) -> LeftAssociativeInfixChain op val -> String
 stringify _ g (Leaf val) = g val
 stringify f g (Link sublist op val) = stringify f g sublist <> f op <> g val
