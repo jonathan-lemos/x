@@ -11,9 +11,9 @@ import X.Utils.LeftToRight
 
 substituteVariables :: Value -> Context -> Value
 substituteVariables val ctx =
-    let subVar = mkSimplifier "substitute variables" $ \case
+    let subVar = Simplifier "substitute variables" (\case
             (Variable s) -> fromMaybe (Variable s) (get s ctx)
-            v -> v
+            v -> v) True
      in runSimplifier subVar val
 
 evaluateValue :: Value -> Context -> Value

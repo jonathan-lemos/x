@@ -5,40 +5,44 @@ module X.Data.Value.SimplifierSpec where
 
 import Test.Framework
 import Test.Framework.TestInterface
-import X.Data.Value
-import X.Data.Value.Simplifier
-import X.TestUtils.Simplifier
 import TestUtils.Assertions.FunctionAssertion
 import X.Data.LeftAssociativeInfixChain
 import X.Data.Operator
+import X.Data.Value
+import X.Data.Value.Simplifier
+import X.TestUtils.Simplifier
 import X.TestUtils.Value
 
 simpleSimplifier :: Simplifier
 simpleSimplifier =
-    mkSimplifier
+    Simplifier
         "simple"
         ( \case
             Scalar 1 -> Scalar 2
             x -> x
         )
+        True
 
 repeatedSimplifier :: Simplifier
 repeatedSimplifier =
-    mkSimplifier
+    Simplifier
         "repeated"
         ( \case
             Scalar x | x < 5 -> Scalar (x + 1)
             x -> x
         )
+        True
 
 postorderSimplifier :: Simplifier
 postorderSimplifier =
-    mkSimplifier
+    Simplifier
         "postorder"
-        (\case
+        ( \case
             Scalar 1 -> Scalar 2
             AdditiveChain (Link (Leaf (Scalar 2)) Add (Scalar 3)) -> Scalar 5
-            x -> x)
+            x -> x
+        )
+        True
 
 test_simplifierRecurses :: Assertion
 test_simplifierRecurses =

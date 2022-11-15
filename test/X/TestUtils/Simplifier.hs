@@ -27,12 +27,15 @@ instance ValueLike Value where
 instance ValueLike String where
     toValue = parseValue
 
+simplifierWithConvergents :: Simplifier -> Simplifier
+simplifierWithConvergents x = aggregateSimplifier $ x:convergentSimplifiers
+
 simplifyThenOthers :: String -> (Value -> Value)
 simplifyThenOthers t =
     let afterSimplify =
             simplifiers
                 @> filter (simplifierName |@>| (/= t))
-                @> aggregateSimplifier ""
+                @> aggregateSimplifier
                 @> runSimplifier
         doSimplify =
             simplifiers
