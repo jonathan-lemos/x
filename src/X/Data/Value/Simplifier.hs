@@ -77,7 +77,7 @@ aggregateSimplifier xs =
                     ( xs
                         |@>| deepSimplify
                         |@>| simplifyingFunction
-                        |@>| (simplifyingFunction aggregateConvergent .)
+                        |@>| (runSimplifier aggregateConvergent .)
                         @> foldr (.) id
                     )
                     False

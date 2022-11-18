@@ -22,6 +22,18 @@ test_reduceSingleElementChain =
         ac (sc 1) `shouldSimplifyTo` sc 1
         mc (sc 1) `shouldSimplifyTo` sc 1
 
+test_simplifyMultiplyBy1 :: Assertion
+test_simplifyMultiplyBy1 =
+    functionAssertion (simplifyingFunction simplifyMultiplyBy1) $ do
+        shouldNotChange (sc 1)
+        shouldNotChange "foo"
+        shouldNotChange (sc 1 @^ sc 2)
+        shouldNotChange (sc 1 @+ sc 2)
+
+        (sc 1 @* "foo") `shouldSimplifyTo` mc "foo"
+        (sc 3 @* sc 1 @* "foo") `shouldSimplifyTo` (sc 3 @* "foo")
+        (sc 3 @* "bar" @* sc 1 @* "foo") `shouldSimplifyTo` (sc 3 @* "bar" @* "foo")
+
 test_toCoefficientAndValue :: Assertion
 test_toCoefficientAndValue =
     functionAssertion toCoefficientAndValue $ do
@@ -40,7 +52,8 @@ test_sumLikeTerms =
         shouldNotChange (sc 1)
         shouldNotChange "foo"
         shouldNotChange (sc 1 @^ sc 2)
-        shouldNotChange (sc 1 @* sc 2)
-        (sc 1 @+ sc 2) `shouldSimplifyTo` (sc 3 @* sc 1)
+        shouldNotChange (sc 3 @* sc 2)
+        (sc 1 @+ sc 2) `shouldSimplifyTo` sc 3
         (sc 3 @* "foo" @+ sc 2 @* "foo") `shouldSimplifyTo` (sc 5 @* "foo")
         ("foo" @* sc 3 @+ sc 2 @* "foo") `shouldSimplifyTo` (sc 5 @* "foo")
+        (sc 1 @- sc 2) `shouldSimplifyTo` sc (-1)

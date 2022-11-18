@@ -29,6 +29,14 @@ reduceSingleElementChain =
         )
         True
 
+-- | Turns 1*x into x
+simplifyMultiplyBy1 :: Simplifier
+simplifyMultiplyBy1 =
+    Simplifier
+        "multiplying by 1"
+        (modifyMultiplicativeChainContents (filter $ snd |@>| (/= Scalar 1)))
+        True
+
 toCoefficientAndValue :: Value -> (CReal, Value)
 toCoefficientAndValue = \case
     MultiplicativeChain xs ->
@@ -69,6 +77,7 @@ simplifiers :: [Simplifier]
 simplifiers =
     [ reduceSingleElementChain
     , sumLikeTerms
+    , simplifyMultiplyBy1
     ]
 
 convergentSimplifiers :: [Simplifier]

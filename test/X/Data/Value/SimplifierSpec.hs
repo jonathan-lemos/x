@@ -6,12 +6,12 @@ module X.Data.Value.SimplifierSpec where
 import Test.Framework
 import Test.Framework.TestInterface
 import TestUtils.Assertions.FunctionAssertion
+import TestUtils.DSL.Value
 import X.Data.LeftAssociativeInfixChain
 import X.Data.Operator
 import X.Data.Value
 import X.Data.Value.Simplifier
 import X.TestUtils.Simplifier
-import TestUtils.DSL.Value
 
 simpleSimplifier :: Simplifier
 simpleSimplifier =
@@ -79,3 +79,4 @@ test_simplifierRunsPostorder =
 
         (sc 1 @+ sc 1) `shouldSimplifyTo` (sc 2 @+ sc 2)
         (sc 1 @+ sc 3) `shouldSimplifyTo` sc 5
+
