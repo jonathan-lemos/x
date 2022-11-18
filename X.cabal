@@ -129,6 +129,7 @@ test-suite X-test
       TestUtils.Assertions.Typeclass.Monad
       TestUtils.Assertions.Utils
       TestUtils.Collector
+      TestUtils.DSL.Value
       X.Control.Parser.AST.ArithmeticExpressionSpec
       X.Control.Parser.AST.AssignmentSpec
       X.Control.Parser.AST.StatementSpec
@@ -148,7 +149,6 @@ test-suite X-test
       X.TestUtils.Simplifier
       X.TestUtils.Try
       X.TestUtils.Unwrap
-      X.TestUtils.Value
       Paths_X
   hs-source-dirs:
       test

@@ -11,7 +11,7 @@ import X.Data.Operator
 import X.Data.Value
 import X.Data.Value.Simplifier
 import X.TestUtils.Simplifier
-import X.TestUtils.Value
+import TestUtils.DSL.Value
 
 simpleSimplifier :: Simplifier
 simpleSimplifier =
@@ -47,35 +47,35 @@ postorderSimplifier =
 test_simplifierRecurses :: Assertion
 test_simplifierRecurses =
     functionAssertion (runSimplifier simpleSimplifier) $ do
-        shouldNotChange "69"
-        shouldNotChange "2+2"
-        shouldNotChange "2*2"
-        shouldNotChange "2-2"
-        shouldNotChange "2-2"
+        shouldNotChange $ sc 69
+        shouldNotChange (sc 2 @+ sc 2)
+        shouldNotChange (sc 2 @* sc 2)
+        shouldNotChange (sc 2 @- sc 2)
+        shouldNotChange (sc 2 @- sc 2)
 
-        "1" `shouldSimplifyTo` "2"
-        "1+3+1*3*1" `shouldSimplifyTo` "2+3+2*3*2"
+        sc 1 `shouldSimplifyTo` sc 2
+        (sc 1 @+ sc 3 @+ sc 1 @* sc 3 @* sc 1) `shouldSimplifyTo` (sc 2 @+ sc 3 @+ sc 2 @* sc 3 @* sc 2)
 
 test_simplifierRepeats :: Assertion
 test_simplifierRepeats =
     functionAssertion (runSimplifier repeatedSimplifier) $ do
-        shouldNotChange "69"
-        shouldNotChange "6+6"
-        shouldNotChange "5*5"
-        shouldNotChange "5-5"
-        shouldNotChange "5/5"
+        shouldNotChange $ sc 69
+        shouldNotChange (sc 6 @+ sc 6)
+        shouldNotChange (sc 5 @* sc 5)
+        shouldNotChange (sc 5 @- sc 5)
+        shouldNotChange (sc 5 @/ sc 5)
 
-        "1" `shouldSimplifyTo` "5"
-        "1+3+1*8*1" `shouldSimplifyTo` "5+5+5*8*5"
+        sc 1 `shouldSimplifyTo` sc 5
+        (sc 1 @+ sc 3 @+ sc 1 @* sc 8 @* sc 1) `shouldSimplifyTo` (sc 5 @+ sc 5 @+ sc 5 @* sc 8 @* sc 5)
 
 test_simplifierRunsPostorder :: Assertion
 test_simplifierRunsPostorder =
     functionAssertion (runSimplifier postorderSimplifier) $ do
-        shouldNotChange "69"
-        shouldNotChange "6+6"
-        shouldNotChange "5*5"
-        shouldNotChange "5-5"
-        shouldNotChange "5/5"
+        shouldNotChange $ sc 69
+        shouldNotChange $ sc 6 @+ sc 6
+        shouldNotChange $ sc 5 @* sc 5
+        shouldNotChange $ sc 5 @- sc 5
+        shouldNotChange $ sc 5 @/ sc 5
 
-        "1+1" `shouldSimplifyTo` "2+2"
-        ac (Scalar 1) [(Add, Scalar 3)] `shouldSimplifyTo` Scalar 5
+        (sc 1 @+ sc 1) `shouldSimplifyTo` (sc 2 @+ sc 2)
+        (sc 1 @+ sc 3) `shouldSimplifyTo` sc 5

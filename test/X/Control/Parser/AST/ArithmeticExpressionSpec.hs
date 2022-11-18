@@ -1,17 +1,17 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module X.Control.Parser.AST.ArithmeticExpressionSpec where
 
 import Test.Framework
 import Test.Framework.TestInterface
 import X.Control.Parser.AST.ArithmeticExpression
-import X.Data.Operator
 import X.Data.Value
 import X.Data.Value.Evaluate
 import X.TestUtils.Context
 import X.Utils.LeftToRight
 import TestUtils.Assertions.ParserAssertion
-import X.TestUtils.Value
+import TestUtils.DSL.Value
 
 test_factor :: Assertion
 test_factor = do
@@ -19,7 +19,7 @@ test_factor = do
         "2" `shouldParseTo` Scalar 2
         "(2)" `shouldParseTo` Scalar 2
         "( 2 )" `shouldParseTo` Scalar 2
-        "(2 + 2)" `shouldParseTo` ac (Scalar 2) [(Add, Scalar 2)]
+        "(2 + 2)" `shouldParseTo` (Scalar 2 @+ Scalar 2)
         "a" `shouldParseTo` Variable "a"
         "foobar" `shouldParseTo` Variable "foobar"
 

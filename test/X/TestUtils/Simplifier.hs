@@ -11,21 +11,13 @@ import X.Data.Value.Simplifier
 import X.Data.Value.Simplify
 import X.TestUtils.Either
 import X.Utils.LeftToRight
+import TestUtils.DSL.Value
 
 parseValue :: String -> Value
 parseValue =
     parse additiveExpression
         |@>| right
         |@>| snd
-
-class ValueLike a where
-    toValue :: a -> Value
-
-instance ValueLike Value where
-    toValue = id
-
-instance ValueLike String where
-    toValue = parseValue
 
 simplifierWithConvergents :: Simplifier -> Simplifier
 simplifierWithConvergents x = aggregateSimplifier $ x:convergentSimplifiers
@@ -44,8 +36,8 @@ simplifyThenOthers t =
                 @> runSimplifier
      in doSimplify |@>| afterSimplify
 
-shouldNotChange :: (ValueLike v) => v -> Collector (FunctionAssertion Value Value) ()
-shouldNotChange v = toValue v `shouldEvalTo` toValue v
+shouldNotChange :: (DSLValueLike v) => v -> Collector (FunctionAssertion Value Value) ()
+shouldNotChange v = dslToValue v `shouldEvalTo` dslToValue v
 
-shouldSimplifyTo :: (ValueLike a, ValueLike b) => a -> b -> (Collector (FunctionAssertion Value Value)) ()
-shouldSimplifyTo a b = toValue a `shouldEvalTo` toValue b
+shouldSimplifyTo :: (DSLValueLike a, DSLValueLike b) => a -> b -> (Collector (FunctionAssertion Value Value)) ()
+shouldSimplifyTo a b = dslToValue a `shouldEvalTo` dslToValue b
