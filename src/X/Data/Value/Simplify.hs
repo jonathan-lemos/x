@@ -12,6 +12,7 @@ import qualified X.Data.LeftAssociativeInfixChain as LAIL
 import X.Data.Operator
 import X.Data.Value
 import X.Data.Value.Simplifier
+import X.Utils.CReal
 import X.Utils.LeftToRight
 import X.Utils.Map
 import X.Utils.Operator
@@ -37,6 +38,39 @@ simplifyMultiplyBy1 =
         (modifyMultiplicativeChainContents (filter $ snd |@>| (/= Scalar 1)))
         True
 
+-- | Turns x^1 into x
+simplifyExpBy1 :: Simplifier
+simplifyExpBy1 =
+    Simplifier
+        "exponentiating by 1"
+        ( \case
+            ExpChain x (Scalar 1) -> x
+            x -> x
+        )
+        True
+
+-- | Turns 1^x into 1
+simplifyExp1ByAnything :: Simplifier
+simplifyExp1ByAnything =
+    Simplifier
+        "exponentiating 1^x"
+        ( \case
+            ExpChain (Scalar 1) _ -> Scalar 1
+            x -> x
+        )
+        True
+
+-- | Executes a^b if a and b are both Scalar
+performScalarExponentiation :: Simplifier
+performScalarExponentiation =
+    Simplifier
+        "exponentiating two scalars"
+        ( \case
+            ExpChain (Scalar a) (Scalar b) -> Scalar (a `safeExp` b)
+            x -> x
+        )
+        True
+
 toCoefficientAndValue :: Value -> (CReal, Value)
 toCoefficientAndValue = \case
     MultiplicativeChain xs ->
@@ -49,6 +83,12 @@ toCoefficientAndValue = \case
     Scalar n -> (n, Scalar 1)
     x -> (1, x)
 
+coefficientMap :: (OperatorLike op, ChainHeadOp op) => LAIL.LeftAssociativeInfixChain op Value -> DM.Map Value [(op, CReal)]
+coefficientMap xs =
+    LAIL.toList xs
+        |@>| second toCoefficientAndValue
+        @> groupMap (snd . snd) (\(op, (quantity, _val)) -> (op, quantity))
+
 -- | Adds like terms e.g. (2x + 3x) -> 5x
 sumLikeTerms :: Simplifier
 sumLikeTerms =
@@ -56,28 +96,65 @@ sumLikeTerms =
         "sum like terms"
         ( \case
             AdditiveChain xs ->
-                LAIL.toListWithInitialOperator Add xs
-                    |@>| second toCoefficientAndValue
-                    @> groupMap (snd . snd) (\(op, (quantity, _val)) -> (op, quantity))
+                coefficientMap xs
+                    |@>| evalOperators 0
                     @> DM.assocs
-                    @> foldl'
-                        ( \result (val, xs) ->
-                            MultiplicativeChain
-                                (Link (Leaf . Scalar $ evalOperators xs 0) Mul val)
-                                : result
-                        )
-                        []
+                    |@>| (\(val, num) -> MultiplicativeChain (Link (Leaf $ Scalar num) Mul val))
                     |@>| (Add,)
                     @> listToAdditiveChain
             x -> x
         )
         False
 
+-- | Multiplies like terms e.g. (2x * 3x) -> 6x^2
+multiplyLikeTerms :: Simplifier
+multiplyLikeTerms =
+    let termReducer :: (MultiplicativeOperator, Value) -> DM.Map Value [(MultiplicativeOperator, Value)] -> DM.Map Value [(MultiplicativeOperator, Value)]
+        termReducer (op, val) map =
+            let (trueVal, trueExp) =
+                    case val of
+                        ExpChain a b -> (a, b)
+                        x -> (x, Scalar 1)
+             in adjustWithDefault
+                    (\c -> (op, trueExp) : c)
+                    []
+                    trueVal
+                    map
+        termMapElemToValue :: (Value, [(MultiplicativeOperator, Value)]) -> Value
+        termMapElemToValue (val, xs) =
+            let mapListLink (op, val) =
+                    let newOp =
+                            case op of
+                                Mul -> Add
+                                Div -> Sub
+                     in (newOp, val)
+                exponent =
+                    xs
+                        |@>| mapListLink
+                        @> listToAdditiveChain
+             in ExpChain val exponent
+     in Simplifier
+            "multiplyLikeTerms"
+            ( \case
+                MultiplicativeChain xs ->
+                    LAIL.toList xs
+                        @> foldr termReducer DM.empty
+                        @> DM.assocs
+                        |@>| ((Mul,) . termMapElemToValue)
+                        @> listToMultiplicativeChain
+                x -> x
+            )
+            False
+
 simplifiers :: [Simplifier]
 simplifiers =
     [ reduceSingleElementChain
     , sumLikeTerms
+    , multiplyLikeTerms
     , simplifyMultiplyBy1
+    , simplifyExpBy1
+    , simplifyExp1ByAnything
+    , performScalarExponentiation
     ]
 
 convergentSimplifiers :: [Simplifier]

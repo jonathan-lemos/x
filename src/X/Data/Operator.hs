@@ -11,11 +11,20 @@ data MultiplicativeOperator = Mul | Div
 class OperatorLike op where
     applyOp :: op -> CReal -> CReal -> CReal
 
+class ChainHeadOp op where
+    chainHeadOp :: op
+
 instance OperatorLike AdditiveOperator where
     applyOp Add = (+)
     applyOp Sub = (-)
 
+instance ChainHeadOp AdditiveOperator where
+    chainHeadOp = Add
+
 instance OperatorLike MultiplicativeOperator where
     applyOp Mul = (*)
     applyOp Div = safeDiv
+
+instance ChainHeadOp MultiplicativeOperator where
+    chainHeadOp = Mul
 

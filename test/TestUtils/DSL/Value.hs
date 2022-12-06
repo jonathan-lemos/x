@@ -59,7 +59,7 @@ infixl 7 @/
 (@^) :: forall a b. (DSLValueLike a, DSLValueLike b) => a -> b -> Value
 a @^ b = ExpChain (dslToValue a) (dslToValue b)
 
-infixl 8 @^
+infixr 8 @^
 
 ac :: (DSLValueLike v) => v -> Value
 ac = AdditiveChain . LAIC.Leaf . dslToValue

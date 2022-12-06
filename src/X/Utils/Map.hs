@@ -15,3 +15,7 @@ groupMap key value =
                 |@>| DM.adjust (value x :) (key x)
         )
         DM.empty
+
+adjustWithDefault :: (Ord k) => (v -> v) -> v -> k -> DM.Map k v -> DM.Map k v
+adjustWithDefault mapper ifNotPresent key =
+    DM.insertWith (const id) key ifNotPresent |@>| DM.adjust mapper key

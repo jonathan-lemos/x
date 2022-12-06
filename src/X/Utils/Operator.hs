@@ -4,7 +4,7 @@ import X.Data.Operator
 import Data.Foldable
 import Data.Number.CReal
 
-evalOperators :: (Foldable f, OperatorLike o) => f (o, CReal) -> CReal -> CReal
-evalOperators xs n =
-    foldl' (\result (o, n) -> applyOp o result n) n xs
+evalOperators :: (Foldable f, OperatorLike o) => CReal -> f (o, CReal) -> CReal
+evalOperators =
+    foldl' (\result (o, n) -> applyOp o result n)
 

@@ -2,6 +2,7 @@ module X.Data.LeftAssociativeInfixChain where
 
 import Data.Bifunctor
 import X.Utils.LeftToRight
+import X.Data.Operator
 
 data LeftAssociativeInfixChain op val = Leaf val | Link (LeftAssociativeInfixChain op val) op val
     deriving (Eq, Ord, Show)
@@ -27,6 +28,9 @@ toHeadAndList =
     let go (Leaf x) = (x, [])
         go (Link sublist op val) = go sublist |@>| ((op, val) :)
      in go |@>| second reverse
+
+toList :: (ChainHeadOp op) => LeftAssociativeInfixChain op val -> [(op, val)]
+toList = toListWithInitialOperator chainHeadOp
 
 toListWithInitialOperator :: op -> LeftAssociativeInfixChain op val -> [(op, val)]
 toListWithInitialOperator op list =

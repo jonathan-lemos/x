@@ -44,3 +44,4 @@ getScalarsFromChain =
                 _ -> result
         )
         []
+
