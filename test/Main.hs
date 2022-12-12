@@ -16,6 +16,7 @@ import {-@ HTF_TESTS @-} X.Control.TrySpec
 import {-@ HTF_TESTS @-} X.Data.Value.SimplifySpec
 -- import {-@ HTF_TESTS @-} X.Shell.MainSpec
 import {-@ HTF_TESTS @-} X.Data.Value.SimplifierSpec
+import {-@ HTF_TESTS @-} X.Data.Value.EvaluateSpec
 
 main :: IO ()
 main = htfMain htf_importedTests

@@ -6,6 +6,7 @@ module X.Data.Value.Simplify where
 import Data.Bifunctor
 import Data.Foldable
 import qualified Data.Map as DM
+import Data.Maybe
 import Data.Number.CReal
 import X.Data.LeftAssociativeInfixChain
 import qualified X.Data.LeftAssociativeInfixChain as LAIL
@@ -69,6 +70,58 @@ performScalarExponentiation =
             ExpChain (Scalar a) (Scalar b) -> Scalar (a `safeExp` b)
             x -> x
         )
+        True
+
+-- | + (-5) -> - 5 and - (-5) to +5
+simplifyDoubleNegative :: Simplifier
+simplifyDoubleNegative =
+    Simplifier
+        "double negative"
+        ( modifyAdditiveChainContents $
+            fmap
+                ( \case
+                    (Add, Scalar n) | n < 0 -> (Sub, Scalar (-n))
+                    (Sub, Scalar n) | n < 0 -> (Add, Scalar (-n))
+                    x -> x
+                )
+        )
+        True
+
+simplifyAdditiveTimesNeg1 :: Simplifier
+simplifyAdditiveTimesNeg1 =
+    let n1count mc =
+            count (LAIL.toList mc |@>| snd)
+                @> DM.lookup (Scalar (-1))
+                @> fromMaybe (0 :: Integer)
+        removeN1s mc =
+            listToMultiplicativeChain $
+                filter
+                    (snd |@>| (/= Scalar (-1)))
+                    (LAIL.toList mc)
+     in Simplifier
+            "- (-1 * x)"
+            ( modifyAdditiveChainContents $
+                fmap
+                    ( \case
+                        (Sub, MultiplicativeChain mc) ->
+                            if n1count mc `rem` 2 == 1
+                                then (Add, removeN1s mc)
+                                else (Sub, MultiplicativeChain mc)
+                        (Add, MultiplicativeChain mc) ->
+                            if n1count mc `rem` 2 == 1
+                                then (Sub, removeN1s mc)
+                                else (Add, MultiplicativeChain mc)
+                        x -> x
+                    )
+            )
+            True
+
+-- | x+0 -> x
+simplifyAdd0 :: Simplifier
+simplifyAdd0 =
+    Simplifier
+        "add 0"
+        (modifyAdditiveChainContents $ filter (snd |@>| (/= Scalar 0)))
         True
 
 toCoefficientAndValue :: Value -> (CReal, Value)
@@ -155,6 +208,9 @@ simplifiers =
     , simplifyExpBy1
     , simplifyExp1ByAnything
     , performScalarExponentiation
+    , simplifyDoubleNegative
+    , simplifyAdd0
+    , simplifyAdditiveTimesNeg1
     ]
 
 convergentSimplifiers :: [Simplifier]

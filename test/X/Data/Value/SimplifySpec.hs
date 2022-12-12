@@ -19,6 +19,7 @@ test_reduceSingleElementChain =
         shouldNotChange (sc 1 @^ sc 2)
         shouldNotChange (sc 1 @+ sc 2)
         shouldNotChange (sc 1 @* sc 2)
+        shouldNotChange (sc 2 @- "x")
         ac (sc 1) `shouldSimplifyTo` sc 1
         mc (sc 1) `shouldSimplifyTo` sc 1
 
@@ -29,6 +30,7 @@ test_simplifyMultiplyBy1 =
         shouldNotChange "foo"
         shouldNotChange (sc 1 @^ sc 2)
         shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 2 @- "x")
 
         (sc 1 @* "foo") `shouldSimplifyTo` mc "foo"
         (sc 3 @* sc 1 @* "foo") `shouldSimplifyTo` (sc 3 @* "foo")
@@ -41,6 +43,7 @@ test_simplifyExpBy1 =
         shouldNotChange "foo"
         shouldNotChange (sc 1 @^ sc 2)
         shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 2 @- "x")
 
         ("foo" @^ sc 1) `shouldSimplifyTo` "foo"
         ((sc 3 @* sc 1) @^ sc 1) `shouldSimplifyTo` (sc 3 @* sc 1)
@@ -52,6 +55,7 @@ test_simplifyExp1ByAnything =
         shouldNotChange "foo"
         shouldNotChange (sc 2 @^ sc 1)
         shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 2 @- "x")
 
         (sc 1 @^ "foo") `shouldSimplifyTo` sc 1
         (sc 1 @^ sc 2) `shouldSimplifyTo` sc 1
@@ -63,9 +67,48 @@ test_performScalarExponentiation =
         shouldNotChange "foo"
         shouldNotChange (sc 1 @+ sc 2)
         shouldNotChange (sc 1 @* sc 2)
+        shouldNotChange (sc 2 @- "x")
 
         (sc 3 @^ sc 2) `shouldSimplifyTo` sc 9
         (sc 2 @^ sc 1) `shouldSimplifyTo` sc 2
+
+test_simplifyAdditiveTimesNeg1 :: Assertion
+test_simplifyAdditiveTimesNeg1 =
+    functionAssertion (simplifyingFunction simplifyAdditiveTimesNeg1) $ do
+        shouldNotChange (sc 1)
+        shouldNotChange "foo"
+        shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 1 @* sc 2)
+        shouldNotChange (sc 2 @- "x")
+        shouldNotChange (sc 3 @- sc (-1) @* sc (-1) @* "x" @+ sc 2)
+
+        (sc 2 @- sc (-1) @* "x") `shouldSimplifyTo` (sc 2 @+ mc "x")
+        (sc 3 @- sc (-1) @* "x" @+ sc 2) `shouldSimplifyTo` (sc 3 @+ mc "x" @+ sc 2)
+
+
+test_simplifyAdd0 :: Assertion
+test_simplifyAdd0 =
+    functionAssertion (simplifyingFunction simplifyAdd0) $ do
+        shouldNotChange (sc 1)
+        shouldNotChange "foo"
+        shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 1 @* sc 2)
+        shouldNotChange (sc 2 @- "x")
+
+        (sc 3 @+ sc 0 @- sc 5 @- sc 0) `shouldSimplifyTo` (sc 3 @- sc 5)
+        (sc 0 @+ sc 2) `shouldSimplifyTo` ac (sc 2)
+
+test_simplifyDoubleNegative :: Assertion
+test_simplifyDoubleNegative =
+    functionAssertion (simplifyingFunction simplifyDoubleNegative) $ do
+        shouldNotChange (sc 1)
+        shouldNotChange "foo"
+        shouldNotChange (sc 1 @+ sc 2)
+        shouldNotChange (sc 1 @* sc 2)
+        shouldNotChange (sc 2 @- "x")
+
+        (sc 3 @+ sc (-2)) `shouldSimplifyTo` (sc 3 @- sc 2)
+        (sc 3 @- sc (-2)) `shouldSimplifyTo` (sc 3 @+ sc 2)
 
 test_toCoefficientAndValue :: Assertion
 test_toCoefficientAndValue =
@@ -86,11 +129,14 @@ test_sumLikeTerms =
         shouldNotChange "foo"
         shouldNotChange (sc 2 @^ "foo")
         shouldNotChange (sc 2 @* sc 3)
+        shouldNotChange (sc 2 @- "x")
+
         (sc 1 @+ sc 2) `shouldSimplifyTo` sc 3
         (sc 3 @* "foo" @+ sc 2 @* "foo") `shouldSimplifyTo` (sc 5 @* "foo")
         ("foo" @* sc 3 @+ sc 2 @* "foo") `shouldSimplifyTo` (sc 5 @* "foo")
         (sc 1 @- sc 2) `shouldSimplifyTo` sc (-1)
 
+-- TODO: throw sumLikeTerms into the equation
 test_multiplyLikeTerms :: Assertion
 test_multiplyLikeTerms =
     functionAssertion (simplifyingFunction $ simplifierWithConvergents multiplyLikeTerms) $ do
@@ -98,6 +144,8 @@ test_multiplyLikeTerms =
         shouldNotChange "foo"
         shouldNotChange (sc 2 @^ "foo")
         shouldNotChange (sc 3 @+ sc 2)
+        shouldNotChange (sc 2 @- "x")
+
         (sc 3 @* "foo" @* "foo" @* "bar" @* sc 2) `shouldSimplifyTo` (sc 2 @* sc 3 @* "bar" @* "foo" @^ (sc 1 @+ sc 1))
         (sc 3 @* "foo" @^ sc 2 @* "foo" @^ sc 3) `shouldSimplifyTo` (sc 3 @* "foo" @^ (sc 2 @+ sc 3))
         ("foo" @^ sc 3 @/ "foo") `shouldSimplifyTo` ("foo" @^ (sc 3 @- sc 1))

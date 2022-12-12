@@ -138,6 +138,7 @@ test-suite X-test
       X.Control.ParserSpec
       X.Control.TerminalSpec
       X.Control.TrySpec
+      X.Data.Value.EvaluateSpec
       X.Data.Value.SimplifierSpec
       X.Data.Value.SimplifySpec
       X.Shell.MainSpec

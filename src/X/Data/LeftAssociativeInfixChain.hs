@@ -1,8 +1,8 @@
 module X.Data.LeftAssociativeInfixChain where
 
 import Data.Bifunctor
-import X.Utils.LeftToRight
 import X.Data.Operator
+import X.Utils.LeftToRight
 
 data LeftAssociativeInfixChain op val = Leaf val | Link (LeftAssociativeInfixChain op val) op val
     deriving (Eq, Ord, Show)
@@ -54,4 +54,3 @@ append (Link sublist lop lval) op val = Link (Link sublist lop lval) op val
 prepend :: val -> op -> LeftAssociativeInfixChain op val -> LeftAssociativeInfixChain op val
 prepend lval lop (Leaf rval) = Link (Leaf lval) lop rval
 prepend lval lop (Link sublist rop rval) = Link (prepend lval lop sublist) rop rval
-
